@@ -15,10 +15,15 @@
       
         <aside class="control-panel">
           <div class="panel-title">ブーム長</div>
+          <span id="boom-length-val"></span>m
             <div class="panel-title">ブーム角度</div>
+            <span id="angle-val">0</span>°
             <div class="panel-title">ジブ長</div>
+            <span id="jib-length-val">0</span>m
             <div class="panel-title">ジブ角度</div>
+            <span id="jib-angle-val">0</span>°
             <div class="panel-title">アウトリガー長</div>
+            <span id="outriggers-length-val">0</span>m
             </aside>
 
    
@@ -70,10 +75,8 @@
             </div>
            <!-- 角度調整用スライダー（0度〜80度） -->
             <input type="range" id="boom-slider" min="0" max="80" step="0.1" value="0">
-            <span id="angle-val">0</span>°
-
             <input type="range" id="boom-length-slider" min="53" max="240" step="0.1" value="53">
-            <span id="boom-length-val">5.3</span>m
+
 
 
         </main>
