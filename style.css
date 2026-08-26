@@ -1,0 +1,163 @@
+/* カテゴリーの枠 */
+.crane-section { margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+
+/* カテゴリーのヘッダー */
+.crane-header { 
+    background: #f8f9fa; padding: 15px; cursor: pointer; font-weight: bold; 
+    border-bottom: 1px solid #ddd; user-select: none;
+}
+
+/* 中身のエリア */
+.crane-content { display: none; padding: 10px; background: #fff; }
+.crane-section.open .crane-content { display: block; }
+
+/* 🟢 ボタン風のスタイル（初期値：緑） */
+.crane-btn {
+    display: block; width: 100%; padding: 12px; margin-bottom: 8px;
+    background-color: #28a745; /* 緑色 */
+    color: white; border: none; border-radius: 5px;
+    font-weight: bold; cursor: pointer; text-align: center;
+    transition: background 0.2s, transform 0.1s;
+}
+.crane-btn:hover { background-color: #218838; }
+.crane-btn:active { transform: scale(0.98); }
+
+/* 🟢 app-container を修正：上（ワークスペース）と下（結果パネル）の縦並びに変更 */
+.app-container {
+    display: flex;
+    flex-direction: column; /* 縦に並べる */
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 15px; /* 上下のすき間 */
+}
+
+/* 左と中央を囲む大きな枠 */
+.main-workspace {
+    width: 100%; /* 横幅いっぱいに広げる */
+    display: flex;
+    gap: 15px;
+    background-color: #22272d;
+    border: 1px solid #2d343f;
+    border-radius: 8px;
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+
+
+/* 中央グラフは残りの幅いっぱいに広がる */
+.chart-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* タイトル（上部リボン）のデザインをダークモードに合わせる */
+.page-title {
+    text-align: center;
+    color: #fff;
+    margin-bottom: 20px;
+    border: 2px solid #3a444d;
+    border-radius: 8px;
+    padding: 10px;
+    background: #252b31;
+    display: block; 
+    width: 90%;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+body {
+    background-color: #1a1e22;
+    color: #e0e0e0;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+
+
+/* SVGを囲う枠 */
+.canvas-wrapper {
+    width: 100%;
+    max-width: 600px;
+    aspect-ratio: 1 / 1;
+    background-color: #15191c; /* グラフ内の背景はさらに暗く */
+    border-radius: 6px;
+    border: 1px solid #1c2126;
+    overflow: hidden;
+}
+
+/* SVG内の目盛りテキストの色 */
+.axis-labels-x text {
+    fill: #888;
+    font-size: 14px;
+    text-anchor: middle;
+}
+
+/* SVG内の目盛りテキストの色 */
+.axis-labels-y text {
+    fill: #888;
+    font-size: 14px;
+    text-anchor: end;
+}
+
+/* 左パネルの項目タイトル */
+.panel-title {
+    font-size: 14px;
+    color: #aaa;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #2d343f;
+}
+
+
+/* 🟢 【新設】下部に横一列で並べるパネルの設定 */
+.info-panel-bottom {
+    display: flex;
+    justify-content: space-between; /* 3つのボックスを均等に配置 */
+    gap: 15px; /* ボックス同士のすき間 */
+    width: 100%;
+}
+
+/* 🟢 【修正】情報ボックスを横に引き伸ばす */
+.info-box {
+    flex: 1; /* 3つのボックスが同じ幅で横いっぱいに広がる */
+    background-color: #22272d; /* ワークスペースと同じ背景色 */
+    border: 1px solid #2d343f;
+    border-radius: 8px;
+    padding: 15px;
+    border-left: 4px solid #f39c12; /* オレンジのアクセント線 */
+    box-sizing: border-box;
+}
+
+.info-label {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 5px;
+}
+.info-value {
+    font-size: 36px; /* 下に並んで見やすくなったので少し大きく */
+    font-weight: bold;
+    color: #fff;
+    font-family: monospace;
+}
+.info-unit {
+    font-size: 16px;
+    color: #888;
+    font-weight: normal;
+}
+
+
+/* 🟢 【新設】左と中央を囲む一つの大きな枠（グレーの背景を付けて一体感を出す） */
+.main-workspace {
+    flex: 1; /* 横幅の残りをすべて使う */
+    display: flex; /* 中にある左パネルと中央グラフを横並びにする */
+    gap: 15px; /* 左パネルと中央グラフの間のすき間 */
+    background-color: #22272d; /* 左右のパネルと同じ背景色 */
+    border: 1px solid #2d343f; /* 外枠の線 */
+    border-radius: 8px; /* 角丸 */
+    padding: 15px; /* 内側の余白 */
+}

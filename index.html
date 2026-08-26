@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+
+    <title>よーてーちゃん</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+        
+        details {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background: #fff;
+            padding: 5px;
+        }
+        summary {
+            padding: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none;
+            user-select: none;
+        }
+        summary::after { content: ' ▼'; float: right; color: #888; }
+        
+        .crane-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 10px;
+        }
+
+        .crane-btn {
+            padding: 8px 4px;
+            font-size: 0.85em;
+            background-color: #28a745; /*ボタンの色*/
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .crane-btn:hover { background-color: #218838; }
+    </style>
+</head>
+<body>
+
+    <h1 class="page-title">
+    よーてーちゃん
+</h1>
+  
+
+    <details><summary>13t クラス</summary>
+        <div class="crane-grid">
+            <button class="crane-btn" onclick="location.href='KRM-13H-F2H.html?model=KRM13HF2H'">KRM-13H-F2H</button>
+        </div>
+    </details>
+
+    <details><summary>16t・20t クラス</summary>
+        <div class="crane-grid">
+            <button class="crane-btn" onclick="location.href='16t_G3.html'">16t (G3)</button>
+            <button class="crane-btn" onclick="location.href='16t_G4.html'">16t (G4)</button>
+            <button class="crane-btn" onclick="location.href='16t_G5.html'">16t (G5)</button>
+            <button class="crane-btn" onclick="location.href='20t_G4.html'">20t (G4)</button>
+        </div>
+    </details>
+
+    <details><summary>25t クラス</summary>
+        <div class="crane-grid">
+            <button class="crane-btn" onclick="location.href='25t_G3.html'">25t (G3)</button>
+            <button class="crane-btn" onclick="location.href='25t_G4.html'">25t (G4)</button>
+            <button class="crane-btn" onclick="location.href='25t_G5.html'">25t (G5)</button>
+        </div>
+    </details>
+
+    <details><summary>35t クラス</summary>
+        <div class="crane-grid">
+            <button class="crane-btn" onclick="location.href='35t_Rf.html'">35t (Rf)</button>
+        </div>
+    </details>
+
+    <details><summary>50t クラス</summary>
+        <div class="crane-grid">
+            <button class="crane-btn" onclick="location.href='50t_Ri.html'">50t (Ri)</button>
+        </div>
+    </details>
+
+    <details><summary>60t クラス</summary>
+        <div class="crane-grid">
+            <button class="crane-btn" onclick="location.href='60t_G4.html'">60t (G4)</button>
+        </div>
+    </details>
+
+    <details><summary>70t クラス</summary>
+        <div class="crane-grid">
+            <button class="crane-btn" onclick="location.href='70t_Rf.html'">70t (Rf)</button>
+        </div>
+    </details>
+
+    <details><summary>80t クラス</summary>
+        <div class="crane-grid">
+            <button class="crane-btn" onclick="location.href='80t_G5.html'">80t (G5)</button>
+        </div>
+    </details>
+
+    <details><summary>100t クラス</summary>
+        <div class="crane-grid">
+            <button class="crane-btn" onclick="location.href='100t_G4.html'">100t (G4)</button>
+        </div>
+    </details>
+
+<script src="sketch.js"></script>
+<script>
+  window.onload = function() {
+    // URLの ?model=... の後ろにある文字を取得する
+    const params = new URLSearchParams(window.location.search);
+    const model = params.get('model'); // ここで「CC」などが自動で取得される
+
+    // 取得した値をそのまま loadCraneData に渡す
+    if(model) {
+        loadCraneData(model); 
+    }
+  };
+</script>
+
+</body>
+</html>

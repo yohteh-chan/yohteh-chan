@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>KRM-13H-F2H</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1 class="page-title">KRM-13H-F2H</h1>
+
+
+    <div class="app-container">
+
+      <div class="main-workspace">
+      
+        <aside class="control-panel">
+          <div class="panel-title">ブーム長</div>
+            <div class="panel-title">ブーム角度</div>
+            <div class="panel-title">ジブ長</div>
+            <div class="panel-title">ジブ角度</div>
+            <div class="panel-title">アウトリガー長</div>
+            </aside>
+
+   
+
+        <main class="chart-container">
+            <div class="canvas-wrapper">
+                <svg id="crane-chart" viewBox="0 0 0 0" width="100%" height="100%">
+                    <g class="grid-lines">
+                        </g>
+
+                   <!-- 縦線（グリッド線）を入れるグループ -->
+                    <g id="grid-lines-x"></g>
+                    <!-- X軸ラベルを入れるグループ -->
+                    <g class="axis-labels-x" id="axis-labels-x" fill="#fff" font-size="12" text-anchor="middle"></g>
+
+                    <!-- 縦線（グリッド線）を入れるグループ -->
+                    <g id="grid-lines-y"></g>
+                    <!-- Y軸ラベルを入れるグループ -->
+                    <g class="axis-labels-y" id="axis-labels-y" fill="#fff" font-size="12" text-anchor="middle"></g>
+
+                    
+                    <g id="body" transform="translate(0, 360)">
+                        <rect x="-32.2" y="-13.15" width="60" height="5" fill="#555" />
+                        <g class="Tire">
+                            <circle id="rear-tire" cx="-15" fill="#222" /><!--- タイヤ　後ろ--->
+                            <circle id="front-tire" cx="15" fill="#222" /><!--- タイヤ　前--->
+                        </g>
+                        <rect id="Cabin" x="-10" y="-29.5238" width="20" height="15.1738" fill="#f39c12" />
+                    </g>
+
+
+
+                    <!-- ブームのグループ -->
+                    <g id="boom" transform="translate(-13.2, 337.91)">
+      
+                            
+
+                    </g>
+
+
+                    
+
+
+                                            <circle id="footpin-point" cx="-13.2" cy="334.16" r="1" fill="#f00" />
+                                            <circle id="check-point" cx="310" cy="334.16" r="1" fill="#f00" />
+
+                   
+                </svg>
+            </div>
+           <!-- 角度調整用スライダー（0度〜80度） -->
+            <input type="range" id="boom-slider" min="0" max="80" step="0.1" value="0">
+            <span id="angle-val">0</span>°
+
+            <input type="range" id="boom-length-slider" min="53" max="240" step="0.1" value="53">
+            <span id="boom-length-val">5.3</span>m
+
+
+        </main>
+
+         </div>
+
+        <footer class="info-panel-bottom">
+        <div class="info-box">
+            <div class="info-label">定格荷重</div>
+            <div class="info-value">7.91 <span class="info-unit">ton</span></div>
+            <div class="hook-sub-info">
+                親フック：8本
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <div class="info-label">作業半径</div>
+            <div class="info-value">0.2 <span class="info-unit">m</span></div>
+        </div>
+
+        <div class="info-box">
+            <div class="info-label">地上揚程</div>
+            <div class="info-value">6.67 <span class="info-unit">m</span></div>
+        </div>
+    </footer>
+
+   
+    </div>
+
+    <!-- ▼▽▼▽　消してもいい　▼▽▼▽ -->
+    <div id="All-Distance">全長：読み込み中...</div><!-- 全長 -->
+    <div id="Carrier-Distance">車体長：読み込み中...</div><!-- 車体長 -->
+    <div id="Carrier-width">車体幅：読み込み中...</div><!-- 車体幅 -->
+    <div id="Boom-1st.distance">ブーム一段目：読み込み中...</div><!-- ブーム一段目長 -->
+    <div id="Boom-2nd.distance">ブーム二段目：読み込み中...</div><!-- ブーム二段目長 -->
+    <div id="Boom-3rd.distance">ブーム三段目：読み込み中...</div><!-- ブーム三段目長 -->
+    <div id="Boom-4th.distance">ブーム四段目：読み込み中...</div><!-- ブーム四段目長 -->
+    <div id="Boom-5th.distance">ブーム五段目：読み込み中...</div><!-- ブーム五段目長 -->
+    <div id="Boom-6th.distance">ブーム六段目：読み込み中...</div><!-- ブーム六段目長 -->
+    <!-- ▲△▲△　消してもいい　▲△▲△ -->
+     
+    <br>
+
+    <!--▽▼▽使うかも▽▼▽-->
+    <div id="Outrigger-1st.distance">アウトリガー最小：読み込み中...</div><!-- アウトリガー最小 -->
+    <div id="Outrigger-2nd.distance">アウトリガー二段目：読み込み中...</div><!-- アウトリガー二段目 -->
+    <div id="Outrigger-3rd.distance">アウトリガー三段目：読み込み中...</div><!-- アウトリガー三段目 -->
+    <div id="Outrigger-4th.distance">アウトリガー四段目：読み込み中...</div><!-- アウトリガー四段目 -->
+    <div id="Outrigger-5th.distance">アウトリガー五段目：読み込み中...</div><!-- アウトリガー五段目 -->
+
+    <!--▲△▲使うかも▲△▲-->
+
+
+    <script src="sketch.js"></script>
+    <script>
+      window.onload = function() {
+        const params = new URLSearchParams(window.location.search);
+        const model = params.get('model');
+        if(model) {
+            loadCraneBaseData(model);
+        }
+      };
+    </script>
+</body>
+</html>
