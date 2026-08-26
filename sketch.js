@@ -221,7 +221,7 @@ async function loadCraneBaseData(model) {
     resetAllBoomLength();
 
     if(length <=127.8 ){
-      const length1 = length - boom1st/100;
+      const length1 = length - boom1st / 100;
       boomLines[2].setAttribute('x2', length1/2+53);
       boomLines[3].setAttribute('x2', length);
     } else if(length >127.8){
