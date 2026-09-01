@@ -143,11 +143,13 @@ body {
     font-weight: bold;
     color: #fff;
     font-family: monospace;
+    display: inline-block;
 }
 .info-unit {
     font-size: 16px;
     color: #888;
     font-weight: normal;
+    display: inline-block;
 }
 
 
@@ -160,4 +162,13 @@ body {
     border: 1px solid #2d343f; /* 外枠の線 */
     border-radius: 8px; /* 角丸 */
     padding: 15px; /* 内側の余白 */
+}
+
+#working-radius {
+  white-space: pre;       /* スペースの詰め込みを防ぐ */
+  font-family: monospace; /* 文字幅を統一してズレを防ぐ */
+}
+
+.info-unit {
+  margin-left: 0.5em; /* 半角スペース分の余白を作る */
 }

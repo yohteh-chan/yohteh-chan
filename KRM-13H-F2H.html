@@ -46,29 +46,30 @@
 
                     
                     <g id="body" transform="translate(0, 360)">
-                        <rect x="-32.2" y="-13.15" width="60" height="5" fill="#555" />
+                        <!--パワートレイン-->
+                        <rect id="power-train" x="-32.2" y="-13.15" width="60" height="5" fill="#555" />
+
                         <g class="Tire">
                             <circle id="rear-tire" cx="-15" fill="#222" /><!--- タイヤ　後ろ--->
                             <circle id="front-tire" cx="15" fill="#222" /><!--- タイヤ　前--->
                         </g>
+                        
+                        <!-- キャビン -->
                         <rect id="Cabin" x="-10" y="-29.5238" width="20" height="15.1738" fill="#f39c12" />
                     </g>
 
 
 
                     <!-- ブームのグループ -->
-                    <g id="boom" transform="translate(-13.2, 337.91)">
-      
-                            
+                    <g id="boom" transform="translate(-13.2, 337.91)"></g>
+                    <g id="edge" transform="translate(-13.2, 337.91)"></g>
 
-                    </g>
-
-
-                    
+                <!---フートピン --->
+                     <circle id="footpin-point" cx="-13.2" cy="334.16" r="1" fill="#f00" />
 
 
-                                            <circle id="footpin-point" cx="-13.2" cy="334.16" r="1" fill="#f00" />
-                                            <circle id="check-point" cx="310" cy="334.16" r="1" fill="#f00" />
+<!--- チェックポイント --->
+<circle id="check-point" cx="310" cy="334.16" r="1" fill="#f00" />
 
                    
                 </svg>
@@ -94,7 +95,7 @@
         
         <div class="info-box">
             <div class="info-label">作業半径</div>
-            <div class="info-value">0.2 <span class="info-unit">m</span></div>
+            <div class="info-value" id="working-radius"></div><span class="info-unit">  m</span>
         </div>
 
         <div class="info-box">

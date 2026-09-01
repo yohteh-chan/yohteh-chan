@@ -113,6 +113,9 @@ async function fetchCraneDataPreset(model, MaxHolizon, MaxHight, XsizeHolizon) {
   return craneDataCache[model];
 }
 
+ let BoomAngle=0;
+ let BoomLength=0;
+
 
 async function loadCraneBaseData(model) {
   // 最初におおまかなデータ取得処理を行うため仮呼出、または直接fetchCraneDataPresetを呼び出します
@@ -133,10 +136,15 @@ async function loadCraneBaseData(model) {
 
   // 数値の計算
   let CW = BaseData[1][1];
-  let CD = BaseData[3][1];
   let AD = BaseData[2][1];
+  let CD = BaseData[3][1];
+  let SpecialBoom = BaseData[7][1];// 伸縮の種類
+  let SB = 0;//伸縮のモード　切り替え用
   let BN = BaseData[1][15];
+
+
   let boom1st = BaseData[4][15];
+  BoomLength = boom1st/1000;
   let boom2nd = BaseData[5][15];
   let boom3rd = BaseData[6][15];
   let boom4th = BaseData[7][15];
@@ -153,12 +161,19 @@ async function loadCraneBaseData(model) {
   let MaxHolizon = Math.ceil(BaseData[12][1]/5000)*50+10;
   let XsizeHolizon = -1 * Math.ceil(BaseData[2][11]/1000)*8;
 
+
+
+
+
   // 【ここで呼び出し】グリッド描画と通信管理を一括処理
   await fetchCraneDataPreset(model, MaxHolizon, MaxHight, XsizeHolizon);
 
   let BoomWidth = BaseData[18][1];
   let tireD = DDData[2][20]/200;
   let tireY = DDData[8][20]/100;
+
+
+ 
 
   // タイヤ描画の更新
   const TireD = document.querySelectorAll('.Tire circle');
@@ -188,52 +203,152 @@ async function loadCraneBaseData(model) {
 
   // --- ブームの生成処理 ---
   const boomLines = [];
-  const boomContainer = document.getElementById('boom');
-  boomContainer.innerHTML = ''; // クリア処理
+  const boom = document.getElementById('boom');
+  const boomEdges = [];
+  const edge = document.getElementById('edge');
+  boom.innerHTML = ''; // クリア処理
+  edge.innerHTML = ''; // クリア処理
+  
 
   for (let i = BN; i >= 1; i--) {
-    const BColor = i === 1 ? '#f39c12' : '#52504e';
-    const groupHTML = `
-      <line id="boom-line-${i}" x1="0" y1="0" y2="0" stroke="${BColor}" stroke-width=${BoomWidth/100*(10-i)/10} />
+    const BColor2 = i === 1 ? '#f39c12' : '#f39c12';
+    const groupHTML2 = `
+      <line id="boom-Edge-${i}" x1="0" y1="0" y2="0" stroke="${BColor2}" stroke-width=${BoomWidth/100*(10-i)/10} />
     `;
-    boomContainer.insertAdjacentHTML('beforeend', groupHTML);
+    edge.insertAdjacentHTML('beforeend', groupHTML2);
+    boomEdges[i] = document.getElementById(`boom-Edge-${i}`);
+
+    const BColor1 = i === 1 ? '#f39c12' : '#52504e';
+    const groupHTML1 = `
+      <line id="boom-line-${i}" x1="0" y1="0" y2="0" stroke="${BColor1}" stroke-width=${BoomWidth/100*(10-i)/10} />
+    `;
+    boom.insertAdjacentHTML('beforeend', groupHTML1);
     boomLines[i] = document.getElementById(`boom-line-${i}`);
+
+    
   }
 
-  boomLines[1].setAttribute('x2', boom1st/100);
+
+
+
+  const boomEdgeLength = 1;
+  const boomVerticalLength = BoomWidth/1000/5;
+  boomLines[1].setAttribute('x2', boom1st/100-boomEdgeLength*5);
+
+  boomEdges[2].setAttribute('x2', boom1st/100-boomEdgeLength*4);
+  boomEdges[3].setAttribute('x2', boom1st/100-boomEdgeLength*3);
+  boomEdges[4].setAttribute('x2', boom1st/100-boomEdgeLength*2);
+  boomEdges[5].setAttribute('x2', boom1st/100-boomEdgeLength);
+  boomEdges[6].setAttribute('x2', boom1st/100);
 
   // スライダー等のイベント設定
   const slider = document.getElementById('boom-slider');
-  const boom = document.getElementById('boom');
   const angleVal = document.getElementById('angle-val');
+  
+  const WorkingRadius = document.getElementById('working-radius');
 
   slider.addEventListener('input', (e) => {
     const angle = e.target.value;
     boom.setAttribute('transform', `translate(-13.2, 337.91) rotate(${-angle},0,-3.77)`);
+    edge.setAttribute('transform', `translate(-13.2, 337.91) rotate(${-angle},0,-3.77)`);
     angleVal.textContent = Number(angle).toFixed(0);
-  });
+    BoomAngle = Number(angle).toFixed(0);
+
+    //切り捨て
+        WorkingRadius.textContent = String(Number(Math.floor((BoomLength*Math.cos(BoomAngle * Math.PI / 180)+BoomWidth/1000*Math.sin(BoomAngle * Math.PI / 180)-1.32)*10)/10).toFixed(1)).padStart(4, ' ');
+
+      });
+
 
   const lengthSlider = document.getElementById('boom-length-slider');
   const lengthVal = document.getElementById('boom-length-val');
+
+  
 
   lengthSlider.addEventListener('input', (e) => {
     const length = parseFloat(e.target.value);
     resetAllBoomLength();
 
+    BoomLength = Number(length/10).toFixed(1);
+
+    //切り捨て
+    WorkingRadius.textContent = String(Number(Math.floor((BoomLength*Math.cos(BoomAngle * Math.PI / 180)+BoomWidth/1000*Math.sin(BoomAngle * Math.PI / 180)-1.32)*10)/10).toFixed(1)).padStart(4, ' ');
+
+    if(SB === 0){
+
     if(length <=127.8 ){
       const length1 = length - boom1st / 100;
-      boomLines[2].setAttribute('x2', length1/2+53);
-      boomLines[3].setAttribute('x2', length);
+      boomLines[2].setAttribute('x2', length1*1/2+boom1st/100-boomEdgeLength*4);
+      boomEdges[2].setAttribute('x1', length1/2+boom1st/100-boomEdgeLength*5);
+      boomEdges[2].setAttribute('x2', length1/2+boom1st/100-boomEdgeLength*4);
+
+
+      boomLines[3].setAttribute('x2', length-boomEdgeLength*3);
+      boomEdges[3].setAttribute('x1', length-boomEdgeLength*4);
+      boomEdges[3].setAttribute('x2', length-boomEdgeLength*3);
+
+
+      boomLines[4].setAttribute('x2', length-boomEdgeLength*2);
+      boomEdges[4].setAttribute('x1', length-boomEdgeLength*3);
+      boomEdges[4].setAttribute('x2', length-boomEdgeLength*2);
+
+
+      boomLines[5].setAttribute('x2', length-boomEdgeLength);
+      boomEdges[5].setAttribute('x1', length-boomEdgeLength*2);
+      boomEdges[5].setAttribute('x2', length-boomEdgeLength);
+
     } else if(length >127.8){
-      const length1 = length - 127.8;
-      boomLines[2].setAttribute('x2', 127.8);
-      boomLines[3].setAttribute('x2', 127.8);
-      boomLines[4].setAttribute('x2', length1/3+127.8);
-      boomLines[5].setAttribute('x2', length1*2/3+127.8);
-      boomLines[6].setAttribute('x2', length);
+      const length1 = 127.8 - boom1st / 100;
+      const length2 = length - 127.8;
+      boomLines[2].setAttribute('x2', length1*1/2+boom1st/100-boomEdgeLength*4);
+      boomEdges[2].setAttribute('x1', length1/2+boom1st/100-boomEdgeLength*5);
+      boomEdges[2].setAttribute('x2', length1/2+boom1st/100-boomEdgeLength*4);
+
+
+      boomLines[3].setAttribute('x2', 127.8-boomEdgeLength*3);
+      boomEdges[3].setAttribute('x1', 127.8-boomEdgeLength*4);
+      boomEdges[3].setAttribute('x2', 127.8-boomEdgeLength*3);
+
+
+
+
+      boomLines[4].setAttribute('x2', length2*1/3+127.8-boomEdgeLength*2);
+      boomEdges[4].setAttribute('x1', length2*1/3+127.8-boomEdgeLength*3);
+      boomEdges[4].setAttribute('x2', length2*1/3+127.8-boomEdgeLength*2);
+
+
+
+      boomLines[5].setAttribute('x2', length2*2/3+127.8-boomEdgeLength);
+      boomEdges[5].setAttribute('x1', length2*2/3+127.8-boomEdgeLength*2);
+      boomEdges[5].setAttribute('x2', length2*2/3+127.8-boomEdgeLength);
     }
 
+      
+
+    
+    
+
+    
+  
+  }else if(SB === 1){
+
+
+  }
+
+
+  for (let i = 2; i <= BN; i++) {
+      boomLines[i].setAttribute('y1', boomVerticalLength*(i-1));
+      boomLines[i].setAttribute('y2', boomVerticalLength*(i-1));
+      boomEdges[i].setAttribute('y1', boomVerticalLength*(i-1));
+      boomEdges[i].setAttribute('y2', boomVerticalLength*(i-1));
+  }
+
+    boomLines[BN].setAttribute('x2', length);
+    boomEdges[BN].setAttribute('x1', length-boomEdgeLength);
+    boomEdges[BN].setAttribute('x2', length);
+
     lengthVal.textContent = Number(length/10).toFixed(1);
+    
   });
 
 
@@ -244,9 +359,12 @@ function resetAllBoomLength() {
   document.querySelectorAll('[id^="boom-line-"]:not(#boom-line-1)').forEach(line => {
     line.setAttribute('x2', 0);
   });
-
-
   
+  document.querySelectorAll('[id^="boom-Edge-"]').forEach(edge => {
+    edge.setAttribute('x1', 0);
+    edge.setAttribute('x2', 0);
+  });
+
 }
 
 
