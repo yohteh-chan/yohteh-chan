@@ -129,6 +129,12 @@ let SBB = document.getElementById('specail-boom-button');
 SBB.addEventListener('click', () => {
   SB=SB === 0 ? 1 : 0; // SBの値を切り替える
   SBB.classList.toggle('active');
+
+//特殊伸縮に切り替える
+  const lengthSlider = document.getElementById('boom-length-slider');
+  if (lengthSlider) {
+    lengthSlider.dispatchEvent(new Event('input', { bubbles: true }));
+  }
  
 });
 
@@ -280,7 +286,7 @@ async function loadCraneBaseData(model) {
 
     //切り捨て
         WorkingRadius.textContent = String(Number(Math.floor((BoomLength*Math.cos(BoomAngle * Math.PI / 180)+BoomWidth/1000*Math.sin(BoomAngle * Math.PI / 180)-1.32)*10)/10).toFixed(1)).padStart(4, ' ');
-lengthSlider.dispatchEvent(new Event('input'));
+        lengthSlider.dispatchEvent(new Event('input'));
       });
 
 
