@@ -172,3 +172,21 @@ body {
 .info-unit {
   margin-left: 0.5em; /* 半角スペース分の余白を作る */
 }
+
+
+/*特殊伸縮のボタン 初期状態：淡い赤 */
+.toggle-btn {
+  background-color: #ffb3b3; /* 淡い赤 */
+  color: #333;
+  border: 1px solid #ff9999;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* 切り替えアニメーション */
+}
+
+/*特殊伸縮のボタン クリック後（activeクラス付与時）：淡い青 */
+.toggle-btn.active {
+  background-color: #b3d9ff; /* 淡い青 */
+  border-color: #99c2ff;
+}

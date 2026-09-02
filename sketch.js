@@ -116,9 +116,21 @@ async function fetchCraneDataPreset(model, MaxHolizon, MaxHight, XsizeHolizon) {
   return craneDataCache[model];
 }
 
- let BoomAngle=0;
- let BoomLength=0;
- let BoomWidth;
+let BoomAngle=0;
+let BoomLength=0;
+let BoomWidth;
+
+let SB = 0;//伸縮のモード　切り替え用
+let SBB = document.getElementById('specail-boom-button');
+
+
+
+// 特殊伸縮のボタンが押されたときの処理
+SBB.addEventListener('click', () => {
+  SB=SB === 0 ? 1 : 0; // SBの値を切り替える
+  SBB.classList.toggle('active');
+ 
+});
 
 
 async function loadCraneBaseData(model) {
@@ -142,22 +154,25 @@ async function loadCraneBaseData(model) {
   let CW = BaseData[1][1];
   let AD = BaseData[2][1];
   let CD = BaseData[3][1];
+  let BoomMaxAngle = BaseData[4][1];//ブーム最大角度
   let SpecialBoom = BaseData[7][1];// 伸縮の種類
-  let SB = 0;//伸縮のモード　切り替え用
+
   let BN = BaseData[1][15];//ブーム段数
   let footpinX = BaseData[1][9];//フートピン位置
   let footpinY = BaseData[2][9];//フートピン位置
 
   
+  for (let i = 1; i <= BN; i++) {
+    window[`Boom${i}th`] = BaseData[i+3][15]; // 例: Boom1th, Boom2th, ..., BoomNth
+  }
 
 
-  let boom1st = BaseData[4][15];
-  BoomLength = boom1st/1000;
-  let boom2nd = BaseData[5][15];
-  let boom3rd = BaseData[6][15];
-  let boom4th = BaseData[7][15];
-  let boom5th = BaseData[8][15];
-  let boom6th = BaseData[9][15];
+  BoomLength = Boom1th/1000;
+
+  
+  alert(Boom1th);
+
+
 
   let outrigger1st = BaseData[12][3];
   let outrigger2nd = BaseData[13][3];
@@ -191,17 +206,18 @@ async function loadCraneBaseData(model) {
   });
 
   document.getElementById('crane-chart').setAttribute('viewBox', '0 0 ' + (MaxHolizon) + ' ' + (MaxHight));
-
+  document.getElementById('boom-slider').setAttribute('max', BoomMaxAngle);
+  //document.getElementById('boom-length-slider').setAttribute('max', SpecialBoom);
   // テキスト情報の反映
   //document.getElementById('All-Distance').innerText = "全長: " + AD.toLocaleString()+ "mm";
   //document.getElementById('Carrier-Distance').innerText = "車体長: " + (CD).toLocaleString()+ "mm";
   //document.getElementById('Carrier-width').innerText = "車体幅: " + (CW).toLocaleString()+ "mm";
-  //document.getElementById('Boom-1st.distance').innerText = "ブーム一段目: " + (boom1st).toLocaleString()+ "mm";
-  //document.getElementById('Boom-2nd.distance').innerText = "ブーム二段目: " + (boom2nd).toLocaleString()+ "mm";
-  //document.getElementById('Boom-3rd.distance').innerText = "ブーム三段目: " + (boom3rd).toLocaleString()+ "mm";
-  //document.getElementById('Boom-4th.distance').innerText = "ブーム四段目: " + (boom4th).toLocaleString()+ "mm";
-  //document.getElementById('Boom-5th.distance').innerText = "ブーム五段目: " + (boom5th).toLocaleString()+ "mm";
-  //document.getElementById('Boom-6th.distance').innerText = "ブーム六段目: " + (boom6th).toLocaleString()+ "mm";
+  //document.getElementById('Boom-1st.distance').innerText = "ブーム一段目: " + (Boom1th).toLocaleString()+ "mm";
+  //document.getElementById('Boom-2nd.distance').innerText = "ブーム二段目: " + (Boom2th).toLocaleString()+ "mm";
+  //document.getElementById('Boom-3rd.distance').innerText = "ブーム三段目: " + (Boom3th).toLocaleString()+ "mm";
+  //document.getElementById('Boom-4th.distance').innerText = "ブーム四段目: " + (Boom4th).toLocaleString()+ "mm";
+  //document.getElementById('Boom-5th.distance').innerText = "ブーム五段目: " + (Boom5th).toLocaleString()+ "mm";
+  //document.getElementById('Boom-6th.distance').innerText = "ブーム六段目: " + (Boom6th).toLocaleString()+ "mm";
 
   //document.getElementById('Outrigger-1st.distance').innerText = "アウトリガー最小: " + (outrigger1st).toLocaleString()+ "mm";
   //document.getElementById('Outrigger-2nd.distance').innerText = "アウトリガー二段目: " + (outrigger2nd).toLocaleString()+ "mm";
@@ -241,11 +257,11 @@ async function loadCraneBaseData(model) {
 
   const boomEdgeLength = 1;//仮
   const boomVerticalLength = BoomWidth/1000/5;//仮
-  boomLines[1].setAttribute('x2', boom1st/100-boomEdgeLength*(BN-1));
+  boomLines[1].setAttribute('x2', Boom1th/100-boomEdgeLength*(BN-1));
 
 
   for (let i = 2; i <= BN; i++) {
-    boomEdges[i].setAttribute('x2', boom1st/100-boomEdgeLength*(BN-i));
+    boomEdges[i].setAttribute('x2', Boom1th/100-boomEdgeLength*(BN-i));
   }
 
 
@@ -264,7 +280,7 @@ async function loadCraneBaseData(model) {
 
     //切り捨て
         WorkingRadius.textContent = String(Number(Math.floor((BoomLength*Math.cos(BoomAngle * Math.PI / 180)+BoomWidth/1000*Math.sin(BoomAngle * Math.PI / 180)-1.32)*10)/10).toFixed(1)).padStart(4, ' ');
-
+lengthSlider.dispatchEvent(new Event('input'));
       });
 
 
@@ -283,11 +299,11 @@ async function loadCraneBaseData(model) {
     WorkingRadius.textContent = String(Number(Math.floor((BoomLength*Math.cos(BoomAngle * Math.PI / 180)+BoomWidth/1000*Math.sin(BoomAngle * Math.PI / 180)-1.32)*10)/10).toFixed(1)).padStart(4, ' ');
 
 
-    SB=1;
+
     if(SB === 0){
 
     if(length <=127.8 ){
-      const length1 = (length + boom1st / 100)/2;
+      const length1 = (length + Boom1th / 100)/2;
       boomLines[2].setAttribute('x2', length1-boomEdgeLength*4);
       boomEdges[2].setAttribute('x1', length1-boomEdgeLength*5);
       boomEdges[2].setAttribute('x2', length1-boomEdgeLength*4);
@@ -308,7 +324,7 @@ async function loadCraneBaseData(model) {
       boomEdges[5].setAttribute('x2', length-boomEdgeLength);
 
     } else if(length >127.8){
-      const length1 = (127.8 + boom1st / 100)/2;
+      const length1 = (127.8 + Boom1th / 100)/2;
       const length2 = length - 127.8;
       boomLines[2].setAttribute('x2', length1-boomEdgeLength*4);
       boomEdges[2].setAttribute('x1', length1-boomEdgeLength*5);
@@ -330,37 +346,37 @@ async function loadCraneBaseData(model) {
   }else if(SB === 1){
 
     if(length <=165.2 ){
-      const length1 = (length - boom1st / 100)/3;
+      const length1 = (length - Boom1th / 100)/3;
 
-      boomLines[2].setAttribute('x2', boom1st/100-boomEdgeLength*4);
-      boomEdges[2].setAttribute('x1', boom1st/100-boomEdgeLength*5);
-      boomEdges[2].setAttribute('x2', boom1st/100-boomEdgeLength*4);
+      boomLines[2].setAttribute('x2', Boom1th/100-boomEdgeLength*4);
+      boomEdges[2].setAttribute('x1', Boom1th/100-boomEdgeLength*5);
+      boomEdges[2].setAttribute('x2', Boom1th/100-boomEdgeLength*4);
 
-      boomLines[3].setAttribute('x2', boom1st/100-boomEdgeLength*3);
-      boomEdges[3].setAttribute('x1', boom1st/100-boomEdgeLength*4);
-      boomEdges[3].setAttribute('x2', boom1st/100-boomEdgeLength*3);
+      boomLines[3].setAttribute('x2', Boom1th/100-boomEdgeLength*3);
+      boomEdges[3].setAttribute('x1', Boom1th/100-boomEdgeLength*4);
+      boomEdges[3].setAttribute('x2', Boom1th/100-boomEdgeLength*3);
 
-      boomLines[4].setAttribute('x2', length1+boom1st/100-boomEdgeLength*2);
-      boomEdges[4].setAttribute('x1', length1+boom1st/100-boomEdgeLength*3);
-      boomEdges[4].setAttribute('x2', length1+boom1st/100-boomEdgeLength*2);
+      boomLines[4].setAttribute('x2', length1+Boom1th/100-boomEdgeLength*2);
+      boomEdges[4].setAttribute('x1', length1+Boom1th/100-boomEdgeLength*3);
+      boomEdges[4].setAttribute('x2', length1+Boom1th/100-boomEdgeLength*2);
 
-      boomLines[5].setAttribute('x2', length1*2+boom1st/100-boomEdgeLength);
-      boomEdges[5].setAttribute('x1', length1*2+boom1st/100-boomEdgeLength*2);
-      boomEdges[5].setAttribute('x2', length1*2+boom1st/100-boomEdgeLength);
+      boomLines[5].setAttribute('x2', length1*2+Boom1th/100-boomEdgeLength);
+      boomEdges[5].setAttribute('x1', length1*2+Boom1th/100-boomEdgeLength*2);
+      boomEdges[5].setAttribute('x2', length1*2+Boom1th/100-boomEdgeLength);
 
     } else if(length >165.2){
-      const length1 = (165.2 - boom1st / 100)/3;
+      const length1 = (165.2 - Boom1th / 100)/3;
       const length2 = length - 165.2;
 
 
-      boomLines[2].setAttribute('x2', length2/2+boom1st/100-boomEdgeLength*4);
-      boomEdges[2].setAttribute('x1', length2/2+boom1st/100-boomEdgeLength*5);
-      boomEdges[2].setAttribute('x2', length2/2+boom1st/100-boomEdgeLength*4);
+      boomLines[2].setAttribute('x2', length2/2+Boom1th/100-boomEdgeLength*4);
+      boomEdges[2].setAttribute('x1', length2/2+Boom1th/100-boomEdgeLength*5);
+      boomEdges[2].setAttribute('x2', length2/2+Boom1th/100-boomEdgeLength*4);
 
 
-      boomLines[3].setAttribute('x2', length2+boom1st/100-boomEdgeLength*3);
-      boomEdges[3].setAttribute('x1', length2+boom1st/100-boomEdgeLength*4);
-      boomEdges[3].setAttribute('x2', length2+boom1st/100-boomEdgeLength*3);
+      boomLines[3].setAttribute('x2', length2+Boom1th/100-boomEdgeLength*3);
+      boomEdges[3].setAttribute('x1', length2+Boom1th/100-boomEdgeLength*4);
+      boomEdges[3].setAttribute('x2', length2+Boom1th/100-boomEdgeLength*3);
 
 
       boomLines[4].setAttribute('x2', length-length1*2-boomEdgeLength*2);
