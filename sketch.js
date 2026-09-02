@@ -109,12 +109,16 @@ async function fetchCraneDataPreset(model, MaxHolizon, MaxHight, XsizeHolizon) {
     ylabelsGroup.insertAdjacentHTML('beforeend', ytextHTML);
   }
 
+
+
+  
   // 取得（または保存済み）のデータを返す
   return craneDataCache[model];
 }
 
  let BoomAngle=0;
  let BoomLength=0;
+ let BoomWidth;
 
 
 async function loadCraneBaseData(model) {
@@ -140,7 +144,11 @@ async function loadCraneBaseData(model) {
   let CD = BaseData[3][1];
   let SpecialBoom = BaseData[7][1];// 伸縮の種類
   let SB = 0;//伸縮のモード　切り替え用
-  let BN = BaseData[1][15];
+  let BN = BaseData[1][15];//ブーム段数
+  let footpinX = BaseData[1][9];//フートピン位置
+  let footpinY = BaseData[2][9];//フートピン位置
+
+  
 
 
   let boom1st = BaseData[4][15];
@@ -168,11 +176,11 @@ async function loadCraneBaseData(model) {
   // 【ここで呼び出し】グリッド描画と通信管理を一括処理
   await fetchCraneDataPreset(model, MaxHolizon, MaxHight, XsizeHolizon);
 
-  let BoomWidth = BaseData[18][1];
+  BoomWidth = BaseData[18][1];//ブーム幅 B19
   let tireD = DDData[2][20]/200;
   let tireY = DDData[8][20]/100;
 
-
+  let FootpinTransY=MaxHight-footpinY/100+BoomWidth/100/2;
  
 
   // タイヤ描画の更新
@@ -185,21 +193,21 @@ async function loadCraneBaseData(model) {
   document.getElementById('crane-chart').setAttribute('viewBox', '0 0 ' + (MaxHolizon) + ' ' + (MaxHight));
 
   // テキスト情報の反映
-  document.getElementById('All-Distance').innerText = "全長: " + AD.toLocaleString()+ "mm";
-  document.getElementById('Carrier-Distance').innerText = "車体長: " + (CD).toLocaleString()+ "mm";
-  document.getElementById('Carrier-width').innerText = "車体幅: " + (CW).toLocaleString()+ "mm";
-  document.getElementById('Boom-1st.distance').innerText = "ブーム一段目: " + (boom1st).toLocaleString()+ "mm";
-  document.getElementById('Boom-2nd.distance').innerText = "ブーム二段目: " + (boom2nd).toLocaleString()+ "mm";
-  document.getElementById('Boom-3rd.distance').innerText = "ブーム三段目: " + (boom3rd).toLocaleString()+ "mm";
-  document.getElementById('Boom-4th.distance').innerText = "ブーム四段目: " + (boom4th).toLocaleString()+ "mm";
-  document.getElementById('Boom-5th.distance').innerText = "ブーム五段目: " + (boom5th).toLocaleString()+ "mm";
-  document.getElementById('Boom-6th.distance').innerText = "ブーム六段目: " + (boom6th).toLocaleString()+ "mm";
+  //document.getElementById('All-Distance').innerText = "全長: " + AD.toLocaleString()+ "mm";
+  //document.getElementById('Carrier-Distance').innerText = "車体長: " + (CD).toLocaleString()+ "mm";
+  //document.getElementById('Carrier-width').innerText = "車体幅: " + (CW).toLocaleString()+ "mm";
+  //document.getElementById('Boom-1st.distance').innerText = "ブーム一段目: " + (boom1st).toLocaleString()+ "mm";
+  //document.getElementById('Boom-2nd.distance').innerText = "ブーム二段目: " + (boom2nd).toLocaleString()+ "mm";
+  //document.getElementById('Boom-3rd.distance').innerText = "ブーム三段目: " + (boom3rd).toLocaleString()+ "mm";
+  //document.getElementById('Boom-4th.distance').innerText = "ブーム四段目: " + (boom4th).toLocaleString()+ "mm";
+  //document.getElementById('Boom-5th.distance').innerText = "ブーム五段目: " + (boom5th).toLocaleString()+ "mm";
+  //document.getElementById('Boom-6th.distance').innerText = "ブーム六段目: " + (boom6th).toLocaleString()+ "mm";
 
-  document.getElementById('Outrigger-1st.distance').innerText = "アウトリガー最小: " + (outrigger1st).toLocaleString()+ "mm";
-  document.getElementById('Outrigger-2nd.distance').innerText = "アウトリガー二段目: " + (outrigger2nd).toLocaleString()+ "mm";
-  document.getElementById('Outrigger-3rd.distance').innerText = "アウトリガー三段目: " + (outrigger3rd).toLocaleString()+ "mm";
-  document.getElementById('Outrigger-4th.distance').innerText = "アウトリガー四段目: " + (outrigger4th).toLocaleString()+ "mm";
-  document.getElementById('Outrigger-5th.distance').innerText = "アウトリガー五段目: " + (outrigger5th).toLocaleString()+ "mm";
+  //document.getElementById('Outrigger-1st.distance').innerText = "アウトリガー最小: " + (outrigger1st).toLocaleString()+ "mm";
+  //document.getElementById('Outrigger-2nd.distance').innerText = "アウトリガー二段目: " + (outrigger2nd).toLocaleString()+ "mm";
+  //document.getElementById('Outrigger-3rd.distance').innerText = "アウトリガー三段目: " + (outrigger3rd).toLocaleString()+ "mm";
+  //document.getElementById('Outrigger-4th.distance').innerText = "アウトリガー四段目: " + (outrigger4th).toLocaleString()+ "mm";
+  //document.getElementById('Outrigger-5th.distance').innerText = "アウトリガー五段目: " + (outrigger5th).toLocaleString()+ "mm";
 
   // --- ブームの生成処理 ---
   const boomLines = [];
@@ -211,7 +219,7 @@ async function loadCraneBaseData(model) {
   
 
   for (let i = BN; i >= 1; i--) {
-    const BColor2 = i === 1 ? '#f39c12' : '#f39c12';
+    const BColor2 ='#f39c12';
     const groupHTML2 = `
       <line id="boom-Edge-${i}" x1="0" y1="0" y2="0" stroke="${BColor2}" stroke-width=${BoomWidth/100*(10-i)/10} />
     `;
@@ -231,15 +239,15 @@ async function loadCraneBaseData(model) {
 
 
 
-  const boomEdgeLength = 1;
-  const boomVerticalLength = BoomWidth/1000/5;
-  boomLines[1].setAttribute('x2', boom1st/100-boomEdgeLength*5);
+  const boomEdgeLength = 1;//仮
+  const boomVerticalLength = BoomWidth/1000/5;//仮
+  boomLines[1].setAttribute('x2', boom1st/100-boomEdgeLength*(BN-1));
 
-  boomEdges[2].setAttribute('x2', boom1st/100-boomEdgeLength*4);
-  boomEdges[3].setAttribute('x2', boom1st/100-boomEdgeLength*3);
-  boomEdges[4].setAttribute('x2', boom1st/100-boomEdgeLength*2);
-  boomEdges[5].setAttribute('x2', boom1st/100-boomEdgeLength);
-  boomEdges[6].setAttribute('x2', boom1st/100);
+
+  for (let i = 2; i <= BN; i++) {
+    boomEdges[i].setAttribute('x2', boom1st/100-boomEdgeLength*(BN-i));
+  }
+
 
   // スライダー等のイベント設定
   const slider = document.getElementById('boom-slider');
@@ -249,8 +257,8 @@ async function loadCraneBaseData(model) {
 
   slider.addEventListener('input', (e) => {
     const angle = e.target.value;
-    boom.setAttribute('transform', `translate(-13.2, 337.91) rotate(${-angle},0,-3.77)`);
-    edge.setAttribute('transform', `translate(-13.2, 337.91) rotate(${-angle},0,-3.77)`);
+    boom.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
+    edge.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     angleVal.textContent = Number(angle).toFixed(0);
     BoomAngle = Number(angle).toFixed(0);
 
@@ -274,13 +282,15 @@ async function loadCraneBaseData(model) {
     //切り捨て
     WorkingRadius.textContent = String(Number(Math.floor((BoomLength*Math.cos(BoomAngle * Math.PI / 180)+BoomWidth/1000*Math.sin(BoomAngle * Math.PI / 180)-1.32)*10)/10).toFixed(1)).padStart(4, ' ');
 
+
+    SB=1;
     if(SB === 0){
 
     if(length <=127.8 ){
-      const length1 = length - boom1st / 100;
-      boomLines[2].setAttribute('x2', length1*1/2+boom1st/100-boomEdgeLength*4);
-      boomEdges[2].setAttribute('x1', length1/2+boom1st/100-boomEdgeLength*5);
-      boomEdges[2].setAttribute('x2', length1/2+boom1st/100-boomEdgeLength*4);
+      const length1 = (length + boom1st / 100)/2;
+      boomLines[2].setAttribute('x2', length1-boomEdgeLength*4);
+      boomEdges[2].setAttribute('x1', length1-boomEdgeLength*5);
+      boomEdges[2].setAttribute('x2', length1-boomEdgeLength*4);
 
 
       boomLines[3].setAttribute('x2', length-boomEdgeLength*3);
@@ -298,39 +308,71 @@ async function loadCraneBaseData(model) {
       boomEdges[5].setAttribute('x2', length-boomEdgeLength);
 
     } else if(length >127.8){
-      const length1 = 127.8 - boom1st / 100;
+      const length1 = (127.8 + boom1st / 100)/2;
       const length2 = length - 127.8;
-      boomLines[2].setAttribute('x2', length1*1/2+boom1st/100-boomEdgeLength*4);
-      boomEdges[2].setAttribute('x1', length1/2+boom1st/100-boomEdgeLength*5);
-      boomEdges[2].setAttribute('x2', length1/2+boom1st/100-boomEdgeLength*4);
+      boomLines[2].setAttribute('x2', length1-boomEdgeLength*4);
+      boomEdges[2].setAttribute('x1', length1-boomEdgeLength*5);
+      boomEdges[2].setAttribute('x2', length1-boomEdgeLength*4);
 
-
-      boomLines[3].setAttribute('x2', 127.8-boomEdgeLength*3);
-      boomEdges[3].setAttribute('x1', 127.8-boomEdgeLength*4);
-      boomEdges[3].setAttribute('x2', 127.8-boomEdgeLength*3);
-
-
-
+      boomLines[3].setAttribute('x2', length2*0/3+127.8-boomEdgeLength*3);
+      boomEdges[3].setAttribute('x1', length2*0/3+127.8-boomEdgeLength*4);
+      boomEdges[3].setAttribute('x2', length2*0/3+127.8-boomEdgeLength*3);
 
       boomLines[4].setAttribute('x2', length2*1/3+127.8-boomEdgeLength*2);
       boomEdges[4].setAttribute('x1', length2*1/3+127.8-boomEdgeLength*3);
       boomEdges[4].setAttribute('x2', length2*1/3+127.8-boomEdgeLength*2);
 
-
-
       boomLines[5].setAttribute('x2', length2*2/3+127.8-boomEdgeLength);
       boomEdges[5].setAttribute('x1', length2*2/3+127.8-boomEdgeLength*2);
       boomEdges[5].setAttribute('x2', length2*2/3+127.8-boomEdgeLength);
     }
-
-      
-
-    
-    
-
-    
   
   }else if(SB === 1){
+
+    if(length <=165.2 ){
+      const length1 = (length - boom1st / 100)/3;
+
+      boomLines[2].setAttribute('x2', boom1st/100-boomEdgeLength*4);
+      boomEdges[2].setAttribute('x1', boom1st/100-boomEdgeLength*5);
+      boomEdges[2].setAttribute('x2', boom1st/100-boomEdgeLength*4);
+
+      boomLines[3].setAttribute('x2', boom1st/100-boomEdgeLength*3);
+      boomEdges[3].setAttribute('x1', boom1st/100-boomEdgeLength*4);
+      boomEdges[3].setAttribute('x2', boom1st/100-boomEdgeLength*3);
+
+      boomLines[4].setAttribute('x2', length1+boom1st/100-boomEdgeLength*2);
+      boomEdges[4].setAttribute('x1', length1+boom1st/100-boomEdgeLength*3);
+      boomEdges[4].setAttribute('x2', length1+boom1st/100-boomEdgeLength*2);
+
+      boomLines[5].setAttribute('x2', length1*2+boom1st/100-boomEdgeLength);
+      boomEdges[5].setAttribute('x1', length1*2+boom1st/100-boomEdgeLength*2);
+      boomEdges[5].setAttribute('x2', length1*2+boom1st/100-boomEdgeLength);
+
+    } else if(length >165.2){
+      const length1 = (165.2 - boom1st / 100)/3;
+      const length2 = length - 165.2;
+
+
+      boomLines[2].setAttribute('x2', length2/2+boom1st/100-boomEdgeLength*4);
+      boomEdges[2].setAttribute('x1', length2/2+boom1st/100-boomEdgeLength*5);
+      boomEdges[2].setAttribute('x2', length2/2+boom1st/100-boomEdgeLength*4);
+
+
+      boomLines[3].setAttribute('x2', length2+boom1st/100-boomEdgeLength*3);
+      boomEdges[3].setAttribute('x1', length2+boom1st/100-boomEdgeLength*4);
+      boomEdges[3].setAttribute('x2', length2+boom1st/100-boomEdgeLength*3);
+
+
+      boomLines[4].setAttribute('x2', length-length1*2-boomEdgeLength*2);
+      boomEdges[4].setAttribute('x1', length-length1*2-boomEdgeLength*3);
+      boomEdges[4].setAttribute('x2', length-length1*2-boomEdgeLength*2);
+
+
+      boomLines[5].setAttribute('x2', length-length1-boomEdgeLength);
+      boomEdges[5].setAttribute('x1', length-length1-boomEdgeLength*2);
+      boomEdges[5].setAttribute('x2', length-length1-boomEdgeLength);
+    }
+
 
 
   }
