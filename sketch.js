@@ -317,10 +317,13 @@ const patternIdx = (length < targetB) ? 1 : BN - 2;
 // 1つの処理で Nlength の抽出と反転を完結
 const Nlength = BSet2[SB][patternIdx].slice(1, BN - 1).reverse();
 
+let l1;
+let l2;
+
 if (length < targetB) {
 
-  const l1 = (length + BaseBoom[1]) / BSsetA[0][0];
-  const l2 = (length - BaseBoom[1]) / BSsetA[0][1];
+  l1 = (length + BaseBoom[1]) / BSsetA[0][0];
+  l2 = (length - BaseBoom[1]) / BSsetA[0][1];
 
 
   baseValues = SB === 0 
@@ -330,8 +333,8 @@ if (length < targetB) {
 
 } else {
 
-  const l1 = (BaseBoom[3] - BaseBoom[1]) / BSsetA[1][0];
-  const l2 = SB === 0 ? (length - BaseBoom[2]) / BSsetA[1][0] : (length - BaseBoom[3]) / BSsetA[1][1];
+  l1 = (BaseBoom[3] - BaseBoom[1]) / BSsetA[1][0];
+  l2 = SB === 0 ? (length - BaseBoom[2]) / BSsetA[1][0] : (length - BaseBoom[3]) / BSsetA[1][1];
  
 
   baseValues = SB === 0
