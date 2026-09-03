@@ -311,9 +311,11 @@ for (let i = 1; i <= Bset0.length; i++) {
 // SBの値に応じた閾値（SB=0ならb3, SB=1ならb4）
 const targetB = SB === 0 ? BaseBoom[2] : BaseBoom[3];
 let baseValues;
-let Nlength=[];
+// パターン指定インデックス（isLower が true なら 1、false なら BN - 2）
+const patternIdx = (length < targetB) ? 1 : BN - 2;
 
-
+// 1つの処理で Nlength の抽出と反転を完結
+const Nlength = BSet2[SB][patternIdx].slice(1, BN - 1).reverse();
 
 if (length < targetB) {
 
