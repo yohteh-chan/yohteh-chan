@@ -306,29 +306,39 @@ for (let i = 1; i <= Bset0.length; i++) {
   BaseBoom[i] = window[`Boom${Bset0[i-1]}th`] / 100;
 }
 
-//alert(BaseBoom); // ★同期処理で停止するため削除
+
 
 // SBの値に応じた閾値（SB=0ならb3, SB=1ならb4）
 const targetB = SB === 0 ? BaseBoom[2] : BaseBoom[3];
 let baseValues;
+let Nlength=[];
+
+
 
 if (length < targetB) {
 
   const l1 = (length + BaseBoom[1]) / BSsetA[0][0];
   const l2 = (length - BaseBoom[1]) / BSsetA[0][1];
+
+
   baseValues = SB === 0 
-    ? [l1, length, length, length]
-    : [BaseBoom[1], BaseBoom[1], BaseBoom[1] + l2 * 1, BaseBoom[1] + l2 * 2];
+    ? [l1, length, length, length]//1100
+    : [BaseBoom[1], BaseBoom[1], BaseBoom[1] + l2 * 1, BaseBoom[1] + l2 * 2];//0011
+
 
 } else {
 
   const l1 = (BaseBoom[3] - BaseBoom[1]) / BSsetA[1][0];
   const l2 = SB === 0 ? (length - BaseBoom[2]) / BSsetA[1][0] : (length - BaseBoom[3]) / BSsetA[1][1];
+ 
 
   baseValues = SB === 0
-    ? [(BaseBoom[2] + BaseBoom[1]) / 2, BaseBoom[2], BaseBoom[2] + l2 * 1, BaseBoom[2] + l2 * 2]
-    : [BaseBoom[1] + l2 * 1, BaseBoom[1] + l2 * 2, length - l1 * 2, length - l1 * 1];
+    ? [(BaseBoom[2] + BaseBoom[1]) / 2, BaseBoom[2], BaseBoom[2] + l2 * 1, BaseBoom[2] + l2 * 2]//2211
+    : [BaseBoom[1] + l2 * 1, BaseBoom[1] + l2 * 2, length - l1 * 2, length - l1 * 1];//1122
+
 }
+
+
 
 // 共通の描画ループ（1回だけで完結）
 for (let i = 2; i <= BN-1; i++) {
