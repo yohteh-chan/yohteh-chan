@@ -147,14 +147,7 @@ async function loadCraneBaseData(model) {
 
   let CW = BaseData[1][1];
 
-  // 文字列を配列に変換して直接セット
-let BSet = typeof BaseData[2][15] === 'string' 
-  ? JSON.parse(BaseData[2][15]) 
-  : BaseData[2][15];
 
-// あとはそのまま BSet1, BSet2 を作成
-let BSet1 = BSet.map(num => num.toString(3).padStart(6, '0'));
-let BSet2 = BSet1.map(str => str.split('').map(Number));
 
   let CD = BaseData[3][1];
   let BoomMaxAngle = BaseData[4][1];
@@ -171,7 +164,56 @@ let BSet2 = BSet1.map(str => str.split('').map(Number));
 
   BoomLength = Boom1th / 1000;
 
-  // alert(Boom1th); // ★同期処理で停止するため削除
+
+let BSet2 = [];   // 3次元配列
+let Bset0 = [];   // 1を含まない行番号（重複除去・昇順）
+let BSsetA = [];  // 各グループの1の個数（0除外・連続重複除去済み）
+
+if (typeof BoomSet === 'string') {
+  const matches = BoomSet.match(/\[[^\]]+\]/g);
+
+  if (matches) {
+    const nonOneIndicesSet = new Set();
+
+    matches.forEach(jsonStr => {
+      const bsetArr = JSON.parse(jsonStr);
+
+      // 1. 各グループの 2次元配列（桁分解済み）を生成
+      const groupMatrix = bsetArr.map(num =>
+        num.toString(3).padStart(BN, '0').split('').map(Number)
+      );
+      BSet2.push(groupMatrix);
+
+      // 2. 「1を含まない行番号」を抽出（Setに追加）
+      groupMatrix.forEach((row, index) => {
+        if (!row.includes(1)) {
+          nonOneIndicesSet.add(index + 1);
+        }
+      });
+
+      // 3. 各行の「1 の個数」を集計
+      const rawCounts = groupMatrix.map(row => 
+        row.filter(val => val === 1).length
+      );
+
+      // 4. 0 を除外した上で、連続する重複を除外
+      const filteredCounts = rawCounts
+        .filter(count => count > 0) // ★ 0 を除外
+        .filter((count, index, array) => 
+          index === 0 || count !== array[index - 1]
+        );
+
+      BSsetA.push(filteredCounts);
+    });
+
+    // 集約した行番号を昇順配列表現に変換
+    Bset0 = Array.from(nonOneIndicesSet).sort((a, b) => a - b);
+  }
+}
+
+
+
+
 
   let outrigger1st = BaseData[12][3];
   let outrigger2nd = BaseData[13][3];
@@ -257,84 +299,49 @@ let BSet2 = BSet1.map(str => str.split('').map(Number));
 
     WorkingRadius.textContent = String(Number(Math.floor((BoomLength*Math.cos(BoomAngle * Math.PI / 180)+BoomWidth/1000*Math.sin(BoomAngle * Math.PI / 180)-1.32)*10)/10).toFixed(1)).padStart(4, ' ');
 
-    if (SB === 0) {
-      if (length <= 127.8) {
-        const length1 = length/2;
-        const length2 = Boom1th / 100/2;
-        boomLines[2].setAttribute('x2', length1 * 1 + length2 * 1 - boomEdgeLength * 4);//1,2
-        boomEdges[2].setAttribute('x1', length1 * 1 + length2 * 1 - boomEdgeLength * 5);//1,2
-        boomEdges[2].setAttribute('x2', length1 * 1 + length2 * 1 - boomEdgeLength * 4);//1,2
 
-        boomLines[3].setAttribute('x2', length1 * 2 + length2 * 0 - boomEdgeLength * 3);//1,2
-        boomEdges[3].setAttribute('x1', length1 * 2 + length2 * 0 - boomEdgeLength * 4);//1,2
-        boomEdges[3].setAttribute('x2', length1 * 2 + length2 * 0 - boomEdgeLength * 3);//1,2
+const BaseBoom = [];
 
-        boomLines[4].setAttribute('x2', length - boomEdgeLength * 2);//0
-        boomEdges[4].setAttribute('x1', length - boomEdgeLength * 3);//0
-        boomEdges[4].setAttribute('x2', length - boomEdgeLength * 2);//0
+for (let i = 1; i <= Bset0.length; i++) {
+  BaseBoom[i] = window[`Boom${Bset0[i-1]}th`] / 100;
+}
 
-        boomLines[5].setAttribute('x2', length - boomEdgeLength * 1);//0
-        boomEdges[5].setAttribute('x1', length - boomEdgeLength * 2);//0
-        boomEdges[5].setAttribute('x2', length - boomEdgeLength * 1);//0
-      } else if (length > 127.8) {
-        const length1 = (127.8 + Boom1th / 100) / 2;
-        const length2 = (length - 127.8)/3;
-        boomLines[2].setAttribute('x2', length1 - boomEdgeLength * 4);//2
-        boomEdges[2].setAttribute('x1', length1 - boomEdgeLength * 5);//2
-        boomEdges[2].setAttribute('x2', length1 - boomEdgeLength * 4);//2
+//alert(BaseBoom); // ★同期処理で停止するため削除
 
-        boomLines[3].setAttribute('x2', length2 * 0 + 127.8 - boomEdgeLength * 3);//2
-        boomEdges[3].setAttribute('x1', length2 * 0 + 127.8 - boomEdgeLength * 4);//2
-        boomEdges[3].setAttribute('x2', length2 * 0 + 127.8 - boomEdgeLength * 3);//2
+// SBの値に応じた閾値（SB=0ならb3, SB=1ならb4）
+const targetB = SB === 0 ? BaseBoom[2] : BaseBoom[3];
+let baseValues;
 
-        boomLines[4].setAttribute('x2', length2 * 1 + 127.8 - boomEdgeLength * 2);//1,2
-        boomEdges[4].setAttribute('x1', length2 * 1 + 127.8 - boomEdgeLength * 3);//1,2
-        boomEdges[4].setAttribute('x2', length2 * 1 + 127.8 - boomEdgeLength * 2);//1,2
+if (length < targetB) {
 
-        boomLines[5].setAttribute('x2', length2 * 2 + 127.8 - boomEdgeLength * 1);//1,2
-        boomEdges[5].setAttribute('x1', length2 * 2 + 127.8 - boomEdgeLength * 2);//1,2
-        boomEdges[5].setAttribute('x2', length2 * 2 + 127.8 - boomEdgeLength * 1);//1,2
-      }
-    } else if (SB === 1) {
-      if (length <= 165.2) {
-        const length1 = (length - Boom1th / 100) / 3;
+  const l1 = (length + BaseBoom[1]) / BSsetA[0][0];
+  const l2 = (length - BaseBoom[1]) / BSsetA[0][1];
+  baseValues = SB === 0 
+    ? [l1, length, length, length]
+    : [BaseBoom[1], BaseBoom[1], BaseBoom[1] + l2 * 1, BaseBoom[1] + l2 * 2];
 
-        boomLines[2].setAttribute('x2', Boom1th / 100 - boomEdgeLength * 4);//0
-        boomEdges[2].setAttribute('x1', Boom1th / 100 - boomEdgeLength * 5);//0
-        boomEdges[2].setAttribute('x2', Boom1th / 100 - boomEdgeLength * 4);//0
+} else {
 
-        boomLines[3].setAttribute('x2', length1 * 0 + Boom1th / 100 - boomEdgeLength * 3);//0
-        boomEdges[3].setAttribute('x1', length1 * 0 + Boom1th / 100 - boomEdgeLength * 4);//0
-        boomEdges[3].setAttribute('x2', length1 * 0 + Boom1th / 100 - boomEdgeLength * 3);//0
+  const l1 = (BaseBoom[3] - BaseBoom[1]) / BSsetA[1][0];
+  const l2 = SB === 0 ? (length - BaseBoom[2]) / BSsetA[1][0] : (length - BaseBoom[3]) / BSsetA[1][1];
 
-        boomLines[4].setAttribute('x2', length1 * 1 + Boom1th / 100 - boomEdgeLength * 2);//1,2
-        boomEdges[4].setAttribute('x1', length1 * 1 + Boom1th / 100 - boomEdgeLength * 3);//1,2
-        boomEdges[4].setAttribute('x2', length1 * 1 + Boom1th / 100 - boomEdgeLength * 2);//1,2
+  baseValues = SB === 0
+    ? [(BaseBoom[2] + BaseBoom[1]) / 2, BaseBoom[2], BaseBoom[2] + l2 * 1, BaseBoom[2] + l2 * 2]
+    : [BaseBoom[1] + l2 * 1, BaseBoom[1] + l2 * 2, length - l1 * 2, length - l1 * 1];
+}
 
-        boomLines[5].setAttribute('x2', length1 * 2 + Boom1th / 100 - boomEdgeLength * 1);//1,2
-        boomEdges[5].setAttribute('x1', length1 * 2 + Boom1th / 100 - boomEdgeLength * 2);//1,2
-        boomEdges[5].setAttribute('x2', length1 * 2 + Boom1th / 100 - boomEdgeLength * 1);//1,2
-      } else if (length > 165.2) {
-        const length1 = (165.2 - Boom1th / 100) / 3;
-        const length2 = (length - 165.2)/2;
+// 共通の描画ループ（1回だけで完結）
+for (let i = 2; i <= BN-1; i++) {
+  const base = baseValues[i - 2];
+  const x2 = base - boomEdgeLength * (BN - i);
+  const x3 = base - boomEdgeLength * (BN + 1 - i);
 
-        boomLines[2].setAttribute('x2', length2 * 1 + Boom1th / 100 - boomEdgeLength * 4);//1,2
-        boomEdges[2].setAttribute('x1', length2 * 1 + Boom1th / 100 - boomEdgeLength * 5);//1,2
-        boomEdges[2].setAttribute('x2', length2 * 1 + Boom1th / 100 - boomEdgeLength * 4);//1,2
+  boomLines[i].setAttribute('x2', x2);
+  boomEdges[i].setAttribute('x1', x3);
+  boomEdges[i].setAttribute('x2', x2);
+}
 
-        boomLines[3].setAttribute('x2', length2 * 2 + Boom1th / 100 - boomEdgeLength * 3);//1,2
-        boomEdges[3].setAttribute('x1', length2 * 2 + Boom1th / 100 - boomEdgeLength * 4);//1,2
-        boomEdges[3].setAttribute('x2', length2 * 2 + Boom1th / 100 - boomEdgeLength * 3);//1,2
 
-        boomLines[4].setAttribute('x2', length - length1 * 2 - boomEdgeLength * 2);//2
-        boomEdges[4].setAttribute('x1', length - length1 * 2 - boomEdgeLength * 3);//2
-        boomEdges[4].setAttribute('x2', length - length1 * 2 - boomEdgeLength * 2);//2
-
-        boomLines[5].setAttribute('x2', length - length1 * 1 - boomEdgeLength * 1);//2
-        boomEdges[5].setAttribute('x1', length - length1 * 1 - boomEdgeLength * 2);//2
-        boomEdges[5].setAttribute('x2', length - length1 * 1 - boomEdgeLength * 1);//2
-      }
-    }
 
     for (let i = 2; i <= BN; i++) {
       boomLines[i].setAttribute('y1', boomVerticalLength * (i - 1));
