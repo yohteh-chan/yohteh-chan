@@ -37,26 +37,66 @@ function initCraneSelector() {
     }
 }
 
+document.getElementById('clear-cache-btn')?.addEventListener('click', () => {
+  localStorage.clear();
+  alert('キャッシュをクリアしました。ページを再読み込みします。');
+  location.reload(); // ページをリロードして最新データを再取得
+});
+
 // sketch.js
 const BaseDataSheetUrls = {
-  "KRM13HF2H": "https://script.google.com/macros/s/AKfycbzDnWVNkIFI0BTX_BpJAZxKEfPn2EVjZxovyBSEY2zEb7-gD3AOejB01Cl6y0G91k_t/exec",
+  "KRM-13H-F2H": "https://script.google.com/macros/s/AKfycbzDnWVNkIFI0BTX_BpJAZxKEfPn2EVjZxovyBSEY2zEb7-gD3AOejB01Cl6y0G91k_t/exec",
+  "KRM13HF2H": "https://script.google.com/macros/s/AKfycbzDnWVNkIFI0BTX_BpJAZxKEfPn2EVjZxovyBSEY2zEb7-gD3AOejB01Cl6y0G91k_t/exec"
 };
 
+// メモリ用キャッシュ（ページ読み込み中の保持用）
 const craneDataCache = {};
 
-// 共通データ取得関数（キャッシュがあれば即返却）
+// データを取得・キャッシュ管理する関数
 async function getCraneData(model) {
-  if (!craneDataCache[model]) {
-    const url = BaseDataSheetUrls[model];
-    if (!url) {
-      console.error(`モデル ${model} のURLが設定されていません。`);
-      return null;
-    }
-    const response = await fetch(url);
-    craneDataCache[model] = await response.json();
+  // 1. メモリキャッシュにあればそれを返す
+  if (craneDataCache[model]) {
+    return craneDataCache[model];
   }
-  return craneDataCache[model];
+
+  // 2. localStorage（ブラウザ保存）にあればそれを返す（爆速）
+  const localData = localStorage.getItem(`crane_data_${model}`);
+  if (localData) {
+    try {
+      const parsedData = JSON.parse(localData);
+      craneDataCache[model] = parsedData; // メモリにも載せておく
+      console.log(`[Cache Hit] localStorageから ${model} のデータを読み出しました`);
+      return parsedData;
+    } catch (e) {
+      console.warn("キャッシュのパースに失敗したため再取得します", e);
+      localStorage.removeItem(`crane_data_${model}`);
+    }
+  }
+
+
+  // 3. キャッシュが無ければGAS（API）へ通信して取得する
+  const url = BaseDataSheetUrls[model];
+  if (!url) {
+    console.error(`モデル ${model} のURLが設定されていません。`);
+    return null;
+  }
+
+  try {
+    console.log(`[Fetch API] GASから ${model} のデータを新規取得します...`);
+    const response = await fetch(url);
+    const data = await response.json();
+
+    // 取得したデータをメモリとlocalStorageの両方に保存
+    craneDataCache[model] = data;
+    localStorage.setItem(`crane_data_${model}`, JSON.stringify(data));
+
+    return data;
+  } catch (error) {
+    console.error("データ取得エラー:", error);
+    return null;
+  }
 }
+
 
 async function fetchCraneDataPreset(model, MaxHolizon, MaxHight, XsizeHolizon) {
   const data = await getCraneData(model);
@@ -205,9 +245,6 @@ if (typeof BoomSet === 'string') {
   }
 }
 
-console.log("BSet2:",BSet2);
-console.log("Bset0:",Bset0);
-console.log("BSsetA:",BSsetA);
 
 
 
@@ -373,7 +410,6 @@ if(SB==0){
 
 
 
-//console.log("BaseBoom:",BaseBoom);
 
 
 
