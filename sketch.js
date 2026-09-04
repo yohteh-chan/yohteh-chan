@@ -203,11 +203,11 @@ if (typeof BoomSet === 'string') {
           index === 0 || count !== array[index - 1]
         );
 
-      BSsetA.push(filteredCounts);
+      BSsetA.push(filteredCounts);// 各グループの1の個数
     });
 
     // 集約した行番号を昇順配列表現に変換
-    Bset0 = Array.from(nonOneIndicesSet).sort((a, b) => a - b);
+    Bset0 = Array.from(nonOneIndicesSet).sort((a, b) => a - b);// 1を含まない行番号
   }
 }
 
@@ -317,33 +317,73 @@ const patternIdx = (length < targetB) ? 1 : BN - 2;
 // 1つの処理で Nlength の抽出と反転を完結
 const Nlength = BSet2[SB][patternIdx].slice(1, BN - 1).reverse();
 
-let l1;
-let l2;
+
+
+
+
+
+//仮に入れる用
+let BaseN0;
+BaseN0="";
+let BaseN1;
+BaseN1="";
+let BaseN2;
+BaseN2="";
+
+
+let LvsTB = length < targetB ? 0:1;//length < targetB
+let BSetA=BSsetA[LvsTB];
+
+
+
+let ForL1=LvsTB===0?length:BaseBoom[2];
+let ForL1BB=SB===0?BaseBoom[2]:BaseBoom[1];
+let l1= (ForL1 + BaseBoom[1]) / BSetA[LvsTB];;
+
+let ForL2BSA=LvsTB===0?1:SB;
+let ForL2BB=LvsTB===0?BaseBoom[1]:(SB===0?BaseBoom[2]:BaseBoom[3]);
+let ForL2BV=SB===0?BaseBoom[2]:length;
+let l2 = (length - ForL2BB) / BSetA[ForL2BSA];;
+
+let l3= ( BaseBoom[1]-BaseBoom[3]) / BSetA[0];;
+
+
+let ForN0=SB===0?length:BaseBoom[1];
+
+//for文の時に、N=1のとき　for(let i=1,i<=BN-2,i++){if(N=1){let step=1; step=step+1;}}
 
 if (length < targetB) {
 
-  l1 = (length + BaseBoom[1]) / BSsetA[0][0];
-  l2 = (length - BaseBoom[1]) / BSsetA[0][1];
-
-
   baseValues = SB === 0 
-    ? [l1, length, length, length]//1100
-    : [BaseBoom[1], BaseBoom[1], BaseBoom[1] + l2 * 1, BaseBoom[1] + l2 * 2];//0011
+    ? [l1,//1 i=1,SB=0
+      length,//1 i=2,SB=0
+
+      ForN0,//0
+      ForN0]//0
+
+    : [ForN0,//0
+      ForN0,//0
+      ForL1BB + l2 * 1,//1
+      ForL1BB + l2 * 2];//1
 
 
 } else {
 
-  l1 = (BaseBoom[3] - BaseBoom[1]) / BSsetA[1][0];
-  l2 = SB === 0 ? (length - BaseBoom[2]) / BSsetA[1][0] : (length - BaseBoom[3]) / BSsetA[1][1];
- 
-
   baseValues = SB === 0
-    ? [(BaseBoom[2] + BaseBoom[1]) / 2, BaseBoom[2], BaseBoom[2] + l2 * 1, BaseBoom[2] + l2 * 2]//2211
-    : [BaseBoom[1] + l2 * 1, BaseBoom[1] + l2 * 2, length - l1 * 2, length - l1 * 1];//1122
+    ? [l1, //2 i=1,SB=0
+    ForL2BV,//2 i=2,SB=0
+
+    ForL1BB + l2 * 1,//1
+    ForL1BB + l2 * 2]//1
+
+    : [ForL1BB + l2 * 1, //1
+    ForL1BB + l2 * 2, //1
+    ForL2BV + l3 * 2, //2
+    ForL2BV + l3 * 1];//2
 
 }
 
-
+BaseN1=SB===0?length:BaseBoom[1];
 
 // 共通の描画ループ（1回だけで完結）
 for (let i = 2; i <= BN-1; i++) {
