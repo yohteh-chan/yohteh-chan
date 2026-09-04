@@ -164,17 +164,14 @@ async function loadCraneBaseData(model) {
 
   BoomLength = Boom1th / 1000;
 
-
 let BSet2 = [];   // 3次元配列
-let Bset0 = [];   // 1を含まない行番号（重複除去・昇順）
+let Bset0 = [];   // 基準のブーム段
 let BSsetA = [];  // 各グループの1の個数（0除外・連続重複除去済み）
 
 if (typeof BoomSet === 'string') {
   const matches = BoomSet.match(/\[[^\]]+\]/g);
 
   if (matches) {
-    const nonOneIndicesSet = new Set();
-
     matches.forEach(jsonStr => {
       const bsetArr = JSON.parse(jsonStr);
 
@@ -184,12 +181,12 @@ if (typeof BoomSet === 'string') {
       );
       BSet2.push(groupMatrix);
 
-      // 2. 「1を含まない行番号」を抽出（Setに追加）
-      groupMatrix.forEach((row, index) => {
-        if (!row.includes(1)) {
-          nonOneIndicesSet.add(index + 1);
-        }
-      });
+      // 2. 「0を含む最後の行番号」を特定（1始まりの番号）
+      // 末尾から探索（findLastIndex）して、最初に見つかった 0 を含む行のインデックスを取得
+      const lastZeroRowIndex = groupMatrix.findLastIndex(row => row.includes(0));
+      if (lastZeroRowIndex !== -1) {
+        Bset0.push(lastZeroRowIndex + 1); // 1始まりの行番号として格納
+      }
 
       // 3. 各行の「1 の個数」を集計
       const rawCounts = groupMatrix.map(row => 
@@ -198,19 +195,19 @@ if (typeof BoomSet === 'string') {
 
       // 4. 0 を除外した上で、連続する重複を除外
       const filteredCounts = rawCounts
-        .filter(count => count > 0) // ★ 0 を除外
+        .filter(count => count > 0)
         .filter((count, index, array) => 
           index === 0 || count !== array[index - 1]
         );
 
-      BSsetA.push(filteredCounts);// 各グループの1の個数
+      BSsetA.push(filteredCounts);
     });
-
-    // 集約した行番号を昇順配列表現に変換
-    Bset0 = Array.from(nonOneIndicesSet).sort((a, b) => a - b);// 1を含まない行番号
   }
 }
 
+console.log("BSet2:",BSet2);
+console.log("Bset0:",Bset0);
+console.log("BSsetA:",BSsetA);
 
 
 
@@ -300,23 +297,13 @@ if (typeof BoomSet === 'string') {
     WorkingRadius.textContent = String(Number(Math.floor((BoomLength*Math.cos(BoomAngle * Math.PI / 180)+BoomWidth/1000*Math.sin(BoomAngle * Math.PI / 180)-1.32)*10)/10).toFixed(1)).padStart(4, ' ');
 
 
-const BaseBoom = [];
-
-for (let i = 1; i <= Bset0.length; i++) {
-  BaseBoom[i] = window[`Boom${Bset0[i-1]}th`] / 100;
-}
 
 
 
-// SBの値に応じた閾値（SB=0ならb3, SB=1ならb4）
-const targetB = SB === 0 ? BaseBoom[2] : BaseBoom[3];
+
+
+
 let baseValues;
-// パターン指定インデックス（isLower が true なら 1、false なら BN - 2）
-const patternIdx = (length < targetB) ? 1 : BN - 2;
-
-// 1つの処理で Nlength の抽出と反転を完結
-const Nlength = BSet2[SB][patternIdx].slice(1, BN - 1).reverse();
-
 
 
 
@@ -330,60 +317,66 @@ BaseN1="";
 let BaseN2;
 BaseN2="";
 
-
-let LvsTB = length < targetB ? 0:1;//length < targetB
-let BSetA=BSsetA[LvsTB];
+//Bset0=3,4
 
 
 
-let ForL1=LvsTB===0?length:BaseBoom[2];
-let ForL1BB=SB===0?BaseBoom[2]:BaseBoom[1];
-let l1= (ForL1 + BaseBoom[1]) / BSetA[LvsTB];;
 
-let ForL2BSA=LvsTB===0?1:SB;
-let ForL2BB=LvsTB===0?BaseBoom[1]:(SB===0?BaseBoom[2]:BaseBoom[3]);
-let ForL2BV=SB===0?BaseBoom[2]:length;
-let l2 = (length - ForL2BB) / BSetA[ForL2BSA];;
+const BaseBoom = [];
+BaseBoom[1]=Boom1th/100;
 
-let l3= ( BaseBoom[1]-BaseBoom[3]) / BSetA[0];;
+Bset0.forEach((val, index) => {
+  BaseBoom[index + 2] = window[`Boom${val}th`] / 100;
+});
 
+let targetB=length<BaseBoom[2+SB]?0:1;
 
-let ForN0=SB===0?length:BaseBoom[1];
-
-//for文の時に、N=1のとき　for(let i=1,i<=BN-2,i++){if(N=1){let step=1; step=step+1;}}
-
-if (length < targetB) {
-
-  baseValues = SB === 0 
-    ? [l1,//1 i=1,SB=0
-      length,//1 i=2,SB=0
-
-      ForN0,//0
-      ForN0]//0
-
-    : [ForN0,//0
-      ForN0,//0
-      ForL1BB + l2 * 1,//1
-      ForL1BB + l2 * 2];//1
+//N=0のときは、lengthか、boom1th or boom2th
 
 
-} else {
+const LtoB1 = length - BaseBoom[1];
+const LtoB2 = length - BaseBoom[2];
+const LtoB3 = length - BaseBoom[3];
 
-  baseValues = SB === 0
-    ? [l1, //2 i=1,SB=0
-    ForL2BV,//2 i=2,SB=0
+if(SB==0){
+  const l1 = ( LtoB1 ) / 2 ;
+  const l2 = ( LtoB1 - LtoB2) / 2 ;
+  const l3 = ( LtoB2 ) / 3;
+ 
+ baseValues = targetB === 0
+  ?[BaseBoom[1] + l1,
+    length,
+    length,
+    length]
 
-    ForL1BB + l2 * 1,//1
-    ForL1BB + l2 * 2]//1
+  :[BaseBoom[1] + l2,
+    BaseBoom[2],
+    BaseBoom[2] + l3,
+    BaseBoom[2] + l3 * 2];
 
-    : [ForL1BB + l2 * 1, //1
-    ForL1BB + l2 * 2, //1
-    ForL2BV + l3 * 2, //2
-    ForL2BV + l3 * 1];//2
+}else{
+  const l1 = ( LtoB1 ) / 3;
+  const l2 = ( LtoB1 - LtoB3 ) / 3;
+
+  baseValues = targetB === 0
+  ?[BaseBoom[1],
+    BaseBoom[1],
+    BaseBoom[1] + l1,
+    BaseBoom[1] + l1 * 2]
+
+  :[BaseBoom[1] + LtoB3 / 2,
+    BaseBoom[1] + LtoB3,
+    BaseBoom[1] + LtoB3 + l2,
+    BaseBoom[1] + LtoB3 + l2 * 2];
 
 }
 
-BaseN1=SB===0?length:BaseBoom[1];
+
+
+//console.log("BaseBoom:",BaseBoom);
+
+
+
 
 // 共通の描画ループ（1回だけで完結）
 for (let i = 2; i <= BN-1; i++) {
