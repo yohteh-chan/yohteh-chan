@@ -495,12 +495,14 @@ for (let i = 2; i <= BN-1; i++) {
 
 
     if(jibB==1){
+
+      const jibShift=boomVerticalLength*(BN-1)+7.54/4;
       jibLines[1].setAttribute('stroke-width',"1");
 
       jibLines[1].setAttribute('x1', length);
       jibLines[1].setAttribute('x2', length+jib1th);
-      jibLines[1].setAttribute('y1', 7.54/2-boomEdgeLength);
-      jibLines[1].setAttribute('y2', 7.54/2-boomEdgeLength);
+      jibLines[1].setAttribute('y1', jibShift);
+      jibLines[1].setAttribute('y2', jibShift);
 
     }else{
       jibLines[1].setAttribute('stroke-width',"0");
