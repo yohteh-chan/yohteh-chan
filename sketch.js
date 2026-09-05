@@ -173,6 +173,21 @@ if (SBB) {
   });
 }
 
+let jibB = 0;
+const jibBtn = document.getElementById('jib-Btn');
+
+jibBtn?.addEventListener('click', () => {
+  jibB = 1 - jibB; // 0 と 1 を相互切り替え
+  jibBtn.classList.toggle('active', jibB === 1); // activeクラスの着脱
+
+const lengthSlider = document.getElementById('boom-length-slider');
+    if (lengthSlider) {
+      lengthSlider.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+
+});
+
 async function loadCraneBaseData(model) {
   // 【改善】共通関数経由で取得（無駄な重複fetchを防止）
   const data = await getCraneData(model);
@@ -248,6 +263,10 @@ if (typeof BoomSet === 'string') {
 
 
 
+let jib1th=BaseData[2][17]/100;
+let jib2th=BaseData[3][17]/100;
+let jib3th=BaseData[4][17]/100;
+
 
   let outrigger1st = BaseData[12][3];
   let outrigger2nd = BaseData[13][3];
@@ -276,16 +295,28 @@ if (typeof BoomSet === 'string') {
   document.getElementById('crane-chart').setAttribute('viewBox', '0 0 ' + (MaxHolizon) + ' ' + (MaxHight));
   document.getElementById('boom-slider').setAttribute('max', BoomMaxAngle);
 
+ const BoomLengthSliderValueChange = document.getElementById('boom-length-slider');
+BoomLengthSliderValueChange.setAttribute('min', window.Boom1th/100);
+BoomLengthSliderValueChange.setAttribute('max', window[`Boom${BN}th`]/100);
+BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
+
   // --- ブームの生成処理 ---
   const boomLines = [];
   const boom = document.getElementById('boom');
   const boomEdges = [];
   const edge = document.getElementById('edge');
+  const jibLines = [];
+  const jib = document.getElementById('jib');
 
   // 【改善】文字列組み立てで一括注入
+  let jibHTML = '';
   let edgeHTML = '';
   let boomHTML = '';
   for (let i = BN; i >= 1; i--) {
+  const BColor3 = '#d80606';
+    jibHTML += `<line id="jib-line-${i}" x1="0" y1="0" y2="0" stroke="${BColor3}" stroke-width="0" />`;
+
+
     const BColor2 = '#f39c12';
     edgeHTML += `<line id="boom-Edge-${i}" x1="0" y1="0" y2="0" stroke="${BColor2}" stroke-width="${BoomWidth/100*(10-i)/10}" />`;
 
@@ -294,10 +325,12 @@ if (typeof BoomSet === 'string') {
   }
   edge.innerHTML = edgeHTML;
   boom.innerHTML = boomHTML;
+  jib.innerHTML = jibHTML;
 
   for (let i = BN; i >= 1; i--) {
     boomEdges[i] = document.getElementById(`boom-Edge-${i}`);
     boomLines[i] = document.getElementById(`boom-line-${i}`);
+    jibLines[i] = document.getElementById(`jib-line-${i}`);
   }
 
   const boomEdgeLength = 1;//仮
@@ -307,6 +340,8 @@ if (typeof BoomSet === 'string') {
   for (let i = 2; i <= BN; i++) {
     boomEdges[i].setAttribute('x2', Boom1th / 100 - boomEdgeLength * (BN - i));
   }
+
+   jibLines[1].setAttribute('x2', jib1th - boomEdgeLength * (BN - 1));
 
   const slider = document.getElementById('boom-slider');
   const angleVal = document.getElementById('angle-val');
@@ -318,6 +353,7 @@ if (typeof BoomSet === 'string') {
     const angle = e.target.value;
     boom.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     edge.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
+    jib.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     angleVal.textContent = Number(angle).toFixed(0);
     BoomAngle = Number(angle).toFixed(0);
 
@@ -343,22 +379,6 @@ if (typeof BoomSet === 'string') {
 let baseValues;
 
 
-
-
-
-//仮に入れる用
-let BaseN0;
-BaseN0="";
-let BaseN1;
-BaseN1="";
-let BaseN2;
-BaseN2="";
-
-//Bset0=3,4
-
-
-
-
 const BaseBoom = [];
 BaseBoom[1]=Boom1th/100;
 
@@ -366,45 +386,79 @@ Bset0.forEach((val, index) => {
   BaseBoom[index + 2] = window[`Boom${val}th`] / 100;
 });
 
+
+
 let targetB=length<BaseBoom[2+SB]?0:1;
 
-//N=0のときは、lengthか、boom1th or boom2th
 
 
 const LtoB1 = length - BaseBoom[1];
 const LtoB2 = length - BaseBoom[2];
 const LtoB3 = length - BaseBoom[3];
 
+
+let BSetA=BSsetA[SB];
+
 if(SB==0){
-  const l1 = ( LtoB1 ) / 2 ;
-  const l2 = ( LtoB1 - LtoB2) / 2 ;
-  const l3 = ( LtoB2 ) / 3;
- 
+  
+const l1 = targetB === 0 ? LtoB1 / BSetA[0] : (LtoB1 - LtoB2) / BSetA[0];
+const l2 = LtoB2 / BSetA[1];
+
+baseValues = [];
+let step1 = 1, step2 = 1;
+
+for (let i = 0; i < BN; i++) {
+  baseValues[i] = i <BSetA[0] ? BaseBoom[1] + l1 * step1++
+                : targetB === 0 ? length
+                : BaseBoom[2] + (i > 1  ? l2 * step2++ : 0);
+}
+
+
+/*
  baseValues = targetB === 0
   ?[BaseBoom[1] + l1,
     length,
     length,
     length]
-
-  :[BaseBoom[1] + l2,
+  :[BaseBoom[1] + l1,
     BaseBoom[2],
-    BaseBoom[2] + l3,
-    BaseBoom[2] + l3 * 2];
+    BaseBoom[2] + l2,
+    BaseBoom[2] + l2 * 2];
+*/
 
 }else{
-  const l1 = ( LtoB1 ) / 3;
-  const l2 = ( LtoB1 - LtoB3 ) / 3;
+const l1 = (targetB === 0 ? LtoB1 : LtoB1 - LtoB3) / BSetA[0];
+const l2 = LtoB3 / BSetA[1];
+
+let s1 = 1, s2 = 1, s3 = 1;
+const th = Bset0[SB] - 2;
+
+baseValues = new Array(BN).fill(BaseBoom[1]).map((val, i) => 
+  val + (i < th 
+    ? (targetB === 0 ? 0 : l2 * s2++) 
+    : (targetB === 0 ? l1 * s1++ : LtoB3 + l1 * s3++))
+);
+
+
+  
+
+   /*
 
   baseValues = targetB === 0
-  ?[BaseBoom[1],
-    BaseBoom[1],
+  ?[BaseBoom[1] + l1 * 0,
+    BaseBoom[1] + l1 * 0,
     BaseBoom[1] + l1,
     BaseBoom[1] + l1 * 2]
 
-  :[BaseBoom[1] + LtoB3 / 2,
-    BaseBoom[1] + LtoB3,
-    BaseBoom[1] + LtoB3 + l2,
-    BaseBoom[1] + LtoB3 + l2 * 2];
+  :[BaseBoom[1] + l2,
+    BaseBoom[1] + l2 * 2,
+    BaseBoom[1] + LtoB3 + l1,
+    BaseBoom[1] + LtoB3 + l1 * 2];
+
+
+   */
+
+
 
 }
 
@@ -438,8 +492,26 @@ for (let i = 2; i <= BN-1; i++) {
     boomEdges[BN].setAttribute('x1', length - boomEdgeLength);
     boomEdges[BN].setAttribute('x2', length);
 
+
+
+    if(jibB==1){
+      jibLines[1].setAttribute('stroke-width',"1");
+
+      jibLines[1].setAttribute('x1', length);
+      jibLines[1].setAttribute('x2', length+jib1th);
+    }else{
+      jibLines[1].setAttribute('stroke-width',"0");
+    }
+
     lengthVal.textContent = Number(length / 10).toFixed(1);
   });
+
+
+//jibB
+
+
+
+
 }
 
 function resetAllBoomLength() {
@@ -450,6 +522,12 @@ function resetAllBoomLength() {
   document.querySelectorAll('[id^="boom-Edge-"]').forEach(edge => {
     edge.setAttribute('x1', 0);
     edge.setAttribute('x2', 0);
+  });
+
+  document.querySelectorAll('[id^="jib-line-"]').forEach(edge => {
+    jib.setAttribute('stroke', '#d80606');
+    jib.setAttribute('x1', 0);
+    jib.setAttribute('x2', 0);
   });
 }
 

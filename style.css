@@ -190,3 +190,20 @@ body {
   background-color: #b3d9ff; /* 淡い青 */
   border-color: #99c2ff;
 }
+
+/*ジブ用ボタン*/
+.jib-Btn{
+  background-color: #ffb3b3; /* 淡い赤 */
+  color: #333;
+  border: 1px solid #ff9999;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* 切り替えアニメーション */
+}
+
+/*特殊伸縮のボタン クリック後（activeクラス付与時）：淡い青 */
+.jib-Btn.active {
+  background-color: #b3d9ff; /* 淡い青 */
+  border-color: #99c2ff;
+}
