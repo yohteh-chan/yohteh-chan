@@ -499,6 +499,9 @@ for (let i = 2; i <= BN-1; i++) {
 
       jibLines[1].setAttribute('x1', length);
       jibLines[1].setAttribute('x2', length+jib1th);
+      jibLines[1].setAttribute('y1', 7.54/2-boomEdgeLength);
+      jibLines[1].setAttribute('y2', 7.54/2-boomEdgeLength);
+
     }else{
       jibLines[1].setAttribute('stroke-width',"0");
     }
@@ -528,6 +531,7 @@ function resetAllBoomLength() {
     jib.setAttribute('stroke', '#d80606');
     jib.setAttribute('x1', 0);
     jib.setAttribute('x2', 0);
+ 
   });
 }
 
