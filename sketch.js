@@ -267,6 +267,14 @@ let jib1th=BaseData[2][17]/100;
 let jib2th=BaseData[3][17]/100;
 let jib3th=BaseData[4][17]/100;
 
+let jibMin=BaseData[20][1];
+let jibMax=BaseData[5][1];
+
+document.getElementById('jib-slider').setAttribute('min', jibMin);
+ document.getElementById('jib-slider').setAttribute('max', jibMax);
+
+   
+
 
   let outrigger1st = BaseData[12][3];
   let outrigger2nd = BaseData[13][3];
@@ -307,12 +315,19 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
   const edge = document.getElementById('edge');
   const jibLines = [];
   const jib = document.getElementById('jib');
+  const headLine =[];
+  const head = document.getElementById('head');
 
   // 【改善】文字列組み立てで一括注入
   let jibHTML = '';
   let edgeHTML = '';
   let boomHTML = '';
+  let headHTML = '';
   for (let i = BN; i >= 1; i--) {
+
+    const BColor4 = '#d80606';
+    headHTML += `<line id="head-line-${i}" x1="0" y1="0" y2="0" stroke="${BColor4}"/>`;
+
   const BColor3 = '#d80606';
     jibHTML += `<line id="jib-line-${i}" x1="0" y1="0" y2="0" stroke="${BColor3}" stroke-width="0" />`;
 
@@ -326,14 +341,16 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
   edge.innerHTML = edgeHTML;
   boom.innerHTML = boomHTML;
   jib.innerHTML = jibHTML;
+  head.innerHTML = headHTML;
 
   for (let i = BN; i >= 1; i--) {
     boomEdges[i] = document.getElementById(`boom-Edge-${i}`);
     boomLines[i] = document.getElementById(`boom-line-${i}`);
     jibLines[i] = document.getElementById(`jib-line-${i}`);
+    headLine[i] = document.getElementById(`head-line-${i}`);
   }
 
-  const boomEdgeLength = 1;//仮
+  const boomEdgeLength = 0.4;//仮
   const boomVerticalLength = BoomWidth / 1000 / 5;//仮
   boomLines[1].setAttribute('x2', Boom1th / 100 - boomEdgeLength * (BN - 1));
 
@@ -342,18 +359,52 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
   }
 
    jibLines[1].setAttribute('x2', jib1th - boomEdgeLength * (BN - 1));
+   headLine[1].setAttribute('x2', 0.7 - boomEdgeLength * (BN - 1));
+   
 
   const slider = document.getElementById('boom-slider');
   const angleVal = document.getElementById('angle-val');
   const WorkingRadius = document.getElementById('working-radius');
   const lengthSlider = document.getElementById('boom-length-slider');
   const lengthVal = document.getElementById('boom-length-val');
+  const jibAngle = document.getElementById('jib-slider');
+  const jibAngleVal = document.getElementById('jib-angle-val');
+
+ const jibShift=boomVerticalLength*(BN-1)+7.54/4;//仮
+
+
+
+
+  jibAngle.addEventListener('input', (e) => {
+    const angle = e.target.value;
+     length=lengthSlider.value;
+     let Bangle = slider.value;
+     // Bangle（度）をラジアンに変換
+    const rad = (-Bangle * Math.PI) / 180;
+
+    // ジブの根元のX座標（オフセット + ブーム長 × cos(角度)）
+    const jibBaseX = -footpinX / 100 + length * Math.cos(rad);
+    const jibBaseY = footpinY/100 - length * Math.sin(rad);
+
+
+    //jib.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
+
+    jib.setAttribute('transform', `translate(${jibBaseX}, ${jibBaseY}) rotate(${angle},${length},${jibShift})`);
+     
+  
+
+
+jibAngleVal.textContent = Number(angle).toFixed(0);
+
+  });
+ 
 
   slider.addEventListener('input', (e) => {
     const angle = e.target.value;
     boom.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     edge.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     jib.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
+    head.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     angleVal.textContent = Number(angle).toFixed(0);
     BoomAngle = Number(angle).toFixed(0);
 
@@ -477,6 +528,8 @@ for (let i = 2; i <= BN-1; i++) {
   boomLines[i].setAttribute('x2', x2);
   boomEdges[i].setAttribute('x1', x3);
   boomEdges[i].setAttribute('x2', x2);
+
+
 }
 
 
@@ -486,6 +539,7 @@ for (let i = 2; i <= BN-1; i++) {
       boomLines[i].setAttribute('y2', boomVerticalLength * (i - 1));
       boomEdges[i].setAttribute('y1', boomVerticalLength * (i - 1));
       boomEdges[i].setAttribute('y2', boomVerticalLength * (i - 1));
+      
     }
 
     boomLines[BN].setAttribute('x2', length);
@@ -493,10 +547,17 @@ for (let i = 2; i <= BN-1; i++) {
     boomEdges[BN].setAttribute('x2', length);
 
 
+      headLine[1].setAttribute('x1', length);
+      headLine[1].setAttribute('x2', length);
+      headLine[1].setAttribute('y1', -7.54/2);
+      headLine[1].setAttribute('y2', 8.6936-7.54/2);
+      headLine[1].setAttribute('stroke-width',2.51);
+
+
 
     if(jibB==1){
 
-      const jibShift=boomVerticalLength*(BN-1)+7.54/4;
+     
       jibLines[1].setAttribute('stroke-width',"1");
 
       jibLines[1].setAttribute('x1', length);
@@ -507,6 +568,8 @@ for (let i = 2; i <= BN-1; i++) {
     }else{
       jibLines[1].setAttribute('stroke-width',"0");
     }
+
+    
 
     lengthVal.textContent = Number(length / 10).toFixed(1);
   });
@@ -529,12 +592,19 @@ function resetAllBoomLength() {
     edge.setAttribute('x2', 0);
   });
 
-  document.querySelectorAll('[id^="jib-line-"]').forEach(edge => {
+  document.querySelectorAll('[id^="jib-line-"]').forEach(jib => {
     jib.setAttribute('stroke', '#d80606');
     jib.setAttribute('x1', 0);
     jib.setAttribute('x2', 0);
  
   });
+
+   document.querySelectorAll('[id^="head-line-"]').forEach(head => {
+    head.setAttribute('stroke', '#d80606');
+    head.setAttribute('x1', 0);
+    head.setAttribute('x2', 0);
+  });
+
 }
 
 function calculate(data) {
