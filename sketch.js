@@ -176,9 +176,13 @@ if (SBB) {
 let jibB = 0;
 const jibBtn = document.getElementById('jib-Btn');
 
+
+
 jibBtn?.addEventListener('click', () => {
   jibB = 1 - jibB; // 0 と 1 を相互切り替え
   jibBtn.classList.toggle('active', jibB === 1); // activeクラスの着脱
+
+
 
 const lengthSlider = document.getElementById('boom-length-slider');
     if (lengthSlider) {
@@ -187,6 +191,8 @@ const lengthSlider = document.getElementById('boom-length-slider');
 
 
 });
+
+
 
 async function loadCraneBaseData(model) {
   // 【改善】共通関数経由で取得（無駄な重複fetchを防止）
@@ -260,19 +266,33 @@ if (typeof BoomSet === 'string') {
   }
 }
 
+let jibNumber = BaseData[1][17];
+const JibSteps = [];
+
+for (let i = 1; i <= jibNumber; i++) {
+  window[`jib${i}th`] = BaseData[i + 1][17]/100;
+  JibSteps.push(BaseData[i + 1][17]/100);
+}
 
 
-
-let jib1th=BaseData[2][17]/100;
-let jib2th=BaseData[3][17]/100;
-let jib3th=BaseData[4][17]/100;
 
 let jibMin=BaseData[20][1];
 let jibMax=BaseData[5][1];
 
-document.getElementById('jib-slider').setAttribute('min', jibMin);
- document.getElementById('jib-slider').setAttribute('max', jibMax);
 
+const JS=document.getElementById('jib-slider');
+
+JS.setAttribute('min', jibMin);
+JS.setAttribute('max', jibMax);
+JS.setAttribute('value', jibMin);
+
+const JLS=document.getElementById('jib-length-slider');
+const JLV=document.getElementById('jib-length-val');
+
+JLS.setAttribute('min', window.jib1th);
+JLS.setAttribute('max', window[`jib${jibNumber}th`]);
+JLV.setAttribute('value', window.jib1th);
+JLS.setAttribute('value', window.jib1th);
    
 
 
@@ -315,22 +335,23 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
   const edge = document.getElementById('edge');
   const jibLines = [];
   const jib = document.getElementById('jib');
-  const headLine =[];
+  const jibHead = document.getElementById('jibHead');
   const head = document.getElementById('head');
+  const TensionRod = document.getElementById('TensionRod');
+
+  //TensionRod
 
   // 【改善】文字列組み立てで一括注入
   let jibHTML = '';
   let edgeHTML = '';
   let boomHTML = '';
   let headHTML = '';
+  let jibHeadHTML = '';
+  let TensionRodHTML='';
   for (let i = BN; i >= 1; i--) {
 
-    const BColor4 = '#d80606';
-    headHTML += `<line id="head-line-${i}" x1="0" y1="0" y2="0" stroke="${BColor4}"/>`;
-
   const BColor3 = '#d80606';
-    jibHTML += `<line id="jib-line-${i}" x1="0" y1="0" y2="0" stroke="${BColor3}" stroke-width="0" />`;
-
+    jibHTML += `<line id="jib-line-${i}" x1="0" y1="0" y2="0" stroke="${BColor3}"/>`;
 
     const BColor2 = '#f39c12';
     edgeHTML += `<line id="boom-Edge-${i}" x1="0" y1="0" y2="0" stroke="${BColor2}" stroke-width="${BoomWidth/100*(10-i)/10}" />`;
@@ -338,17 +359,29 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
     const BColor1 = i === 1 ? '#f39c12' : '#52504e';
     boomHTML += `<line id="boom-line-${i}" x1="0" y1="0" y2="0" stroke="${BColor1}" stroke-width="${BoomWidth/100*(10-i)/10}" />`;
   }
+  const BColor4 = '#d80606';
+  headHTML += `<line id="head-line" x1="0" y1="0" y2="0" stroke="${BColor4}"/>`;
+  const BColor5 = '#d80606';
+  jibHeadHTML += `<line id="jib-head-line" x1="0" y1="0" y2="0" stroke="${BColor5}"/>`;
+  const BColor6 = '#d80606';
+  TensionRodHTML += `<line id="TensionRod-line" x1="0" y1="0" y2="0" stroke="${BColor6}"/>`;
+
   edge.innerHTML = edgeHTML;
   boom.innerHTML = boomHTML;
   jib.innerHTML = jibHTML;
+  jibHead.innerHTML = jibHeadHTML;
   head.innerHTML = headHTML;
+  TensionRod.innerHTML = TensionRodHTML;
 
   for (let i = BN; i >= 1; i--) {
     boomEdges[i] = document.getElementById(`boom-Edge-${i}`);
     boomLines[i] = document.getElementById(`boom-line-${i}`);
     jibLines[i] = document.getElementById(`jib-line-${i}`);
-    headLine[i] = document.getElementById(`head-line-${i}`);
   }
+
+   headLine = document.getElementById(`head-line`);
+   jibHeadLine = document.getElementById(`jib-head-line`);
+   TensionRodLine = document.getElementById(`TensionRod-line`);
 
   const boomEdgeLength = 0.4;//仮
   const boomVerticalLength = BoomWidth / 1000 / 5;//仮
@@ -359,7 +392,8 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
   }
 
    jibLines[1].setAttribute('x2', jib1th - boomEdgeLength * (BN - 1));
-   headLine[1].setAttribute('x2', 0.7 - boomEdgeLength * (BN - 1));
+
+
    
 
   const slider = document.getElementById('boom-slider');
@@ -370,32 +404,20 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
   const jibAngle = document.getElementById('jib-slider');
   const jibAngleVal = document.getElementById('jib-angle-val');
 
- const jibShift=boomVerticalLength*(BN-1)+7.54/4;//仮
-
-
-
+  const jibShift=boomVerticalLength*(BN-1)+7.54/4;//仮
+  const jibLength = document.getElementById('jib-length-slider');
+  const jibLengthVal = document.getElementById('jib-length-val');
 
   jibAngle.addEventListener('input', (e) => {
     const angle = e.target.value;
-     length=lengthSlider.value;
-     let Bangle = slider.value;
-     // Bangle（度）をラジアンに変換
-    const rad = (-Bangle * Math.PI) / 180;
+    jibAngleVal.textContent = Number(angle).toFixed(0);
+    lengthSlider.dispatchEvent(new Event('input'));
+  });
 
-    // ジブの根元のX座標（オフセット + ブーム長 × cos(角度)）
-    const jibBaseX = -footpinX / 100 + length * Math.cos(rad);
-    const jibBaseY = footpinY/100 - length * Math.sin(rad);
-
-
-    //jib.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
-
-    jib.setAttribute('transform', `translate(${jibBaseX}, ${jibBaseY}) rotate(${angle},${length},${jibShift})`);
-     
-  
-
-
-jibAngleVal.textContent = Number(angle).toFixed(0);
-
+  jibLength.addEventListener('input', (e) => {
+    const length = e.target.value;
+    jibLengthVal.textContent = Number(length).toFixed(1);
+    lengthSlider.dispatchEvent(new Event('input'));
   });
  
 
@@ -405,6 +427,8 @@ jibAngleVal.textContent = Number(angle).toFixed(0);
     edge.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     jib.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     head.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
+    jibHead.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
+    TensionRod.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     angleVal.textContent = Number(angle).toFixed(0);
     BoomAngle = Number(angle).toFixed(0);
 
@@ -412,11 +436,18 @@ jibAngleVal.textContent = Number(angle).toFixed(0);
     lengthSlider.dispatchEvent(new Event('input'));
   });
 
+
+
+
+
+
+
   lengthSlider.addEventListener('input', (e) => {
     const length = parseFloat(e.target.value);
     resetAllBoomLength();
 
-    BoomLength = Number(length / 10).toFixed(1);
+
+
 
     WorkingRadius.textContent = String(Number(Math.floor((BoomLength*Math.cos(BoomAngle * Math.PI / 180)+BoomWidth/1000*Math.sin(BoomAngle * Math.PI / 180)-1.32)*10)/10).toFixed(1)).padStart(4, ' ');
 
@@ -547,35 +578,67 @@ for (let i = 2; i <= BN-1; i++) {
     boomEdges[BN].setAttribute('x2', length);
 
 
-      headLine[1].setAttribute('x1', length);
-      headLine[1].setAttribute('x2', length);
-      headLine[1].setAttribute('y1', -7.54/2);
-      headLine[1].setAttribute('y2', 8.6936-7.54/2);
-      headLine[1].setAttribute('stroke-width',2.51);
+      headLine.setAttribute('x1', length);
+      headLine.setAttribute('x2', length);
+      headLine.setAttribute('y1', -7.54/2);
+      headLine.setAttribute('y2', 8.6936-7.54/2);
+      headLine.setAttribute('stroke-width',2.51);
 
 
+
+let JAangle =  (jibAngle.value * Math.PI) / 180;
 
     if(jibB==1){
+      jibHeadLine.setAttribute('stroke-width','1.454');//仮
+  
+      jibLines[1].setAttribute('stroke-width',"1.454");//仮
+      jibLines[2].setAttribute('stroke-width',"1.11");//仮
+      jibLines[2].setAttribute('stroke',"#52504e");//仮
 
-     
-      jibLines[1].setAttribute('stroke-width',"1");
 
-      jibLines[1].setAttribute('x1', length);
-      jibLines[1].setAttribute('x2', length+jib1th);
-      jibLines[1].setAttribute('y1', jibShift);
-      jibLines[1].setAttribute('y2', jibShift);
+      TensionRodLine.setAttribute('stroke-width','1');//仮
+      TensionRodLine.setAttribute('x1', length);
+      TensionRodLine.setAttribute('x2', length+jib1th* Math.cos(JAangle));
+      TensionRodLine.setAttribute('y1', -7.54/2);//仮
+      TensionRodLine.setAttribute('y2', jibShift + jib1th * Math.sin(JAangle));
+
+      for (let i = 1; i <= jibNumber; i++) {
+  const currentJibLength = i===1?window[`jib${i}th`]:jibLength.value; // ジブ長を動的取得
+  
+  if (jibLines[i] && currentJibLength) {
+    jibLines[i].setAttribute('x1', length);
+    jibLines[i].setAttribute('x2', length + currentJibLength * Math.cos(JAangle));
+    jibLines[i].setAttribute('y1', jibShift);
+    jibLines[i].setAttribute('y2', jibShift + currentJibLength * Math.sin(JAangle));
+  }
+}
+  let jibHeadLineDist=2;//仮
+     jibHeadLine.setAttribute('x1', length+(jibLength.value-jibHeadLineDist)* Math.cos(JAangle));
+     jibHeadLine.setAttribute('x2', length+(jibLength.value)* Math.cos(JAangle));
+     jibHeadLine.setAttribute('y1', jibShift+(jibLength.value-jibHeadLineDist)* Math.sin(JAangle));
+     jibHeadLine.setAttribute('y2', jibShift+(jibLength.value)* Math.sin(JAangle));
+   
+
 
     }else{
-      jibLines[1].setAttribute('stroke-width',"0");
+      jibLines.forEach(line => {
+       if (line) line.setAttribute('stroke-width', '0');
+      });
+      jibHeadLine.setAttribute('stroke-width', '0');
+      TensionRodLine.setAttribute('stroke-width','0');//仮
     }
 
     
 
     lengthVal.textContent = Number(length / 10).toFixed(1);
+
+    
   });
 
+  slider.dispatchEvent(new Event('input'));
+  lengthSlider.dispatchEvent(new Event('input'));
+  jibAngle.dispatchEvent(new Event('input'));
 
-//jibB
 
 
 
@@ -603,6 +666,12 @@ function resetAllBoomLength() {
     head.setAttribute('stroke', '#d80606');
     head.setAttribute('x1', 0);
     head.setAttribute('x2', 0);
+  });
+
+  document.querySelectorAll('[id^="jib-head-line"]').forEach(jibHead => {
+    jibHead.setAttribute('stroke', '#d80606');
+    jibHead.setAttribute('x1', 0);
+    jibHead.setAttribute('x2', 0);
   });
 
 }
