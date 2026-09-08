@@ -294,6 +294,11 @@ JLS.setAttribute('max', window[`jib${jibNumber}th`]);
 JLV.setAttribute('value', window.jib1th);
 JLS.setAttribute('value', window.jib1th);
    
+const DHCdata = DDData.map(row => row[32]);//シリンダ・デリック　起伏シリンダー
+//描画情報のシリンダデリックのセル数
+const DHCCount = DDData.map(row => row[32]).filter(val => val != null && String(val).trim() !== '').length;
+
+
 
 
   let outrigger1st = BaseData[12][3];
@@ -338,8 +343,9 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
   const jibHead = document.getElementById('jibHead');
   const head = document.getElementById('head');
   const TensionRod = document.getElementById('TensionRod');
+  const DHC = document.getElementById('DerrickHydraulicCylinder');
+  const DHCLines=[];
 
-  //TensionRod
 
   // 【改善】文字列組み立てで一括注入
   let jibHTML = '';
@@ -348,23 +354,26 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
   let headHTML = '';
   let jibHeadHTML = '';
   let TensionRodHTML='';
-  for (let i = BN; i >= 1; i--) {
+  let DHCHTML='';
 
+  
+  const BColor2 = '#f39c12';
   const BColor3 = '#d80606';
-    jibHTML += `<line id="jib-line-${i}" x1="0" y1="0" y2="0" stroke="${BColor3}"/>`;
 
-    const BColor2 = '#f39c12';
-    edgeHTML += `<line id="boom-Edge-${i}" x1="0" y1="0" y2="0" stroke="${BColor2}" stroke-width="${BoomWidth/100*(10-i)/10}" />`;
-
+  for (let i = BN; i >= 1; i--) {
     const BColor1 = i === 1 ? '#f39c12' : '#52504e';
+    jibHTML += `<line id="jib-line-${i}" x1="0" y1="0" y2="0" stroke="${BColor2}"/>`;
+    edgeHTML += `<line id="boom-Edge-${i}" x1="0" y1="0" y2="0" stroke="${BColor2}" stroke-width="${BoomWidth/100*(10-i)/10}" />`;
     boomHTML += `<line id="boom-line-${i}" x1="0" y1="0" y2="0" stroke="${BColor1}" stroke-width="${BoomWidth/100*(10-i)/10}" />`;
   }
-  const BColor4 = '#d80606';
-  headHTML += `<line id="head-line" x1="0" y1="0" y2="0" stroke="${BColor4}"/>`;
-  const BColor5 = '#d80606';
-  jibHeadHTML += `<line id="jib-head-line" x1="0" y1="0" y2="0" stroke="${BColor5}"/>`;
-  const BColor6 = '#d80606';
-  TensionRodHTML += `<line id="TensionRod-line" x1="0" y1="0" y2="0" stroke="${BColor6}"/>`;
+
+  headHTML += `<line id="head-line" x1="0" y1="0" y2="0" stroke="${BColor3}"/>`;
+  jibHeadHTML += `<line id="jib-head-line" x1="0" y1="0" y2="0" stroke="${BColor2}"/>`;
+  TensionRodHTML += `<line id="TensionRod-line" x1="0" y1="0" y2="0" stroke="${BColor2}"/>`;
+
+  for (let i=0;i<=5;i++){
+    DHCHTML += `<circle id="DHC-line-${i}" x1="0" y1="0" y2="0" stroke="${BColor2}"/>`;
+  }
 
   edge.innerHTML = edgeHTML;
   boom.innerHTML = boomHTML;
@@ -372,6 +381,7 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
   jibHead.innerHTML = jibHeadHTML;
   head.innerHTML = headHTML;
   TensionRod.innerHTML = TensionRodHTML;
+  DHC.innerHTML =DHCHTML;
 
   for (let i = BN; i >= 1; i--) {
     boomEdges[i] = document.getElementById(`boom-Edge-${i}`);
@@ -379,9 +389,28 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
     jibLines[i] = document.getElementById(`jib-line-${i}`);
   }
 
-   headLine = document.getElementById(`head-line`);
-   jibHeadLine = document.getElementById(`jib-head-line`);
-   TensionRodLine = document.getElementById(`TensionRod-line`);
+
+
+
+  const headLine = document.getElementById(`head-line`);
+  const jibHeadLine = document.getElementById(`jib-head-line`);
+  const TensionRodLine = document.getElementById(`TensionRod-line`);
+
+
+//ここから-------------------------------------------------------------------------------------------------------------------------------------------------
+
+  for (let i=0;i<=5;i++){
+    DHCLines[i] = document.getElementById(`DHC-line-${i}`);
+  }
+
+  DHCLines[0].setAttribute('r', DHCdata[3]/100);
+  DHCLines[0].setAttribute('cx', 13.2+DHCdata[19]/100);
+  DHCLines[0].setAttribute('cy', 25.8-DHCdata[18]/100);
+  
+
+    console.log("DHCLines",DHCdata[18] / 100);
+
+
 
   const boomEdgeLength = 0.4;//仮
   const boomVerticalLength = BoomWidth / 1000 / 5;//仮
@@ -393,6 +422,7 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
 
    jibLines[1].setAttribute('x2', jib1th - boomEdgeLength * (BN - 1));
 
+   
 
    
 
@@ -416,7 +446,7 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
 
   jibLength.addEventListener('input', (e) => {
     const length = e.target.value;
-    jibLengthVal.textContent = Number(length).toFixed(1);
+    jibLengthVal.textContent = Number(length/10).toFixed(2);
     lengthSlider.dispatchEvent(new Event('input'));
   });
  
@@ -429,6 +459,7 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
     head.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     jibHead.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     TensionRod.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
+    DHC.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     angleVal.textContent = Number(angle).toFixed(0);
     BoomAngle = Number(angle).toFixed(0);
 
@@ -587,45 +618,87 @@ for (let i = 2; i <= BN-1; i++) {
 
 
 let JAangle =  (jibAngle.value * Math.PI) / 180;
+let jibHeadLineDist=2;//仮
+let jibHeadY = 1.454;
+let jibLine1thY=1.454;
+let jibLine2thY=1.11;
+let TenshionRodR=1;//テンションロッドの太さ
+
+
 
     if(jibB==1){
-      jibHeadLine.setAttribute('stroke-width','1.454');//仮
+      jibHeadLine.setAttribute('stroke-width',jibHeadY);//仮
   
-      jibLines[1].setAttribute('stroke-width',"1.454");//仮
-      jibLines[2].setAttribute('stroke-width',"1.11");//仮
+      jibLines[1].setAttribute('stroke-width',jibLine1thY);//仮
+      jibLines[2].setAttribute('stroke-width',jibLine2thY);//仮
       jibLines[2].setAttribute('stroke',"#52504e");//仮
 
 
-      TensionRodLine.setAttribute('stroke-width','1');//仮
+      TensionRodLine.setAttribute('stroke-width',TenshionRodR);//仮
       TensionRodLine.setAttribute('x1', length);
       TensionRodLine.setAttribute('x2', length+jib1th* Math.cos(JAangle));
       TensionRodLine.setAttribute('y1', -7.54/2);//仮
       TensionRodLine.setAttribute('y2', jibShift + jib1th * Math.sin(JAangle));
 
-      for (let i = 1; i <= jibNumber; i++) {
-  const currentJibLength = i===1?window[`jib${i}th`]:jibLength.value; // ジブ長を動的取得
-  
-  if (jibLines[i] && currentJibLength) {
-    jibLines[i].setAttribute('x1', length);
-    jibLines[i].setAttribute('x2', length + currentJibLength * Math.cos(JAangle));
-    jibLines[i].setAttribute('y1', jibShift);
-    jibLines[i].setAttribute('y2', jibShift + currentJibLength * Math.sin(JAangle));
-  }
-}
-  let jibHeadLineDist=2;//仮
-     jibHeadLine.setAttribute('x1', length+(jibLength.value-jibHeadLineDist)* Math.cos(JAangle));
-     jibHeadLine.setAttribute('x2', length+(jibLength.value)* Math.cos(JAangle));
-     jibHeadLine.setAttribute('y1', jibShift+(jibLength.value-jibHeadLineDist)* Math.sin(JAangle));
-     jibHeadLine.setAttribute('y2', jibShift+(jibLength.value)* Math.sin(JAangle));
-   
+     const setLine = (line, x1, x2, y1, y2) => {
+      line.setAttribute('x1', x1);
+      line.setAttribute('x2', x2);
+      line.setAttribute('y1', y1);
+      line.setAttribute('y2', y2);
+    };
+
+    const jibLen = Number(jibLength.value);
+    const cosA = Math.cos(JAangle);
+    const sinA = Math.sin(JAangle);
+
+    // 1. ジブライン（複数段）の処理
+    for (let i = 1; i <= jibNumber; i++) {
+      const len = i === 1 ? window[`jib${i}th`] : jibLen;
+      if (jibLines[i] && len) {
+        setLine(jibLines[i], length, length + len * cosA, jibShift, jibShift + len * sinA);
+      }
+    }
+
+    // 2. ジブヘッドラインの処理
+    if (jibHeadLine) {
+      const xEnd = length + jibLen * cosA;
+      const yEnd = jibShift + jibLen * sinA;
+      setLine(jibHeadLine, xEnd - jibHeadLineDist * cosA, xEnd, yEnd - jibHeadLineDist * sinA, yEnd);
+    }
 
 
     }else{
-      jibLines.forEach(line => {
-       if (line) line.setAttribute('stroke-width', '0');
-      });
-      jibHeadLine.setAttribute('stroke-width', '0');
-      TensionRodLine.setAttribute('stroke-width','0');//仮
+
+
+// 共通計算値の事前定義
+const BaseBoom = Boom1th / 100;
+const jibTipX = BaseBoom - jib1th;
+const jibHeadTipX = jibTipX + jibHeadLineDist;
+
+const HeadHalf = 7.54 / 2; // 約 3.77
+const tensionY = HeadHalf - jibLine1thY * 0.5;
+
+// 1. ジブラインの一括設定（ループ）
+for (let i = 1; i <= jibNumber; i++) {
+  if (!jibLines[i]) continue;
+  jibLines[i].setAttribute('x1', BaseBoom);
+  jibLines[i].setAttribute('x2', jibTipX);
+  jibLines[i].setAttribute('y1', HeadHalf);
+  jibLines[i].setAttribute('y2', HeadHalf);
+}
+
+// 2. 補助関数の定義（複数要素の属性設定を共通化）
+const setLine = (line, x1, x2, y1, y2) => {
+  if (!line) return;
+  line.setAttribute('x1', x1);
+  line.setAttribute('x2', x2);
+  line.setAttribute('y1', y1);
+  line.setAttribute('y2', y2);
+};
+
+// 3. 各ラインの配置設定
+setLine(jibHeadLine, jibTipX, jibHeadTipX, HeadHalf, HeadHalf);
+setLine(TensionRodLine, BaseBoom, jibHeadTipX, tensionY, tensionY);
     }
 
     
@@ -656,7 +729,7 @@ function resetAllBoomLength() {
   });
 
   document.querySelectorAll('[id^="jib-line-"]').forEach(jib => {
-    jib.setAttribute('stroke', '#d80606');
+    jib.setAttribute('stroke', '#f39c12');
     jib.setAttribute('x1', 0);
     jib.setAttribute('x2', 0);
  
@@ -669,9 +742,15 @@ function resetAllBoomLength() {
   });
 
   document.querySelectorAll('[id^="jib-head-line"]').forEach(jibHead => {
-    jibHead.setAttribute('stroke', '#d80606');
+    jibHead.setAttribute('stroke', '#f39c12');
     jibHead.setAttribute('x1', 0);
     jibHead.setAttribute('x2', 0);
+  });
+
+  document.querySelectorAll('[id^="DHC-line-"]').forEach(DHC => {
+    DHC.setAttribute('stroke', '#f39c12');
+   // DHC.setAttribute('cx', 0);
+   // DHC.setAttribute('cy', 0);
   });
 
 }
