@@ -346,6 +346,8 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
   const TensionRod = document.getElementById('TensionRod');
   const DHC = document.getElementById('DerrickHydraulicCylinder');
   const DHCLines=[];
+  const DHCbox = document.getElementById('DerrickHydraulicCylinderBOX');
+  const DHCboxLines=[];
 
 
   // 【改善】文字列組み立てで一括注入
@@ -356,6 +358,7 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
   let jibHeadHTML = '';
   let TensionRodHTML='';
   let DHCHTML='';
+  let DHCboxHTML='';
 
   
   const BColor2 = '#f39c12';
@@ -365,7 +368,7 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
     const BColor1 = i === 1 ? '#f39c12' : '#52504e';
     jibHTML += `<line id="jib-line-${i}" x1="0" y1="0" y2="0" stroke="${BColor2}"/>`;
     edgeHTML += `<line id="boom-Edge-${i}" x1="0" y1="0" y2="0" stroke="${BColor2}" stroke-width="${BoomWidth/100*(10-i)/10}" />`;
-    boomHTML += `<line id="boom-line-${i}" x1="0" y1="0" y2="0" stroke="${BColor1}" stroke-width="0" />`;//${BoomWidth/100*(10-i)/10}
+    boomHTML += `<line id="boom-line-${i}" x1="0" y1="0" y2="0" stroke="${BColor1}" stroke-width="${BoomWidth/100*(10-i)/10}" />`;//
   }
 
   headHTML += `<line id="head-line" x1="0" y1="0" y2="0" stroke="${BColor3}"/>`;
@@ -374,6 +377,7 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
 
   for (let i=0;i<=5;i++){
     DHCHTML += `<circle id="DHC-line-${i}" x1="0" y1="0" y2="0" stroke="${BColor2}"/>`;
+    DHCboxHTML += `<line id="DHC-box-${i}" x1="0" y1="0" y2="0" stroke="${BColor2}"/>`;
   }
 
   edge.innerHTML = edgeHTML;
@@ -383,6 +387,7 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
   head.innerHTML = headHTML;
   TensionRod.innerHTML = TensionRodHTML;
   DHC.innerHTML =DHCHTML;
+  DHCbox.innerHTML =DHCboxHTML;
 
   for (let i = BN; i >= 1; i--) {
     boomEdges[i] = document.getElementById(`boom-Edge-${i}`);
@@ -432,6 +437,7 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
 
     for (let i=0;i<=5;i++){
     DHCLines[i] = document.getElementById(`DHC-line-${i}`);
+    DHCboxLines[i] = document.getElementById(`DHC-box-${i}`);
   }
 
   jibAngle.addEventListener('input', (e) => {
@@ -455,16 +461,23 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
     head.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     jibHead.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     TensionRod.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
-    DHC.setAttribute('transform', `rotate(${-angle},0,0)`);
+    DHC.setAttribute('transform', `rotate(${-angle},${DHCdata[19] / 100},${MaxHight-DHCdata[18] / 100})`);//仮
+    DHCbox.setAttribute('transform', `rotate(${-angle},${DHCdata[19] / 100},${MaxHight-DHCdata[18] / 100})`);//仮
     angleVal.textContent = Number(angle).toFixed(0);
     BoomAngle = Number(angle).toFixed(0);
 
-  DHCLines[0].setAttribute('r', 1);//DHCdata[3]/100
-  DHCLines[0].setAttribute('cx',-13.2);// (13.2+DHCdata[19] / 100)
-  DHCLines[0].setAttribute('cy',360-25.8);// (DHCdata[19] / 100)
+  DHCLines[0].setAttribute('r', DHCdata[3]/100);
+  DHCLines[0].setAttribute('cx',DHCdata[19] / 100);
+  DHCLines[0].setAttribute('cy',MaxHight-DHCdata[18] / 100);
+
+  DHCboxLines[0].setAttribute('stroke-width', 10);
+  DHCboxLines[0].setAttribute('x1',10);
+  DHCboxLines[0].setAttribute('x2',-10);
+  DHCboxLines[0].setAttribute('y1',200);
+  DHCboxLines[0].setAttribute('y2',300);//ここ
   
 
- console.log("BoomWidth/100/2",BoomWidth/100/2);
+
 
 
 
@@ -579,7 +592,7 @@ baseValues = new Array(BN).fill(BaseBoom[1]).map((val, i) =>
 
 
       for(i=0;i<=BN;i++){
-        boomLines[i].setAttribute('stroke-width', 0);
+        //boomLines[i].setAttribute('stroke-width', 0);
       }
 
 
@@ -754,9 +767,12 @@ function resetAllBoomLength() {
 
   document.querySelectorAll('[id^="DHC-line-"]').forEach(DHC => {
     DHC.setAttribute('stroke', '#f39c12');
-   // DHC.setAttribute('cx', 0);
-   // DHC.setAttribute('cy', 0);
   });
+
+    document.querySelectorAll('[id^="DHC-box-"]').forEach(DHCbox => {
+    DHCbox.setAttribute('stroke', '#f39c12');
+  });
+
 
 }
 
