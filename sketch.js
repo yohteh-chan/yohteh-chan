@@ -215,9 +215,11 @@ async function loadCraneBaseData(model) {
   let SpecialBoom = BaseData[7][1];
 
   let BN = BaseData[1][15];
+  let BoomShift = DDData[3][2]/100;
   let BoomSet = BaseData[2][15];
   let footpinX = BaseData[1][9];
-  let footpinY = BaseData[2][9];
+  let footpinY = BaseData[2][9]-BoomShift;
+ 
 
   for (let i = 1; i <= BN; i++) {
     window[`Boom${i}th`] = BaseData[i+3][15];
@@ -344,8 +346,8 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
   const jibHead = document.getElementById('jibHead');
   const head = document.getElementById('head');
   const TensionRod = document.getElementById('TensionRod');
-  const DHC = document.getElementById('DerrickHydraulicCylinder');
-  const DHCLines=[];
+  const DHCF = document.getElementById('DerrickHydraulicCylinderF');
+  const DHCT = document.getElementById('DerrickHydraulicCylinderT');
   const DHCbox = document.getElementById('DerrickHydraulicCylinderBOX');
   const DHCboxLines=[];
 
@@ -357,7 +359,8 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
   let headHTML = '';
   let jibHeadHTML = '';
   let TensionRodHTML='';
-  let DHCHTML='';
+  let DHCFHTML='';
+  let DHCTHTML='';
   let DHCboxHTML='';
 
   
@@ -375,10 +378,11 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
   jibHeadHTML += `<line id="jib-head-line" x1="0" y1="0" y2="0" stroke="${BColor2}"/>`;
   TensionRodHTML += `<line id="TensionRod-line" x1="0" y1="0" y2="0" stroke="${BColor2}"/>`;
 
-  for (let i=0;i<=5;i++){
-    DHCHTML += `<circle id="DHC-line-${i}" x1="0" y1="0" y2="0" stroke="${BColor2}"/>`;
+  for (let i=0;i<=1;i++){
     DHCboxHTML += `<line id="DHC-box-${i}" x1="0" y1="0" y2="0" stroke="${BColor2}"/>`;
   }
+  DHCFHTML += `<circle id="DHC-F-circle" x1="0" y1="0" y2="0" stroke="${BColor2}"/>`;
+  DHCTHTML += `<circle id="DHC-T-circle" x1="0" y1="0" y2="0" stroke="${BColor2}"/>`;
 
   edge.innerHTML = edgeHTML;
   boom.innerHTML = boomHTML;
@@ -386,7 +390,8 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
   jibHead.innerHTML = jibHeadHTML;
   head.innerHTML = headHTML;
   TensionRod.innerHTML = TensionRodHTML;
-  DHC.innerHTML =DHCHTML;
+  DHCF.innerHTML =DHCFHTML;
+  DHCT.innerHTML =DHCTHTML;
   DHCbox.innerHTML =DHCboxHTML;
 
   for (let i = BN; i >= 1; i--) {
@@ -403,7 +408,8 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
   const TensionRodLine = document.getElementById(`TensionRod-line`);
 
 
-
+ const DHCFcircle = document.getElementById(`DHC-F-circle`);
+ const DHCTcircle = document.getElementById(`DHC-T-circle`);
    
 
 
@@ -436,9 +442,11 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
 
 
     for (let i=0;i<=5;i++){
-    DHCLines[i] = document.getElementById(`DHC-line-${i}`);
+    
     DHCboxLines[i] = document.getElementById(`DHC-box-${i}`);
   }
+
+ 
 
   jibAngle.addEventListener('input', (e) => {
     const angle = e.target.value;
@@ -461,20 +469,25 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
     head.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     jibHead.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     TensionRod.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
-    DHC.setAttribute('transform', `rotate(${-angle},${DHCdata[19] / 100},${MaxHight-DHCdata[18] / 100})`);//仮
+    DHCT.setAttribute('transform', `translate(${-footpinX/100}, ${MaxHight - footpinY / 100}) rotate(${-angle},0,0)`);
+    DHCF.setAttribute('transform', `rotate(${-angle},${DHCdata[19] / 100},${MaxHight-DHCdata[18] / 100})`);//仮
     DHCbox.setAttribute('transform', `rotate(${-angle},${DHCdata[19] / 100},${MaxHight-DHCdata[18] / 100})`);//仮
     angleVal.textContent = Number(angle).toFixed(0);
     BoomAngle = Number(angle).toFixed(0);
 
-  DHCLines[0].setAttribute('r', DHCdata[3]/100);
-  DHCLines[0].setAttribute('cx',DHCdata[19] / 100);
-  DHCLines[0].setAttribute('cy',MaxHight-DHCdata[18] / 100);
+  DHCFcircle.setAttribute('r', DHCdata[3]/100);
+  DHCFcircle.setAttribute('cx',DHCdata[19] / 100);
+  DHCFcircle.setAttribute('cy',MaxHight-DHCdata[18] / 100);
 
-  DHCboxLines[0].setAttribute('stroke-width', 10);
-  DHCboxLines[0].setAttribute('x1',10);
-  DHCboxLines[0].setAttribute('x2',-10);
-  DHCboxLines[0].setAttribute('y1',200);
-  DHCboxLines[0].setAttribute('y2',300);//ここ
+  DHCTcircle.setAttribute('r', DHCdata[5]/100);
+  DHCTcircle.setAttribute('cx',DHCdata[14] / 100);
+  DHCTcircle.setAttribute('cy',7.54+BoomShift);
+
+  DHCboxLines[0].setAttribute('stroke-width', DHCdata[9] / 100);
+  DHCboxLines[0].setAttribute('x1',DHCdata[19] / 100 + DHCdata[3]/100);
+  DHCboxLines[0].setAttribute('x2',DHCdata[19]/100 + DHCdata[10]/100*2 + DHCdata[3]/100);
+  DHCboxLines[0].setAttribute('y1',MaxHight-DHCdata[18] / 100);
+  DHCboxLines[0].setAttribute('y2',MaxHight-25.8+7.54+BoomShift-Math.sin(angle*Math.PI/180)*1.22);//ここ
   
 
 
@@ -640,8 +653,8 @@ let jibHeadLineDist=2;//仮
 let jibHeadY = 1.454;
 let jibLine1thY=1.454;
 let jibLine2thY=1.11;
-let TenshionRodR=1;//テンションロッドの太さ
-
+let TenshionRodR=DDData[6][38]/100;//テンションロッドの太さ
+   
 
 
     if(jibB==1){
@@ -652,7 +665,7 @@ let TenshionRodR=1;//テンションロッドの太さ
       jibLines[2].setAttribute('stroke',"#52504e");//仮
 
 
-      TensionRodLine.setAttribute('stroke-width',TenshionRodR);//仮
+      TensionRodLine.setAttribute('stroke-width',TenshionRodR);
       TensionRodLine.setAttribute('x1', length);
       TensionRodLine.setAttribute('x2', length+jib1th* Math.cos(JAangle));
       TensionRodLine.setAttribute('y1', -7.54/2);//仮
@@ -766,7 +779,7 @@ function resetAllBoomLength() {
   });
 
   document.querySelectorAll('[id^="DHC-line-"]').forEach(DHC => {
-    DHC.setAttribute('stroke', '#f39c12');
+    //DHC.setAttribute('stroke', '#f39c12');
   });
 
     document.querySelectorAll('[id^="DHC-box-"]').forEach(DHCbox => {
