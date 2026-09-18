@@ -441,8 +441,7 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
   const jibLengthVal = document.getElementById('jib-length-val');
 
 
-    for (let i=0;i<=5;i++){
-    
+  for (let i=1;i>=0;i--){
     DHCboxLines[i] = document.getElementById(`DHC-box-${i}`);
   }
 
@@ -463,36 +462,86 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
 
   slider.addEventListener('input', (e) => {
     const angle = e.target.value;
-    boom.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
+    const pivotX = DHCdata[19] / 100;
+    const pivotY = MaxHight - DHCdata[18] / 100;
+    boom.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);//
     edge.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     jib.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     head.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     jibHead.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     TensionRod.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     DHCT.setAttribute('transform', `translate(${-footpinX/100}, ${MaxHight - footpinY / 100}) rotate(${-angle},0,0)`);
-    DHCF.setAttribute('transform', `rotate(${-angle},${DHCdata[19] / 100},${MaxHight-DHCdata[18] / 100})`);//仮
-    DHCbox.setAttribute('transform', `rotate(${-angle},${DHCdata[19] / 100},${MaxHight-DHCdata[18] / 100})`);//仮
+    DHCF.setAttribute('transform', `rotate(${-angle},${pivotX},${pivotY})`);//仮
+   
     angleVal.textContent = Number(angle).toFixed(0);
     BoomAngle = Number(angle).toFixed(0);
 
   DHCFcircle.setAttribute('r', DHCdata[3]/100);
-  DHCFcircle.setAttribute('cx',DHCdata[19] / 100);
-  DHCFcircle.setAttribute('cy',MaxHight-DHCdata[18] / 100);
+  DHCFcircle.setAttribute('cx',pivotX);
+  DHCFcircle.setAttribute('cy',pivotY);
 
   DHCTcircle.setAttribute('r', DHCdata[5]/100);
-  DHCTcircle.setAttribute('cx',DHCdata[14] / 100);
-  DHCTcircle.setAttribute('cy',7.54+BoomShift);
-
-  DHCboxLines[0].setAttribute('stroke-width', DHCdata[9] / 100);
-  DHCboxLines[0].setAttribute('x1',DHCdata[19] / 100 + DHCdata[3]/100);
-  DHCboxLines[0].setAttribute('x2',DHCdata[19]/100 + DHCdata[10]/100*2 + DHCdata[3]/100);
-  DHCboxLines[0].setAttribute('y1',MaxHight-DHCdata[18] / 100);
-  DHCboxLines[0].setAttribute('y2',MaxHight-25.8+7.54+BoomShift-Math.sin(angle*Math.PI/180)*1.22);//ここ
-  
+  DHCTcircle.setAttribute('fill', '#f39c12');
 
 
 
+// 1. rotate(-angle, 0, 0) の回転角をラジアンに変換
+const rad = -angle * Math.PI / 180;
+const radLocal = -rad;  // DHCbox のローカル座標への逆変換用
 
+// 2. ローカル座標 (DHCdata[14]/100, 7.54 + BoomShift) を原点(0,0)中心で回転させる
+const localCX = DHCdata[14] / 100;
+const localCY = 7.54 + BoomShift;
+
+const worldCX = (localCX * Math.cos(rad) - localCY * Math.sin(rad)) - footpinX / 100;
+const worldCY = (localCX * Math.sin(rad) + localCY * Math.cos(rad)) + MaxHight - footpinY / 100;
+
+const dx = worldCX - pivotX;
+const dy = worldCY - pivotY;
+
+
+
+
+// 6. DHCbox 内のローカル座標へ逆回転させて X2, Y2 を算出
+let X2_1 = pivotX + (dx * Math.cos(radLocal) - dy * Math.sin(radLocal));
+let Y2_1 = pivotY + (dx * Math.sin(radLocal) + dy * Math.cos(radLocal));
+
+// 2. 始点 (x1, y1) から先端 (X2, Y2) への角度（方向）を算出
+const theta = Math.atan2(Y2_1 - pivotY, X2_1 - pivotX);
+
+
+//
+
+let X2_0 =pivotX + (DHCdata[10] / 100) * Math.cos(theta);
+let Y2_0 =pivotY + (DHCdata[10] / 100) * Math.sin(theta);
+
+
+
+
+
+// 3. translate(${-footpinX/100}, ${MaxHight - footpinY/100}) の平行移動分を加算して設定
+DHCTcircle.setAttribute('cx', localCX);
+DHCTcircle.setAttribute('cy', localCY);
+
+// 1. DHCbox（親）を DHCFcircle の中心軸で回転させる
+DHCbox.setAttribute('transform', `rotate(${-angle}, ${pivotX}, ${MaxHight - DHCdata[18] / 100})`);
+
+
+
+
+DHCboxLines[1].setAttribute('stroke-width', DHCdata[11] / 100);
+DHCboxLines[1].setAttribute('stroke', '#a09d9a');
+DHCboxLines[1].setAttribute('x1', pivotX + DHCdata[3] / 100);
+DHCboxLines[1].setAttribute('y1', MaxHight - DHCdata[18] / 100);
+DHCboxLines[1].setAttribute('x2', X2_1);
+DHCboxLines[1].setAttribute('y2', Y2_1);
+
+DHCboxLines[0].parentElement.appendChild(DHCboxLines[0]);
+DHCboxLines[0].setAttribute('stroke-width', DHCdata[9] / 100);
+DHCboxLines[0].setAttribute('x1', pivotX + DHCdata[3] / 100);
+DHCboxLines[0].setAttribute('y1', MaxHight - DHCdata[18] / 100);
+DHCboxLines[0].setAttribute('x2', X2_0);
+DHCboxLines[0].setAttribute('y2', Y2_0);
 
     WorkingRadius.textContent = String(Number(Math.floor((BoomLength*Math.cos(BoomAngle * Math.PI / 180)+BoomWidth/1000*Math.sin(BoomAngle * Math.PI / 180)-1.32)*10)/10).toFixed(1)).padStart(4, ' ');
     lengthSlider.dispatchEvent(new Event('input'));
@@ -653,11 +702,12 @@ let jibHeadLineDist=2;//仮
 let jibHeadY = 1.454;
 let jibLine1thY=1.454;
 let jibLine2thY=1.11;
-let TenshionRodR=DDData[6][38]/100;//テンションロッドの太さ
+let TenshionRodR=2.72/10;//テンションロッドの太さ
    
 
 
     if(jibB==1){
+      //alert(TenshionRodR);
       jibHeadLine.setAttribute('stroke-width',jibHeadY);//仮
   
       jibLines[1].setAttribute('stroke-width',jibLine1thY);//仮
@@ -782,8 +832,8 @@ function resetAllBoomLength() {
     //DHC.setAttribute('stroke', '#f39c12');
   });
 
-    document.querySelectorAll('[id^="DHC-box-"]').forEach(DHCbox => {
-    DHCbox.setAttribute('stroke', '#f39c12');
+  document.querySelectorAll('[id^="DHC-box-"]').forEach(DHCbox => {
+    //DHCbox.setAttribute('stroke', '#f39c12');
   });
 
 
