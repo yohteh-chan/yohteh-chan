@@ -199,6 +199,10 @@ async function loadCraneBaseData(model) {
   const data = await getCraneData(model);
   if (!data) return;
 
+
+  
+  const $ = id => document.getElementById(id);
+
   const BaseData = data["製品情報"];
   const DAData = data["危険角度"];
   const DDData = data["描画情報"];
@@ -282,14 +286,14 @@ let jibMin=BaseData[20][1];
 let jibMax=BaseData[5][1];
 
 
-const JS=document.getElementById('jib-slider');
+const JS=$('jib-slider');
 
 JS.setAttribute('min', jibMin);
 JS.setAttribute('max', jibMax);
 JS.setAttribute('value', jibMin);
 
-const JLS=document.getElementById('jib-length-slider');
-const JLV=document.getElementById('jib-length-val');
+const JLS=$('jib-length-slider');
+const JLV=$('jib-length-val');
 
 JLS.setAttribute('min', window.jib1th);
 JLS.setAttribute('max', window[`jib${jibNumber}th`]);
@@ -301,13 +305,13 @@ const DHCdata = DDData.map(row => row[32]);//シリンダ・デリック　起�
 const DHCCount = DDData.map(row => row[32]).filter(val => val != null && String(val).trim() !== '').length;
 
 
+let SL=BaseData[22][1];
 
 
-  let outrigger1st = BaseData[12][3];
-  let outrigger2nd = BaseData[13][3];
-  let outrigger3rd = BaseData[14][3];
-  let outrigger4th = BaseData[15][3];
-  let outrigger5th = BaseData[16][3];
+const outriggers = [];
+for (let i = 0; i <= BaseData[1][3]; i++) {
+  outriggers.push(BaseData[12 + i][3]);
+}
 
   let MaxHight = Math.ceil(BaseData[10][1] / 5000) * 50 + 10;
   let MaxHolizon = Math.ceil(BaseData[12][1] / 5000) * 50 + 10;
@@ -328,40 +332,47 @@ const DHCCount = DDData.map(row => row[32]).filter(val => val != null && String(
     circle.setAttribute('cy', -tireY);
   });
 
-  document.getElementById('crane-chart').setAttribute('viewBox', '0 0 ' + (MaxHolizon) + ' ' + (MaxHight));
-  document.getElementById('boom-slider').setAttribute('max', BoomMaxAngle);
+  $('crane-chart').setAttribute('viewBox', '0 0 ' + (MaxHolizon) + ' ' + (MaxHight));
+  $('boom-slider').setAttribute('max', BoomMaxAngle);
 
- const BoomLengthSliderValueChange = document.getElementById('boom-length-slider');
+ const BoomLengthSliderValueChange = $('boom-length-slider');
 BoomLengthSliderValueChange.setAttribute('min', window.Boom1th/100);
 BoomLengthSliderValueChange.setAttribute('max', window[`Boom${BN}th`]/100);
 BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
 
   // --- ブームの生成処理 ---
   const boomLines = [];
-  const boom = document.getElementById('boom');
   const boomEdges = [];
-  const edge = document.getElementById('edge');
   const jibLines = [];
-  const jib = document.getElementById('jib');
-  const jibHead = document.getElementById('jibHead');
-  const head = document.getElementById('head');
-  const TensionRod = document.getElementById('TensionRod');
-  const DHCF = document.getElementById('DerrickHydraulicCylinderF');
-  const DHCT = document.getElementById('DerrickHydraulicCylinderT');
-  const DHCbox = document.getElementById('DerrickHydraulicCylinderBOX');
   const DHCboxLines=[];
 
 
+  const edge = $('edge');
+  const boom = $('boom');
+  const jib = $('jib');
+  const jibHead = $('jibHead');
+  const head = $('head');
+  const TensionRod = $('TensionRod');
+  const DHCF = $('DerrickHydraulicCylinderF');
+  const DHCT = $('DerrickHydraulicCylinderT');
+  const DHCbox = $('DerrickHydraulicCylinderBOX');
+
+
+
   // 【改善】文字列組み立てで一括注入
-  let jibHTML = '';
-  let edgeHTML = '';
-  let boomHTML = '';
-  let headHTML = '';
-  let jibHeadHTML = '';
-  let TensionRodHTML='';
-  let DHCFHTML='';
-  let DHCTHTML='';
-  let DHCboxHTML='';
+
+  let [
+      jibHTML,
+    edgeHTML,
+    boomHTML,
+    headHTML,
+    jibHeadHTML,
+    TensionRodHTML,
+    DHCFHTML,
+    DHCTHTML,
+    DHCboxHTML
+    ] = Array(9).fill('');
+
 
   
   const BColor2 = '#f39c12';
@@ -395,21 +406,21 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
   DHCbox.innerHTML =DHCboxHTML;
 
   for (let i = BN; i >= 1; i--) {
-    boomEdges[i] = document.getElementById(`boom-Edge-${i}`);
-    boomLines[i] = document.getElementById(`boom-line-${i}`);
-    jibLines[i] = document.getElementById(`jib-line-${i}`);
+    boomEdges[i] = $(`boom-Edge-${i}`);
+    boomLines[i] = $(`boom-line-${i}`);
+    jibLines[i] = $(`jib-line-${i}`);
   }
 
 
 
 
-  const headLine = document.getElementById(`head-line`);
-  const jibHeadLine = document.getElementById(`jib-head-line`);
-  const TensionRodLine = document.getElementById(`TensionRod-line`);
+  const headLine = $(`head-line`);
+  const jibHeadLine = $(`jib-head-line`);
+  const TensionRodLine = $(`TensionRod-line`);
 
 
- const DHCFcircle = document.getElementById(`DHC-F-circle`);
- const DHCTcircle = document.getElementById(`DHC-T-circle`);
+ const DHCFcircle = $(`DHC-F-circle`);
+ const DHCTcircle = $(`DHC-T-circle`);
    
 
 
@@ -428,21 +439,21 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
 
    
 
-  const slider = document.getElementById('boom-slider');
-  const angleVal = document.getElementById('angle-val');
-  const WorkingRadius = document.getElementById('working-radius');
-  const lengthSlider = document.getElementById('boom-length-slider');
-  const lengthVal = document.getElementById('boom-length-val');
-  const jibAngle = document.getElementById('jib-slider');
-  const jibAngleVal = document.getElementById('jib-angle-val');
+  const slider = $('boom-slider');
+  const angleVal = $('angle-val');
+  const WorkingRadius = $('working-radius');
+  const lengthSlider = $('boom-length-slider');
+  const lengthVal = $('boom-length-val');
+  const jibAngle = $('jib-slider');
+  const jibAngleVal = $('jib-angle-val');
 
   const jibShift=boomVerticalLength*(BN-1)+7.54/4;//仮
-  const jibLength = document.getElementById('jib-length-slider');
-  const jibLengthVal = document.getElementById('jib-length-val');
+  const jibLength = $('jib-length-slider');
+  const jibLengthVal = $('jib-length-val');
 
 
   for (let i=1;i>=0;i--){
-    DHCboxLines[i] = document.getElementById(`DHC-box-${i}`);
+    DHCboxLines[i] = $(`DHC-box-${i}`);
   }
 
  
@@ -453,11 +464,41 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
     lengthSlider.dispatchEvent(new Event('input'));
   });
 
-  jibLength.addEventListener('input', (e) => {
-    const length = e.target.value;
-    jibLengthVal.textContent = Number(length/10).toFixed(2);
-    lengthSlider.dispatchEvent(new Event('input'));
-  });
+  // jibLength.addEventListener('input', (e) => {
+  //   const length = e.target.value;
+  //   jibLengthVal.textContent = Number(length/10).toFixed(2);
+  //   lengthSlider.dispatchEvent(new Event('input'));
+  // });
+
+
+// 最寄りの値を検索するヘルパー関数（reduceより高速な標準ループ）
+const getNearest = (arr, val) => {
+  let nearest = arr[0];
+  let minDiff = Math.abs(arr[0] - val);
+  for (let i = 1; i < arr.length; i++) {
+    const diff = Math.abs(arr[i] - val);
+    if (diff < minDiff) {
+      minDiff = diff;
+      nearest = arr[i];
+    }
+  }
+  return nearest;
+};
+
+jibLength.addEventListener('input', (e) => {
+  let val = parseFloat(e.target.value);
+
+  if (SL === 0) {
+    // JibSteps の中から最も近い値を直接取得
+    val = getNearest(JibSteps, val);
+    
+    // スライダーの値を強制上書き（HTML側の step 設定による弾かれ防止）
+    e.target.value = val;
+  }
+
+  jibLengthVal.textContent = Number(val/10).toFixed(2);
+  lengthSlider.dispatchEvent(new Event('input'));
+});
  
 
   slider.addEventListener('input', (e) => {
@@ -470,6 +511,8 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
     head.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     jibHead.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
     TensionRod.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
+    
+    
     DHCT.setAttribute('transform', `translate(${-footpinX/100}, ${MaxHight - footpinY / 100}) rotate(${-angle},0,0)`);
     DHCF.setAttribute('transform', `rotate(${-angle},${pivotX},${pivotY})`);//仮
    
@@ -715,11 +758,17 @@ let TenshionRodR=2.72/10;//テンションロッドの太さ
       jibLines[2].setAttribute('stroke',"#52504e");//仮
 
 
-      TensionRodLine.setAttribute('stroke-width',TenshionRodR);
-      TensionRodLine.setAttribute('x1', length);
-      TensionRodLine.setAttribute('x2', length+jib1th* Math.cos(JAangle));
-      TensionRodLine.setAttribute('y1', -7.54/2);//仮
-      TensionRodLine.setAttribute('y2', jibShift + jib1th * Math.sin(JAangle));
+// 共通ヘルパー関数（コードの上のほうに1つ置いておく）
+const setAttrs = (el, attrs) => Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+
+// --- 実際の処理 ---
+setAttrs(TensionRodLine, {
+  'stroke-width': TenshionRodR,
+  'x1': length,
+  'x2': length + jib1th * Math.cos(JAangle),
+  'y1': -7.54 / 2,
+  'y2': jibShift + jib1th * Math.sin(JAangle)
+});
 
      const setLine = (line, x1, x2, y1, y2) => {
       line.setAttribute('x1', x1);
