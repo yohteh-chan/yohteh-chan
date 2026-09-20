@@ -155,7 +155,7 @@ async function fetchCraneDataPreset(model, MaxHolizon, MaxHight, XsizeHolizon) {
 }
 
 let BoomAngle = 0;
-let BoomLength = 0;
+
 let BoomWidth;
 
 let SB = 0;
@@ -202,38 +202,60 @@ async function loadCraneBaseData(model) {
 
   
   const $ = id => document.getElementById(id);
+  const setAttrs = (el, attrs) => {
+    for (const key in attrs) el.setAttribute(key, attrs[key]);
+  };
 
-  const BaseData = data["製品情報"];
-  const DAData = data["危険角度"];
-  const DDData = data["描画情報"];
-  const J0Data = data["J0"];
-  const J1Data = data["J1"];
-  const J2Data = data["J2"];
+  
+  const toRad = (deg) => (deg * Math.PI) / 180;//角度からラジアンへ変換
 
-  let CW = BaseData[1][1];
+  const BaseData = data["製品情報"],
+  DAData = data["危険角度"],
+  DDData = data["描画情報"],
+  J0Data = data["J0"],
+  J1Data = data["J1"],
+  J2Data = data["J2"];
+
+  let CW = BaseData[1][1],
+  CD = BaseData[3][1],
+  BoomMaxAngle = BaseData[4][1],
+  SpecialBoom = BaseData[7][1],
+  SL=BaseData[22][1];
+
+    let BoomShift = DDData[3][2]/100;
+
+  let BN = BaseData[1][15],
+      BoomSet = BaseData[2][15];
+
+  let footpinX = BaseData[1][9],
+      footpinY = BaseData[2][9]-BoomShift;
 
 
+      let jibNumber = BaseData[1][17];
+      // 2次元配列 DDData の AC列（インデックス 28）から、空でない数値のみを抽出
+const jibY = DDData
+  .map(row => row[28])
+  .filter(val => val !== null && val !== undefined && val !== '') // 空を除去
+  .map(Number); // ジブの縦軸　厚み
 
-  let CD = BaseData[3][1];
-  let BoomMaxAngle = BaseData[4][1];
-  let SpecialBoom = BaseData[7][1];
-
-  let BN = BaseData[1][15];
-  let BoomShift = DDData[3][2]/100;
-  let BoomSet = BaseData[2][15];
-  let footpinX = BaseData[1][9];
-  let footpinY = BaseData[2][9]-BoomShift;
+const JibSteps = [];
  
+
+let jibMin=BaseData[20][1];
+let jibMax=BaseData[5][1];
+
+
+
+let BSet2 = [],   // 3次元配列
+    Bset0 = [],   // 基準のブーム段
+    BSsetA = [];  // 各グループの1の個数（0除外・連続重複除去済み）
+
+
 
   for (let i = 1; i <= BN; i++) {
     window[`Boom${i}th`] = BaseData[i+3][15];
   }
 
-  BoomLength = Boom1th / 1000;
-
-let BSet2 = [];   // 3次元配列
-let Bset0 = [];   // 基準のブーム段
-let BSsetA = [];  // 各グループの1の個数（0除外・連続重複除去済み）
 
 if (typeof BoomSet === 'string') {
   const matches = BoomSet.match(/\[[^\]]+\]/g);
@@ -272,8 +294,7 @@ if (typeof BoomSet === 'string') {
   }
 }
 
-let jibNumber = BaseData[1][17];
-const JibSteps = [];
+
 
 for (let i = 1; i <= jibNumber; i++) {
   window[`jib${i}th`] = BaseData[i + 1][17]/100;
@@ -282,8 +303,7 @@ for (let i = 1; i <= jibNumber; i++) {
 
 
 
-let jibMin=BaseData[20][1];
-let jibMax=BaseData[5][1];
+
 
 
 const JS=$('jib-slider');
@@ -305,7 +325,7 @@ const DHCdata = DDData.map(row => row[32]);//シリンダ・デリック　起�
 const DHCCount = DDData.map(row => row[32]).filter(val => val != null && String(val).trim() !== '').length;
 
 
-let SL=BaseData[22][1];
+
 
 
 const outriggers = [];
@@ -320,10 +340,13 @@ for (let i = 0; i <= BaseData[1][3]; i++) {
   await fetchCraneDataPreset(model, MaxHolizon, MaxHight, XsizeHolizon);
 
   BoomWidth = BaseData[18][1];
+
+
   let tireD = DDData[2][20] / 200;
   let tireY = DDData[8][20] / 100;
 
   let FootpinTransY = MaxHight - footpinY / 100 + BoomWidth / 100 / 2;
+
 
 
   const TireD = document.querySelectorAll('.Tire circle');
@@ -335,27 +358,30 @@ for (let i = 0; i <= BaseData[1][3]; i++) {
   $('crane-chart').setAttribute('viewBox', '0 0 ' + (MaxHolizon) + ' ' + (MaxHight));
   $('boom-slider').setAttribute('max', BoomMaxAngle);
 
- const BoomLengthSliderValueChange = $('boom-length-slider');
-BoomLengthSliderValueChange.setAttribute('min', window.Boom1th/100);
-BoomLengthSliderValueChange.setAttribute('max', window[`Boom${BN}th`]/100);
-BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
+ const el = $('boom-length-slider');
+const minVal = window.Boom1th / 100;
+
+el.min = minVal;
+el.max = window[`Boom${BN}th`] / 100;
+el.value = minVal;
+
 
   // --- ブームの生成処理 ---
-  const boomLines = [];
-  const boomEdges = [];
-  const jibLines = [];
-  const DHCboxLines=[];
+  const boomLines = [],
+        boomEdges = [],
+        jibLines = [],
+        DHCboxLines=[];
 
 
-  const edge = $('edge');
-  const boom = $('boom');
-  const jib = $('jib');
-  const jibHead = $('jibHead');
-  const head = $('head');
-  const TensionRod = $('TensionRod');
-  const DHCF = $('DerrickHydraulicCylinderF');
-  const DHCT = $('DerrickHydraulicCylinderT');
-  const DHCbox = $('DerrickHydraulicCylinderBOX');
+const edge = $('edge'),
+      boom = $('boom'),
+      jib = $('jib'),
+      jibHead = $('jibHead'),
+      head = $('head'),
+      TensionRod = $('TensionRod'),
+      DHCF = $('DerrickHydraulicCylinderF'),
+      DHCT = $('DerrickHydraulicCylinderT'),
+      DHCbox = $('DerrickHydraulicCylinderBOX');
 
 
 
@@ -375,35 +401,45 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
 
 
   
-  const BColor2 = '#f39c12';
-  const BColor3 = '#d80606';
+const BColor2 = '#f39c12',
+      BColor3 = '#d80606';
 
   for (let i = BN; i >= 1; i--) {
     const BColor1 = i === 1 ? '#f39c12' : '#52504e';
     jibHTML += `<line id="jib-line-${i}" x1="0" y1="0" y2="0" stroke="${BColor2}"/>`;
     edgeHTML += `<line id="boom-Edge-${i}" x1="0" y1="0" y2="0" stroke="${BColor2}" stroke-width="${BoomWidth/100*(10-i)/10}" />`;
-    boomHTML += `<line id="boom-line-${i}" x1="0" y1="0" y2="0" stroke="${BColor1}" stroke-width="${BoomWidth/100*(10-i)/10}" />`;//
+    boomHTML += `<line id="boom-line-${i}" x1="0" y1="0" y2="0" stroke="${BColor1}" stroke-width="${BoomWidth/100*(10-i)/10}" />`;
   }
 
-  headHTML += `<line id="head-line" x1="0" y1="0" y2="0" stroke="${BColor3}"/>`;
-  jibHeadHTML += `<line id="jib-head-line" x1="0" y1="0" y2="0" stroke="${BColor2}"/>`;
-  TensionRodHTML += `<line id="TensionRod-line" x1="0" y1="0" y2="0" stroke="${BColor2}"/>`;
+
+// タグ名・ID・色を指定して SVG 要素文字列を生成する最軽量ヘルパー
+const createSVG = (tag, id, stroke) => `<${tag} id="${id}" x1="0" y1="0" y2="0" stroke="${stroke}"/>`;
+
+// circle
+DHCFHTML += createSVG('circle', 'DHC-F-circle', BColor2);
+DHCTHTML += createSVG('circle', 'DHC-T-circle', BColor2);
+
+// line 
+headHTML += createSVG('line', 'head-line', BColor3);
+jibHeadHTML += createSVG('line', 'jib-head-line', BColor2);
+TensionRodHTML += createSVG('line', 'TensionRod-line', BColor2);
+
+
 
   for (let i=0;i<=1;i++){
     DHCboxHTML += `<line id="DHC-box-${i}" x1="0" y1="0" y2="0" stroke="${BColor2}"/>`;
   }
-  DHCFHTML += `<circle id="DHC-F-circle" x1="0" y1="0" y2="0" stroke="${BColor2}"/>`;
-  DHCTHTML += `<circle id="DHC-T-circle" x1="0" y1="0" y2="0" stroke="${BColor2}"/>`;
+ 
 
-  edge.innerHTML = edgeHTML;
-  boom.innerHTML = boomHTML;
-  jib.innerHTML = jibHTML;
-  jibHead.innerHTML = jibHeadHTML;
-  head.innerHTML = headHTML;
+  edge.innerHTML       = edgeHTML;
+  boom.innerHTML       = boomHTML;
+  jib.innerHTML        = jibHTML;
+  jibHead.innerHTML    = jibHeadHTML;
+  head.innerHTML       = headHTML;
   TensionRod.innerHTML = TensionRodHTML;
-  DHCF.innerHTML =DHCFHTML;
-  DHCT.innerHTML =DHCTHTML;
-  DHCbox.innerHTML =DHCboxHTML;
+  DHCF.innerHTML       = DHCFHTML;
+  DHCT.innerHTML       = DHCTHTML;
+  DHCbox.innerHTML     = DHCboxHTML;
 
   for (let i = BN; i >= 1; i--) {
     boomEdges[i] = $(`boom-Edge-${i}`);
@@ -414,13 +450,11 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
 
 
 
-  const headLine = $(`head-line`);
-  const jibHeadLine = $(`jib-head-line`);
-  const TensionRodLine = $(`TensionRod-line`);
-
-
- const DHCFcircle = $(`DHC-F-circle`);
- const DHCTcircle = $(`DHC-T-circle`);
+  const headLine = $(`head-line`),
+        jibHeadLine = $(`jib-head-line`),
+        TensionRodLine = $(`TensionRod-line`),
+        DHCFcircle = $(`DHC-F-circle`),
+        DHCTcircle = $(`DHC-T-circle`);
    
 
 
@@ -439,17 +473,17 @@ BoomLengthSliderValueChange.setAttribute('value', window.Boom1th/100);
 
    
 
-  const slider = $('boom-slider');
-  const angleVal = $('angle-val');
-  const WorkingRadius = $('working-radius');
-  const lengthSlider = $('boom-length-slider');
-  const lengthVal = $('boom-length-val');
-  const jibAngle = $('jib-slider');
-  const jibAngleVal = $('jib-angle-val');
+  const slider = $('boom-slider'),
+        angleVal = $('angle-val'),
+        WorkingRadius = $('working-radius'),
+        lengthSlider = $('boom-length-slider'),
+        lengthVal = $('boom-length-val'),
+        jibAngle = $('jib-slider'),
+        jibAngleVal = $('jib-angle-val'),
+        jibLength = $('jib-length-slider'),
+        jibLengthVal = $('jib-length-val');
 
   const jibShift=boomVerticalLength*(BN-1)+7.54/4;//仮
-  const jibLength = $('jib-length-slider');
-  const jibLengthVal = $('jib-length-val');
 
 
   for (let i=1;i>=0;i--){
@@ -501,16 +535,20 @@ jibLength.addEventListener('input', (e) => {
 });
  
 
+
+
   slider.addEventListener('input', (e) => {
     const angle = e.target.value;
     const pivotX = DHCdata[19] / 100;
     const pivotY = MaxHight - DHCdata[18] / 100;
-    boom.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);//
-    edge.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
-    jib.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
-    head.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
-    jibHead.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
-    TensionRod.setAttribute('transform', `translate(${-footpinX/100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth/100/2})`);
+    const tfStr = `translate(${-footpinX / 100}, ${FootpinTransY}) rotate(${-angle},0,${-BoomWidth / 200})`;
+
+      boom.setAttribute('transform', tfStr);
+      edge.setAttribute('transform', tfStr);
+      jib.setAttribute('transform', tfStr);
+      head.setAttribute('transform', tfStr);
+      jibHead.setAttribute('transform', tfStr);
+      TensionRod.setAttribute('transform', tfStr);
     
     
     DHCT.setAttribute('transform', `translate(${-footpinX/100}, ${MaxHight - footpinY / 100}) rotate(${-angle},0,0)`);
@@ -572,21 +610,31 @@ DHCbox.setAttribute('transform', `rotate(${-angle}, ${pivotX}, ${MaxHight - DHCd
 
 
 
-DHCboxLines[1].setAttribute('stroke-width', DHCdata[11] / 100);
-DHCboxLines[1].setAttribute('stroke', '#a09d9a');
-DHCboxLines[1].setAttribute('x1', pivotX + DHCdata[3] / 100);
-DHCboxLines[1].setAttribute('y1', MaxHight - DHCdata[18] / 100);
-DHCboxLines[1].setAttribute('x2', X2_1);
-DHCboxLines[1].setAttribute('y2', Y2_1);
+
+
+
+// 使い方（1行でスッキリまとまる）
+setAttrs(DHCboxLines[1], {
+  'stroke-width': DHCdata[11] / 100,
+  'stroke': '#a09d9a',
+  'x1': pivotX + DHCdata[3] / 100,
+  'y1': MaxHight - DHCdata[18] / 100,
+  'x2': X2_1,
+  'y2': Y2_1
+});
 
 DHCboxLines[0].parentElement.appendChild(DHCboxLines[0]);
-DHCboxLines[0].setAttribute('stroke-width', DHCdata[9] / 100);
-DHCboxLines[0].setAttribute('x1', pivotX + DHCdata[3] / 100);
-DHCboxLines[0].setAttribute('y1', MaxHight - DHCdata[18] / 100);
-DHCboxLines[0].setAttribute('x2', X2_0);
-DHCboxLines[0].setAttribute('y2', Y2_0);
 
-    WorkingRadius.textContent = String(Number(Math.floor((BoomLength*Math.cos(BoomAngle * Math.PI / 180)+BoomWidth/1000*Math.sin(BoomAngle * Math.PI / 180)-1.32)*10)/10).toFixed(1)).padStart(4, ' ');
+
+setAttrs(DHCboxLines[0], {
+  'stroke-width': DHCdata[9] / 100,
+  'x1': pivotX + DHCdata[3] / 100,
+  'y1': MaxHight - DHCdata[18] / 100,
+  'x2': X2_0,
+  'y2': Y2_0
+});
+
+    
     lengthSlider.dispatchEvent(new Event('input'));
   });
 
@@ -598,12 +646,7 @@ DHCboxLines[0].setAttribute('y2', Y2_0);
 
 
 
-
-    WorkingRadius.textContent = String(Number(Math.floor((BoomLength*Math.cos(BoomAngle * Math.PI / 180)+BoomWidth/1000*Math.sin(BoomAngle * Math.PI / 180)-1.32)*10)/10).toFixed(1)).padStart(4, ' ');
-
-
-
-
+    WorkingRadius.textContent = String(Number(Math.floor(((length/10)*Math.cos(toRad(BoomAngle))+BoomWidth/1000*Math.sin(toRad(BoomAngle))-footpinX/1000)*10)/10).toFixed(1)).padStart(4, ' ');
 
 
 
@@ -696,8 +739,8 @@ baseValues = new Array(BN).fill(BaseBoom[1]).map((val, i) =>
 
 
 
-      for(i=0;i<=BN;i++){
-        //boomLines[i].setAttribute('stroke-width', 0);
+      for(let i=0;i<=BN;i++){
+        //boomLines[i].setAttribute('stroke-width', 0);//確認用
       }
 
 
@@ -730,58 +773,67 @@ for (let i = 2; i <= BN-1; i++) {
     boomEdges[BN].setAttribute('x1', length - boomEdgeLength);
     boomEdges[BN].setAttribute('x2', length);
 
-
-      headLine.setAttribute('x1', length);
-      headLine.setAttribute('x2', length);
-      headLine.setAttribute('y1', -7.54/2);
-      headLine.setAttribute('y2', 8.6936-7.54/2);
-      headLine.setAttribute('stroke-width',2.51);
+   
 
 
+      setAttrs(headLine, {
+      'x1': length,
+      'x2': length,
+      'y1': -7.54 / 2,
+      'y2': 8.6936 - 7.54 / 2,
+      'stroke-width': 2.51
+    });
 
 
-let JAangle =  (jibAngle.value * Math.PI) / 180;
+
+let JAangle =  toRad(jibAngle.value);
 let jibHeadLineDist=2;//仮
 let jibHeadY = 1.454;
 let jibLine1thY=1.454;
 let jibLine2thY=1.11;
 let TenshionRodR=2.72/10;//テンションロッドの太さ
    
+const setLine = (line, x1, x2, y1, y2) => {
+  if (!line) return;
+  line.setAttribute('x1', x1);
+  line.setAttribute('x2', x2);
+  line.setAttribute('y1', y1);
+  line.setAttribute('y2', y2);
+};
 
 
     if(jibB==1){
       //alert(TenshionRodR);
-      jibHeadLine.setAttribute('stroke-width',jibHeadY);//仮
-  
-      jibLines[1].setAttribute('stroke-width',jibLine1thY);//仮
-      jibLines[2].setAttribute('stroke-width',jibLine2thY);//仮
-      jibLines[2].setAttribute('stroke',"#52504e");//仮
+      setAttrs(jibHeadLine, {
+        'stroke-width': jibHeadY //仮
+      });
+
+      setAttrs(jibLines[1], {
+        'stroke-width': jibLine1thY //仮
+      });
+
+      setAttrs(jibLines[2], {
+        'stroke-width': jibLine2thY, //仮
+        'stroke': '#52504e' //仮
+      });
 
 
-// 共通ヘルパー関数（コードの上のほうに1つ置いておく）
-const setAttrs = (el, attrs) => Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+    const cosA = Math.cos(JAangle),
+          sinA = Math.sin(JAangle);
 
-// --- 実際の処理 ---
 setAttrs(TensionRodLine, {
   'stroke-width': TenshionRodR,
   'x1': length,
-  'x2': length + jib1th * Math.cos(JAangle),
+  'x2': length + jib1th * cosA,
   'y1': -7.54 / 2,
-  'y2': jibShift + jib1th * Math.sin(JAangle)
+  'y2': jibShift + jib1th * sinA
 });
 
-     const setLine = (line, x1, x2, y1, y2) => {
-      line.setAttribute('x1', x1);
-      line.setAttribute('x2', x2);
-      line.setAttribute('y1', y1);
-      line.setAttribute('y2', y2);
-    };
-
+     
     const jibLen = Number(jibLength.value);
-    const cosA = Math.cos(JAangle);
-    const sinA = Math.sin(JAangle);
 
-    // 1. ジブライン（複数段）の処理
+
+
     for (let i = 1; i <= jibNumber; i++) {
       const len = i === 1 ? window[`jib${i}th`] : jibLen;
       if (jibLines[i] && len) {
@@ -789,7 +841,7 @@ setAttrs(TensionRodLine, {
       }
     }
 
-    // 2. ジブヘッドラインの処理
+
     if (jibHeadLine) {
       const xEnd = length + jibLen * cosA;
       const yEnd = jibShift + jibLen * sinA;
@@ -801,42 +853,73 @@ setAttrs(TensionRodLine, {
 
 
 // 共通計算値の事前定義
-const BaseBoom = Boom1th / 100;
-const jibTipX = BaseBoom - jib1th;
+const BaseBoom1 = Boom1th / 100;
+const jibTipX = BaseBoom1 - jib1th;
 const jibHeadTipX = jibTipX + jibHeadLineDist;
 
-const HeadHalf = 7.54 / 2; // 約 3.77
-const tensionY = HeadHalf - jibLine1thY * 0.5;
+const HeadHalf = 7.54 / 2; // 仮
+const tensionY = HeadHalf - jibLine1thY * 0.5;//仮
 
 // 1. ジブラインの一括設定（ループ）
 for (let i = 1; i <= jibNumber; i++) {
   if (!jibLines[i]) continue;
-  jibLines[i].setAttribute('x1', BaseBoom);
-  jibLines[i].setAttribute('x2', jibTipX);
-  jibLines[i].setAttribute('y1', HeadHalf);
-  jibLines[i].setAttribute('y2', HeadHalf);
+setAttrs(jibLines[i], {
+    'x1': BaseBoom1,
+    'x2': jibTipX,
+    'y1': HeadHalf,
+    'y2': HeadHalf
+  });
 }
-
-// 2. 補助関数の定義（複数要素の属性設定を共通化）
-const setLine = (line, x1, x2, y1, y2) => {
-  if (!line) return;
-  line.setAttribute('x1', x1);
-  line.setAttribute('x2', x2);
-  line.setAttribute('y1', y1);
-  line.setAttribute('y2', y2);
-};
 
 // 3. 各ラインの配置設定
 setLine(jibHeadLine, jibTipX, jibHeadTipX, HeadHalf, HeadHalf);
-setLine(TensionRodLine, BaseBoom, jibHeadTipX, tensionY, tensionY);
-    }
+setLine(TensionRodLine, BaseBoom1, jibHeadTipX, tensionY, tensionY);
+    
+
+}
 
     
 
     lengthVal.textContent = Number(length / 10).toFixed(1);
 
+    let jibHookPoint =Number(JibSteps[0])>=Number(jibLength.value)?0:jibNumber-1;
+
+
+
+
+    let boom_jib=Number(BoomAngle)-Number(jibAngle.value);
+
+    
+let jibD=jibLength.value/10*Math.cos(toRad(boom_jib))
+        -jibY[jibHookPoint]/1000*Math.sin(toRad(boom_jib));
+
+let boomD=(length/10)*Math.cos(toRad(BoomAngle))
+         +BoomWidth/1000*Math.sin(toRad(BoomAngle))-footpinX/1000;
+
+WorkingRadius.textContent = (Math.floor((boomD + jibD * jibB) * 10) / 10).toFixed(1).padStart(4, ' ');
+
+
+    //console.log("A /",check);
+    // console.log("B /",length);
+    // console.log("C /",BoomAngle);
+    // console.log("D /",BoomWidth);
+    // console.log("E /",jibLength.value);
+    // console.log("F /",jibAngle.value);
+    // console.log("G /",jibHookPoint);
+    // console.log("H /",jibY[jibHookPoint]);
+    // console.log("I /",jibB);
+
+
+
+// console.log(" /",);
+
+
     
   });
+  
+
+  
+  
 
   slider.dispatchEvent(new Event('input'));
   lengthSlider.dispatchEvent(new Event('input'));
