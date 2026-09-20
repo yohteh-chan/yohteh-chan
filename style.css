@@ -207,3 +207,217 @@ body {
   background-color: #b3d9ff; /* 淡い青 */
   border-color: #99c2ff;
 }
+
+
+/* ポップアップ窓の基本スタイル */
+.popup-window {
+  border: 1px solid #444;
+  background-color: rgba(34, 34, 34, 0.5);
+  color: #fff;
+  border-radius: 8px;
+  padding: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  min-width: 100px;
+  position: fixed;
+  
+  /* ★追加: translate(posX, posY) の基準点を画面左上に固定 */
+  top: 0;
+  left: 0;
+
+  max-width: 50vw;    /* 画面幅の90%まで */
+  max-height: 50vh;   /* 画面高さの80%まで */
+  
+  margin: 0; /* ドラッグ座標（translate）を正確に制御するため指定 */
+  touch-action: none;
+  z-index: 1000;
+}
+
+/* ★追加: dialog[open] の明示的な表示制御 */
+.popup-window[open] {
+  display: block;
+}
+
+/* ダイアログが開いた際の背景（暗くせず透過） */
+.popup-window::backdrop {
+  background: transparent;
+}
+
+/* ドラッグ可能なヘッダー部分 */
+.popup-header {
+  background-color: #333;
+  padding: 8px 12px;
+  cursor: move; /* 移動可能カーソル */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top-left-radius: 7px;
+  border-top-right-radius: 7px;
+  user-select: none; /* ドラッグ中のテキスト選択を防止 */
+  border-bottom: 1px solid #444;
+}
+
+.popup-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.popup-label {
+  font-size: 14px;
+  color: #ccc;
+}
+
+/* 閉じるボタン */
+.close-btn {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.close-btn:hover {
+  color: #fff;
+}
+
+/* SVG内のブーム要素をホバーしたときにカーソルをポインターにする */
+#boom {
+  cursor: pointer;
+}
+
+.arc-slider-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  user-select: none;
+}
+
+#arc-slider-svg {
+  touch-action: none; /* ドラッグ時のスクロール防止 */
+  cursor: pointer;
+}
+
+/* 円弧パス共通スタイル */
+.arc-path {
+  fill: none;
+  stroke-width: 16;
+  stroke-linecap: round;
+}
+
+/* 各レイヤーの色定義 */
+.arc-bg {
+  stroke: #3498db; /* 背景の可動域 */
+}
+
+/* ★ arc-bg が注意領域（黄色）に入ったとき */
+.arc-bg.is-attention {
+  stroke: #fff024;
+}
+
+/* ★ arc-bg が危険領域（赤色）に入ったとき */
+.arc-bg.is-danger {
+  stroke: #e74c3c !important;
+}
+
+.arc-attention {
+  stroke: #fff024; /* 危険領域の色（黄） */
+  opacity: 1;
+  stroke-linecap: butt;
+}
+
+.arc-danger {
+  stroke: #e74c3c; /* 危険領域の色（赤） */
+  opacity: 1;
+  stroke-linecap: butt;
+}
+
+.arc-danger-edge {
+  stroke: #e74c3c; /* 危険領域の色（赤） */
+  opacity: 1;
+}
+
+.arc-active {
+  stroke: #444; /* 現在値の色（青） */
+}
+
+.arc-active-edge {
+  stroke: #444; /* 現在値の色（青） */
+  stroke-linecap: butt;
+}
+
+/* 操作つまみ */
+.arc-handle {
+  fill: #fff;
+  stroke: #3498db;
+  stroke-width: 4;
+  cursor: grab;
+  filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5));
+}
+
+.arc-handle.is-attention {
+  fill: #fff024;
+  stroke: #fff024;
+}
+
+.arc-handle.is-danger {
+  fill: #e74c3c;
+  stroke: #e74c3c;
+}
+
+
+
+.arc-handle:active {
+  cursor: grabbing;
+  fill: #ecf0f1;
+}
+
+/* 文字表示 */
+.arc-text-val {
+  fill: #fff;
+  font-size: 28px;
+  font-weight: bold;
+  font-family: sans-serif;
+}
+
+/* ヘッダー右側のボタン群を横並びにする */
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ピンボタンのスタイル */
+.pin-btn {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: color 0.2s, background 0.2s;
+}
+
+.pin-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* ピン留めアクティブ時のスタイル */
+.pin-btn.pinned {
+    color: #f39c12; /* オレンジ色で固定中を主張 */
+    background: rgba(243, 156, 18, 0.2);
+}
+
+/* ブーム角度パネルのクリック可能エリア */
+.angle-panel-click-area {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+    border-radius: 6px;
+    padding: 4px 0px; /* タップ/クリックしやすいように少し余白をつける */
+}
+
