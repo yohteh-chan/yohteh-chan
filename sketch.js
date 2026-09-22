@@ -760,6 +760,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (popupLengthVal) popupLengthVal.textContent = displayVal;
         if (mainLengthVal) mainLengthVal.textContent = displayVal;
+        lengthSlider.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
     // 点（目盛り）を生成する関数
