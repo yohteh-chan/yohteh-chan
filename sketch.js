@@ -666,23 +666,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const dialog = document.getElementById('boom-angle-dialog');
     const dialogHeader = document.getElementById('boom-angle-dialog-header');
     const closeBtn = document.getElementById('close-boom-angle-dialog');
-    const pinBtn = document.getElementById('pin-boom-angle-dialog'); // ★ピンボタン取得
+    const pinBtn = document.getElementById('pin-boom-angle-dialog');
     const BoomTrigger = document.getElementById('boom-trigger');
 
     let posX = 0, posY = 0;
-
+    let isBoomDialogPinned = false; // 未定義エラー防止のための変数定義
 
     // ★ピン留めボタンのイベント設定
     if (pinBtn) {
         pinBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // イベントのバブリングを止める
+            e.stopPropagation();
             isBoomDialogPinned = !isBoomDialogPinned;
             pinBtn.classList.toggle('pinned', isBoomDialogPinned);
             console.log('Pinned:', isBoomDialogPinned);
         });
     }
 
-      // ダイアログを開く共通関数
+    // ダイアログを開く共通関数
     function openBoomDialog() {
         if (dialog && !dialog.open) {
             posX = window.innerWidth / 2 - 120;
@@ -692,40 +692,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // それぞれの要素にイベント登録
     if (boomGroup) boomGroup.addEventListener('click', openBoomDialog);
     if (BoomTrigger) BoomTrigger.addEventListener('click', openBoomDialog);
 
     if (closeBtn && dialog) {
         closeBtn.addEventListener('click', () => {
-            // ×ボタンが押された時はピン止めに関わらず閉じる（ピン状態もリセット）
             isBoomDialogPinned = false;
             if (pinBtn) pinBtn.classList.remove('pinned');
             dialog.close();
         });
     }
 
- // ダイアログ外のクリックで閉じる処理（show() 対応版）
-document.addEventListener('pointerdown', (e) => {
-    // ダイアログが開いていて、かつピン留めされていない時だけ判定
-    if (dialog && dialog.open && !isBoomDialogPinned) {
-        
-        // クリックされた要素が「ダイアログ本体」および「ダイアログを開くボタン(boomGroup)」に含まれない場合
-        const isClickInsideDialog = dialog.contains(e.target);
-        const isClickOnTrigger = 
+    // ダイアログ外のクリックで閉じる処理
+    document.addEventListener('pointerdown', (e) => {
+        if (dialog && dialog.open && !isBoomDialogPinned) {
+            const isClickInsideDialog = dialog.contains(e.target);
+            const isClickOnTrigger = 
                 (boomGroup && boomGroup.contains(e.target)) ||
                 (BoomTrigger && BoomTrigger.contains(e.target));
 
-        if (!isClickInsideDialog && !isClickOnTrigger) {
-            dialog.close();
+            if (!isClickInsideDialog && !isClickOnTrigger) {
+                dialog.close();
+            }
         }
-    }
-});
+    });
 
+    // ドラッグ処理
     let isDragging = false, startX = 0, startY = 0;
     if (dialogHeader && dialog) {
         dialogHeader.addEventListener('mousedown', (e) => {
-            if (e.target === closeBtn || e.target === pinBtn) return; // ピンボタン操作時のドラッグ防止
+            if (e.target === closeBtn || e.target === pinBtn) return;
             isDragging = true;
             startX = e.clientX - posX;
             startY = e.clientY - posY;
@@ -747,50 +743,71 @@ document.addEventListener('pointerdown', (e) => {
         });
     }
 
-
+    // --- スライダー ＆ 目盛り生成制御 ---
     const lengthSlider = document.getElementById('boom-length-slider');
     const popupLengthVal = document.getElementById('popup-length-val');
     const mainLengthVal = document.getElementById('length-val');
-    const ticks = document.querySelectorAll('.tick-mark');
 
-    
+    const presetValues = [53, 90.4, 127.8, 165.2, 202.6, 240];
 
-   function updateLengthUI(value) {
-        const valStr = parseFloat(value).toFixed(1);
+    // UI更新関数 (※dispatchEvent は削除)
+    function updateLengthUI(value) {
+        const valNum = parseFloat(value);
         
         if (lengthSlider) lengthSlider.value = value;
-        if (popupLengthVal) popupLengthVal.textContent = valStr;
-        if (mainLengthVal) mainLengthVal.textContent = valStr;
-
-      
-    }function updateLengthUI(value) {
-        const valStr = parseFloat(value).toFixed(1);
         
-        if (lengthSlider) lengthSlider.value = value;
-        if (popupLengthVal) popupLengthVal.textContent = Number(valStr/10).toFixed(1);
+        const displayVal = (valNum / 10).toFixed(1);
 
+        if (popupLengthVal) popupLengthVal.textContent = displayVal;
+        if (mainLengthVal) mainLengthVal.textContent = displayVal;
     }
 
+    // 点（目盛り）を生成する関数
+    function generatePresetTicks(values) {
+        const ticksContainer = document.getElementById('preset-ticks');
+        if (!ticksContainer || !lengthSlider || values.length === 0) return;
 
-    // 1. スライダー本体をドラッグ移動したとき
+        ticksContainer.innerHTML = '';
+
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        lengthSlider.min = min;
+        lengthSlider.max = max;
+
+
+        
+        values.forEach(val => {
+            const span = document.createElement('span');
+            span.className = 'tick-mark';
+            span.setAttribute('data-value', val);
+
+            const dotRadius = 8;
+
+            const percent = ((val - min) / (max - min)) * 100;
+            //span.style.left = `${percent}%`;
+
+            span.style.left = `calc(${percent}% + (${dotRadius}px - ${percent * (dotRadius * 2 / 100)}px))`;
+
+            span.addEventListener('click', (e) => {
+                e.stopPropagation();
+                updateLengthUI(val);
+            });
+
+            ticksContainer.appendChild(span);
+        });
+    }
+
+    // 目盛り生成と初期化
+    generatePresetTicks(presetValues);
+
     if (lengthSlider) {
         lengthSlider.addEventListener('input', (e) => {
             updateLengthUI(e.target.value);
         });
+        
+        // 初期値の反映
+        updateLengthUI(lengthSlider.value);
     }
-
-    // 2. ★規定位置の点（マーク）をクリックしたとき
-    ticks.forEach(tick => {
-        tick.addEventListener('click', (e) => {
-            e.stopPropagation(); // イベントのバブリングを防止
-            const targetVal = tick.getAttribute('data-value');
-            if (targetVal !== null) {
-                updateLengthUI(targetVal);
-            }
-        });
-    });
-
-
 });
 
 
