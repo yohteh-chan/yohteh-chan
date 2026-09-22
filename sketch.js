@@ -746,6 +746,51 @@ document.addEventListener('pointerdown', (e) => {
             }
         });
     }
+
+
+    const lengthSlider = document.getElementById('boom-length-slider');
+    const popupLengthVal = document.getElementById('popup-length-val');
+    const mainLengthVal = document.getElementById('length-val');
+    const ticks = document.querySelectorAll('.tick-mark');
+
+    
+
+   function updateLengthUI(value) {
+        const valStr = parseFloat(value).toFixed(1);
+        
+        if (lengthSlider) lengthSlider.value = value;
+        if (popupLengthVal) popupLengthVal.textContent = valStr;
+        if (mainLengthVal) mainLengthVal.textContent = valStr;
+
+      
+    }function updateLengthUI(value) {
+        const valStr = parseFloat(value).toFixed(1);
+        
+        if (lengthSlider) lengthSlider.value = value;
+        if (popupLengthVal) popupLengthVal.textContent = Number(valStr/10).toFixed(1);
+
+    }
+
+
+    // 1. スライダー本体をドラッグ移動したとき
+    if (lengthSlider) {
+        lengthSlider.addEventListener('input', (e) => {
+            updateLengthUI(e.target.value);
+        });
+    }
+
+    // 2. ★規定位置の点（マーク）をクリックしたとき
+    ticks.forEach(tick => {
+        tick.addEventListener('click', (e) => {
+            e.stopPropagation(); // イベントのバブリングを防止
+            const targetVal = tick.getAttribute('data-value');
+            if (targetVal !== null) {
+                updateLengthUI(targetVal);
+            }
+        });
+    });
+
+
 });
 
 
