@@ -747,8 +747,42 @@ document.addEventListener('DOMContentLoaded', () => {
     const lengthSlider = document.getElementById('boom-length-slider');
     const popupLengthVal = document.getElementById('popup-length-val');
     const mainLengthVal = document.getElementById('length-val');
+    const trackBg = document.querySelector('.boom-track-bg');
 
-    const presetValues = [53, 90.4, 127.8, 165.2, 202.6, 240];
+    const presetValues = [53, 90.4, 127.8, 165.2, 202.6, 240];//仮
+
+
+function updateBoomFill() {
+    if (!lengthSlider) return;
+
+    const min = parseFloat(lengthSlider.min) || 53; //仮
+    const max = parseFloat(lengthSlider.max) || 240;//仮
+    const currentVal = parseFloat(lengthSlider.value);
+
+    // つまみの現在位置をパーセント（0〜100%）で計算
+    const percent = ((currentVal - min) / (max - min)) * 100;
+
+    const COLOR_ACTIVE = '#444'; // 伸びた部分
+    const COLOR_INACTIVE = 'rgba(0, 0, 0, 0.5)';   // 未到達部分
+
+    // つまみ位置でピタッと色が変わるグラデーション文字列を生成
+    const fillGradient = `linear-gradient(90deg, 
+        ${COLOR_ACTIVE} 0%, 
+        ${COLOR_ACTIVE} ${percent}%, 
+        ${COLOR_INACTIVE} ${percent}%, 
+        ${COLOR_INACTIVE} 100%)`;
+
+    // CSS変数を更新
+    trackBg.style.setProperty('--boom-fill', fillGradient);
+}
+
+// スライダー操作イベントに紐付け
+lengthSlider.addEventListener('input', updateBoomFill);
+updateBoomFill();
+
+
+
+
 
     // UI更新関数 (※dispatchEvent は削除)
     function updateLengthUI(value) {

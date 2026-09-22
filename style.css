@@ -432,14 +432,6 @@ body {
     align-items: center;
 }
 
-
-/* Rangeスライダー（つまみ）のスタイル調整 */
-#boom-length-slider {
-    width: 100%;
-    accent-color: #3498db; /* スライダーのテーマカラー */
-    cursor: pointer;
-}
-
 /* スライダーまわりのレイアウト */
 .range-wrapper {
     position: relative;
@@ -447,22 +439,63 @@ body {
     width: 100%;
 }
 
+/* スライダー本体（★ここを右にシフトする） */
 #boom-length-slider {
-    width: 100%;
-    accent-color: #3498db;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
     cursor: pointer;
     position: relative;
     z-index: 2;
     margin: 0;
     display: block;
+    outline: none;
+    -webkit-user-drag: none;
+    touch-action: none;
+
+    /* ★ スライダー本体と可動域をそのまま右に 60px シフト */
+    margin-left: 60px;
+    width: calc(100% - 60px);
 }
 
-/* 規定位置の点（目盛り）グループ */
+/* Chrome, Safari, Edge 用 */
+#boom-length-slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 16px; 
+    background: transparent; /* 透明化 */
+    -webkit-mask-image: none; /* マスク解除 */
+    mask-image: none;
+}
+
+/* つまみ（Thumb）の基本設定 */
+#boom-length-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 8px;
+    height: 20px;
+    box-sizing: border-box;
+    background: #e41010;
+    border: 2px solid #e41010;
+    margin-top: -1px; /* 16pxトラックに対して18pxつまみを中央配置 */
+    cursor: grab;
+    flex-shrink: 0;
+}
+
+#boom-length-slider::-moz-range-thumb {
+    width: 16px;
+    height: 22px;
+    background: #f39c12;
+    border: 2px solid #2c3e50;
+    clip-path: polygon(0% 0%, 100% 0%, 100% 70%, 50% 100%, 0% 70%);
+    cursor: grab;
+}
+
+/* 規定位置の点（目盛り）グループ（★スライダーに合わせて右シフト） */
 .preset-ticks {
     position: absolute;
     top: 50%;
-    /*left: 10px;  ★右にずらしたい分だけ指定（例: 10px） */
-    width: 100%; /* 幅をぴったり100%にする */
+    left: 60px;               /* ★ スライダーと同じく 60px からスタート */
+    width: calc(100% - 60px); /* ★ スライダーと同じ横幅にする */
     height: 0;
     transform: translateY(-50%);
     z-index: 3;
@@ -474,17 +507,85 @@ body {
     position: absolute;
     width: 10px;
     height: 10px;
-    background-color: #f39c12; /* 点の色 */
+    background-color: #e67e22;
     border: 0px;
     border-radius: 50%;
     top: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50% , calc(-50% - 25px));
     cursor: pointer;
     pointer-events: auto;
     transition: transform 0.15s ease, background-color 0.15s ease;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .tick-mark:hover {
-    transform: translate(-50%, -50%) scale(1.3);
-    background-color: #e67e22;
+    transform: translate(-50%,  calc(-50% - 25px)) scale(1.3);
+    background-color: #e41010;
+}
+
+/* スライダーの親要素全体でテキスト選択とドラッグ動作を禁止する */
+.range-wrapper,
+#boom-angle-dialog {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+
+
+/* ★ ブームの根元（基部）要素 */
+.boom-root-slider {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 60px;                 /* シフト幅と同じ60px */
+    height: 18px;                /* トラックの左端よりほんの少し太くしてカバーする */
+    background: #f39c12; 
+
+    box-sizing: border-box;
+    z-index: 1;
+}
+
+.boom-track-bg {
+    position: absolute;
+    left: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: calc(100% - 60px);
+    height: 18px;
+    z-index: 1; /* スライダー（z-index:2）の下に配置 */
+    pointer-events: none; /* マウス操作を透過してスライダーに届かせる */
+
+    /* JSから塗られるグラデーション */
+    background: var(--boom-fill, linear-gradient(90deg, #e41010 0%, #e41010 50%, transparent 50%, transparent 100%));
+
+    /* マスクで5段階の段々に切り抜く */
+    -webkit-mask-image: 
+        linear-gradient(black, black),
+        linear-gradient(black, black),
+        linear-gradient(black, black),
+        linear-gradient(black, black),
+        linear-gradient(black, black);
+    
+    -webkit-mask-position: 
+        0% center, 25% center, 50% center, 75% center, 100% center;
+        
+    -webkit-mask-size: 
+        20% 100%, 20% 80%, 20% 60%, 20% 40%, 20% 20%;
+        
+    -webkit-mask-repeat: no-repeat;
+    mask-image: 
+        linear-gradient(black, black),
+        linear-gradient(black, black),
+        linear-gradient(black, black),
+        linear-gradient(black, black),
+        linear-gradient(black, black);
+    mask-position: 
+        0% center, 25% center, 50% center, 75% center, 100% center;
+    mask-size: 
+        20% 100%, 20% 80%, 20% 60%, 20% 40%, 20% 20%;
+    mask-repeat: no-repeat;
 }
