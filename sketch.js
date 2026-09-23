@@ -173,6 +173,8 @@ jibBtn?.addEventListener('click', () => {
     lengthSlider?.dispatchEvent(new Event('input', { bubbles: true }));
 });
 
+
+
 async function loadCraneBaseData(model) {
     const data = await getCraneData(model);
     if (!data) return;
@@ -276,6 +278,16 @@ async function loadCraneBaseData(model) {
     let tireD = DDData[2][20] / 200;
     let tireY = DDData[8][20] / 100;
     let FootpinTransY = MaxHight - footpinY / 100 + BoomWidth / 100 / 2;
+
+    const outriggerStates = {
+        fl: 'max',
+        fr: 'max',
+        rl: 'max',
+        rr: 'max'
+    };
+
+    let outriggerNumber =BaseData[1][3];
+    
 
     const TireD = document.querySelectorAll('.Tire circle');
     TireD.forEach(circle => {
@@ -624,6 +636,143 @@ async function loadCraneBaseData(model) {
         }
     });
 
+
+//アウトリガー
+    try {
+
+    let outriggerList = [];
+
+
+
+    //BaseData[12+i][3]
+for (let i = outriggerNumber; i >= 1; i--) {
+    let labelText;
+    const distanceVal = BaseData[11 + i][3]/1000; // 例: "7.0m" または 7.0
+
+    if (i === outriggerNumber) {
+        labelText = "最大 (" + distanceVal + "m)";
+    } else if (i === 1) {
+        labelText = "最小 (" + distanceVal + "m)";
+    } else {
+        labelText = "中間 (" + distanceVal + "m)";
+    }
+
+    outriggerList.push({
+        value: String(i),
+        label: labelText
+    });
+}
+
+
+        // 2. 対象の select 要素を取得
+        const selectEl = document.getElementById('outrigger-select');
+        if (!selectEl) {
+            console.warn('#outrigger-select が見つかりませんでした');
+            return;
+        }
+
+        // 3. 既存の option を一度クリアする
+        selectEl.innerHTML = '';
+
+        // 4. 動的に option を作成して追加する
+        const fragment = document.createDocumentFragment();
+
+        outriggerList.forEach((item) => {
+            const option = document.createElement('option');
+            option.value = item.value;
+            option.textContent = item.label;
+            fragment.appendChild(option);
+        });
+
+        selectEl.appendChild(fragment);
+
+    } catch (error) {
+        console.error('アウトリガーデータの読み込みに失敗しました:', error);
+    }
+
+
+
+const outriggerBtns = document.querySelectorAll('.outrigger-btn:not(.btn-all)');
+const allBtn = document.querySelector('.outrigger-btn.btn-all');
+const outriggerSelect = document.getElementById('outrigger-select');
+
+// 各個ボタンのクリック（トグルON/OFF）
+outriggerBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.currentTarget.classList.toggle('selected');
+        updateAllBtnState();
+        logCurrentSelection('ボタン操作');
+    });
+});
+
+// ALLボタンのクリック（全選択 / 全解除）
+if (allBtn) {
+    allBtn.addEventListener('click', () => {
+        const allSelected = Array.from(outriggerBtns).every(btn => btn.classList.contains('selected'));
+
+        outriggerBtns.forEach(btn => {
+            if (allSelected) {
+                btn.classList.remove('selected'); // 全解除
+            } else {
+                btn.classList.add('selected');    // 全選択
+            }
+        });
+
+        updateAllBtnState();
+        logCurrentSelection('ALLボタン操作');
+    });
+}
+
+// ALLボタン自体の表示状態を自動更新
+function updateAllBtnState() {
+    if (!allBtn) return;
+    const allSelected = Array.from(outriggerBtns).every(btn => btn.classList.contains('selected'));
+    if (allSelected) {
+        allBtn.classList.add('selected');
+    } else {
+        allBtn.classList.remove('selected');
+    }
+}
+
+// ★ 2. セレクトボックスの値が変わったとき、選択中のアウトリガーの「保持する数字（値）」を更新
+if (outriggerSelect) {
+    outriggerSelect.addEventListener('change', () => {
+        const selectedVal = outriggerSelect.value;
+        const selectedBtns = document.querySelectorAll('.outrigger-btn.selected:not(.btn-all)');
+
+        // 選択状態（黄枠がついている）のアウトリガーの値を一括更新
+        selectedBtns.forEach(btn => {
+            const pos = btn.dataset.position;
+            if (pos && outriggerStates.hasOwnProperty(pos)) {
+                outriggerStates[pos] = selectedVal; // データを書き換え
+            }
+        });
+
+        logCurrentSelection('長さ変更');
+    });
+}
+
+// ★ 3. 選択状態(1/0)と、保持している各アウトリガーの数値を出力する関数
+function logCurrentSelection(actionType) {
+    const positions = ['fl', 'fr', 'rl', 'rr'];
+    
+    // ① 現在選択されているかどうかのフラグ (1 or 0)
+    const selectStatusStr = positions.map(pos => {
+        const btn = document.querySelector(`.outrigger-btn[data-position="${pos}"]`);
+        const isSelected = btn && btn.classList.contains('selected') ? 1 : 0;
+        return `${pos.toUpperCase()} ${isSelected}`;
+    }).join(', ');
+
+    // ② 保持している各箇所の長さの値 (FL: max, FR: mid など)
+    const valuesStr = positions.map(pos => {
+        return `${pos.toUpperCase()}: ${outriggerStates[pos]}`;
+    }).join(', ');
+
+    // ログ出力
+    //console.log(`[${actionType}] 選択状態: [${selectStatusStr}] | 保持データ: { ${valuesStr} }`);
+}
+
+
     slider?.dispatchEvent(new Event('input'));
     lengthSlider?.dispatchEvent(new Event('input'));
     jibAngle?.dispatchEvent(new Event('input'));
@@ -668,9 +817,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeBtn = document.getElementById('close-boom-angle-dialog');
     const pinBtn = document.getElementById('pin-boom-angle-dialog');
     const BoomTrigger = document.getElementById('boom-trigger');
+    const outriggerBtns = document.querySelectorAll('.outrigger-btn');
+    const stateSelect = document.getElementById('outrigger-state-select');
+
+    let activeBtn = null;
 
     let posX = 0, posY = 0;
     let isBoomDialogPinned = false; // 未定義エラー防止のための変数定義
+    let highestZIndex = 1000;
+
+function bringToFront(dialogEl) {
+        if (!dialogEl) return;
+        highestZIndex++;
+        dialogEl.style.zIndex = highestZIndex;
+    }
+
+    
 
     // ★ピン留めボタンのイベント設定
     if (pinBtn) {
@@ -781,11 +943,17 @@ lengthSlider.addEventListener('input', updateBoomFill);
 updateBoomFill();
 
 
-
+let isUpdatingUI = false;
 
 
     // UI更新関数 (※dispatchEvent は削除)
-    function updateLengthUI(value) {
+   function updateLengthUI(value) {
+    // 処理中の場合は処理を中断して無限ループを防ぐ
+    if (isUpdatingUI) return;
+
+    isUpdatingUI = true; // フラグをオンにする
+
+    try {
         const valNum = parseFloat(value);
         
         if (lengthSlider) lengthSlider.value = value;
@@ -794,9 +962,15 @@ updateBoomFill();
 
         if (popupLengthVal) popupLengthVal.textContent = displayVal;
         if (mainLengthVal) mainLengthVal.textContent = displayVal;
-        lengthSlider.dispatchEvent(new Event('input', { bubbles: true }));
-    }
 
+        // イベントを発火させても、isUpdatingUI が true なのでループしない
+        if (lengthSlider) {
+            lengthSlider.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    } finally {
+        isUpdatingUI = false; // 処理が終わったら必ずフラグをオフに戻す
+    }
+}
     // 点（目盛り）を生成する関数
     function generatePresetTicks(values) {
         const ticksContainer = document.getElementById('preset-ticks');
@@ -836,13 +1010,194 @@ updateBoomFill();
     generatePresetTicks(presetValues);
 
     if (lengthSlider) {
-        lengthSlider.addEventListener('input', (e) => {
-            updateLengthUI(e.target.value);
+    lengthSlider.addEventListener('input', (e) => {
+        if (isUpdatingUI) return; // ★プログラムからの更新時は何もしない
+        updateLengthUI(e.target.value);
+    });
+    
+    // 初期値の反映
+    updateLengthUI(lengthSlider.value);
+}
+
+
+    
+
+
+
+function makeElementDraggable(dialogEl, headerEl) {
+        if (!dialogEl || !headerEl) return;
+
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let currentX = 0;
+        let currentY = 0;
+        let isPinned = false;
+
+        dialogEl.addEventListener('pointerdown', () => {
+            bringToFront(dialogEl);
         });
-        
-        // 初期値の反映
-        updateLengthUI(lengthSlider.value);
+
+
+        const pinBtn = headerEl.querySelector('.pin-btn');
+        if (pinBtn) {
+            pinBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // ドラッグ発火を防ぐ
+                isPinned = !isPinned; // フラグの切り替え
+
+                if (isPinned) {
+                    pinBtn.classList.add('pinned');
+                    headerEl.style.cursor = 'default';
+                } else {
+                    pinBtn.classList.remove('pinned');
+                    headerEl.style.cursor = 'move';
+                }
+            });
+        }
+
+        // ドラッグ開始
+        headerEl.addEventListener('pointerdown', (e) => {
+            // 閉じるボタンやピンボタンをクリックした時はドラッグを開始しない
+            if (e.target.closest('.close-btn') || e.target.closest('.pin-btn')) return;
+
+            isDragging = true;
+            headerEl.setPointerCapture(e.pointerId);
+
+            // 現在の transform 位置を取得（まだ未設定なら 0）
+            const transform = window.getComputedStyle(dialogEl).transform;
+            if (transform !== 'none') {
+                const matrix = new DOMMatrix(transform);
+                currentX = matrix.e;
+                currentY = matrix.f;
+            } else {
+                currentX = 0;
+                currentY = 0;
+            }
+
+            startX = e.clientX - currentX;
+            startY = e.clientY - currentY;
+
+            headerEl.style.cursor = 'grabbing';
+        });
+
+        // ドラッグ中
+        headerEl.addEventListener('pointermove', (e) => {
+            if (!isDragging) return;
+
+            currentX = e.clientX - startX;
+            currentY = e.clientY - startY;
+
+            // translate(x, y) で位置を移動
+            dialogEl.style.transform = `translate(${currentX}px, ${currentY}px)`;
+        });
+
+        // ドラッグ終了
+        const stopDrag = (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            try {
+                headerEl.releasePointerCapture(e.pointerId);
+            } catch (err) {}
+            headerEl.style.cursor = 'move';
+        };
+
+        headerEl.addEventListener('pointerup', stopDrag);
+        headerEl.addEventListener('pointercancel', stopDrag);
+
+        document.addEventListener('pointerdown', (e) => {
+            // ダイアログが開いていない場合は何もしない
+            if (!dialogEl.hasAttribute('open')) return;
+
+            // ピン止めされている場合は閉じない
+            if (isPinned) return;
+
+            // クリックされた要素がダイアログ内部、または開くきっかけ（#power-train等）なら閉じない
+            const isClickInside = dialogEl.contains(e.target);
+            const isPowerTrainClick = e.target.closest('#power-train');
+
+            if (!isClickInside && !isPowerTrainClick) {
+                dialogEl.removeAttribute('open');
+            }
+        });
     }
+
+    // ----------------------------------------------------
+    // アウトリガーダイアログの初期化とイベント設定
+    // ----------------------------------------------------
+    const powerTrainEl = document.getElementById('power-train');
+    const outriggerDialog = document.getElementById('outrigger-dialog');
+    const outriggerCloseBtn = document.getElementById('outrigger-close-btn');
+
+    // ドラッグ機能の適用（アウトリガー用ダイアログ）
+    if (outriggerDialog) {
+        const outriggerHeader = outriggerDialog.querySelector('.popup-header');
+        makeElementDraggable(outriggerDialog, outriggerHeader);
+    }
+
+    // 開く処理
+    if (powerTrainEl && outriggerDialog) {
+        powerTrainEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            outriggerDialog.setAttribute('open', '');
+            bringToFront(outriggerDialog); // 最前面化
+        });
+    }
+
+    // 閉じる処理
+    if (outriggerCloseBtn && outriggerDialog) {
+        outriggerCloseBtn.addEventListener('click', () => {
+            outriggerDialog.removeAttribute('open');
+        });
+    }
+
+
+const boomDialog = document.getElementById('boom-angle-dialog');
+    if (boomDialog) {
+        makeElementDraggable(boomDialog, boomDialog.querySelector('.popup-header'));
+    }
+
+
+
+
+    outriggerBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const pos = e.currentTarget.dataset.position;
+
+            if (pos === 'all') {
+                // ALLボタンを押した場合：全てのアウトリガーに現在のセレクト値を一括適用
+                const selectedState = stateSelect.value;
+                outriggerBtns.forEach(b => {
+                    if (b.dataset.position !== 'all') {
+                        applyStateToBtn(b, selectedState);
+                    }
+                });
+            } else {
+                // 各個別ボタンを押した場合：アクティブ表示にして状態を切り替え
+                outriggerBtns.forEach(b => b.style.outline = 'none');
+                e.currentTarget.style.outline = '2px solid #fff';
+                activeBtn = e.currentTarget;
+            }
+        });
+    });
+
+    // 状態（セレクトボックス）が変更されたら選択中のボタンに反映
+    if (stateSelect) {
+        stateSelect.addEventListener('change', (e) => {
+            if (activeBtn && activeBtn.dataset.position !== 'all') {
+                applyStateToBtn(activeBtn, e.target.value);
+            }
+        });
+    }
+
+    // ボタンに状態クラスを付与するヘルパー関数
+    function applyStateToBtn(btnElement, stateValue) {
+        btnElement.classList.remove('is-max', 'is-mid', 'is-min', 'is-block');
+        btnElement.classList.add(`is-${stateValue}`);
+    }
+
+
+
+
 });
 
 
@@ -869,7 +1224,7 @@ function describeArc(x, y, radius, startAngle, endAngle) {
 
 // 円弧スライダーの初期化関数
 function initArcSlider() {
-    // ※ pinBtn 関連のコードは DOMContentLoaded 側に移動したためここからは削除しています
+  
 
     const svg = document.getElementById('arc-slider-svg');
     const pathBg = document.getElementById('arc-bg');

@@ -14,11 +14,12 @@
       <div class="main-workspace">
       
         <aside class="control-panel">
-          <div class="panel-title">ブーム長　<input type="button" id="specail-boom-button" value="特殊伸縮" class="toggle-btn">
-          </div>
-          <span id="boom-length-val"></span>m
+          
 
           <div id="boom-trigger" class="angle-panel-click-area">
+            <div class="panel-title">ブーム長　<input type="button" id="specail-boom-button" value="特殊伸縮" class="toggle-btn">
+          </div>
+          <span id="boom-length-val"></span>m
             <div class="panel-title">ブーム角度</div>
             <span id="angle-val">0</span>°
         </div>
@@ -28,7 +29,7 @@
             <div class="panel-title">ジブ角度</div>
             <span id="jib-angle-val">0</span>°
             <div class="panel-title">アウトリガー長</div>
-            <span id="outriggers-length-val">0</span>m
+
             
            
             </aside>
@@ -71,6 +72,8 @@
 
                     <g id="body" transform="translate(0, 360)">
                         <!--パワートレイン -->
+
+                        
                         <rect id="power-train" x="-32.2" y="-13.15" width="60" height="5" fill="#555" />
 
                         <g class="Tire">
@@ -160,6 +163,10 @@
         <button type="button" id="close-boom-angle-dialog" class="close-btn">&times;</button>
     </div>
     </div>
+
+
+
+
     <div class="popup-body">
         <div class="arc-slider-container">
             <!-- 円弧スライダー描画用SVG -->
@@ -213,6 +220,49 @@
 
         <!-- 既存の数値制御用スライダー（非表示にして互換保持、あるいは完全置換） -->
         <input type="range" id="boom-slider" step="0.1" value="0" style="display:none;">
+    </div>
+</dialog>
+
+
+<!-- アウトリガー設定用ダイアログ -->
+<dialog id="outrigger-dialog" class="popup-window">
+    <div class="popup-header">
+        <span>アウトリガー張出設定</span>
+        <div class="header-controls">
+            <button type="button" class="pin-btn" title="位置を固定">📌</button>
+            <button type="button" class="close-btn" id="outrigger-close-btn">&times;</button>
+        </div>
+    </div>
+    <div class="popup-body">
+        <!-- 画像風のアウトリガー配置パネル -->
+        <div class="outrigger-panel">
+            <!-- 前左 (Front Left) -->
+            <button type="button" class="outrigger-btn" data-position="fl"></button>
+            
+            <!-- 中央：車体イメージとALLボタン -->
+            <div class="vehicle-center">
+                <div class="vehicle-body">
+                    <button type="button" class="outrigger-btn btn-all" data-position="all">ALL</button>
+                </div>
+            </div>
+            
+            <!-- 前右 (Front Right) -->
+            <button type="button" class="outrigger-btn" data-position="fr"></button>
+            
+            <!-- 後左 (Rear Left) -->
+            <button type="button" class="outrigger-btn" data-position="rl"></button>
+            
+            <!-- 後右 (Rear Right) -->
+            <button type="button" class="outrigger-btn" data-position="rr"></button>
+        </div>
+
+        <!-- 元の正常動作していた ID "outrigger-select" を保持 -->
+        <div class="outrigger-setting-row">
+            <label for="outrigger-select">張り出し状態:</label>
+            <select id="outrigger-select">
+
+            </select>
+        </div>
     </div>
 </dialog>
 

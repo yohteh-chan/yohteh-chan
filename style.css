@@ -257,10 +257,11 @@ body {
 }
 
 .popup-body {
+  position: relative;
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+
 }
 
 .popup-label {
@@ -386,7 +387,7 @@ body {
 .header-controls {
     display: flex;
     align-items: center;
-    gap: 8px;
+
 }
 
 /* ピンボタンのスタイル */
@@ -434,7 +435,21 @@ body {
 
 /* スライダーまわりのレイアウト */
 .range-wrapper {
-    position: relative;
+    position: absolute;
+    bottom: 40px;
+    right: 15px;
+    z-index: 10;
+    align-items: center;
+    padding: 12px 0;
+    width: 80%;
+}
+
+.length-val-display {
+    position: absolute;
+    bottom: 10px;
+    left: 30px;
+    z-index: 10;
+    
     padding: 12px 0;
     width: 100%;
 }
@@ -493,7 +508,7 @@ body {
 /* 規定位置の点（目盛り）グループ（★スライダーに合わせて右シフト） */
 .preset-ticks {
     position: absolute;
-    top: 50%;
+    top: 180%;
     left: 60px;               /* ★ スライダーと同じく 60px からスタート */
     width: calc(100% - 60px); /* ★ スライダーと同じ横幅にする */
     height: 0;
@@ -588,4 +603,163 @@ body {
     mask-size: 
         20% 100%, 20% 80%, 20% 60%, 20% 40%, 20% 20%;
     mask-repeat: no-repeat;
+}
+
+/* SVG内の power-train をホバーした時のカーソル指定 */
+#power-train {
+    cursor: pointer;
+    transition: fill 0.2s ease;
+}
+
+#power-train:hover {
+    fill: #777; /* ホバー時に少し明るくして反応を示す */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* アウトリガーダイアログ内の設定行レイアウト */
+.outrigger-setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+}
+
+.outrigger-setting-row select {
+    background: #333;
+    color: #fff;
+    border: 1px solid #555;
+    padding: 4px 8px;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+}
+
+.outrigger-panel {
+    display: grid;
+    grid-template-columns: 50px 70px 50px;
+    grid-template-rows: 50px 50px;
+    grid-template-areas:
+        "fl vehicle fr"
+        "rl vehicle rr";
+    gap: 12px 10px;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    background: transparent;
+    border-radius: 6px;
+    margin-bottom: 12px;
+}
+
+.outrigger-btn[data-position="fl"] { grid-area: fl; }
+.outrigger-btn[data-position="fr"] { grid-area: fr; }
+.vehicle-center                     { grid-area: vehicle; }
+.outrigger-btn[data-position="rl"] { grid-area: rl; }
+.outrigger-btn[data-position="rr"] { grid-area: rr; }
+
+/* ALL（車体イメージ）の左右中央揃え */
+.vehicle-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.vehicle-body {
+    width: 50px;
+    height: 90px;
+    border: 2px solid #aaa;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    background: #222;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+/* ★ ボタン基本スタイル（ブラウザ標準の枠線・輪郭を完全に消去） */
+.outrigger-btn {
+    width: 100%;
+    height: 100%;
+    
+    /* 1. ブラウザ標準の枠線・シャドウを完全に削ぎ落とす */
+    border: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
+    appearance: none;
+    -webkit-appearance: none;
+    
+    border-radius: 4px;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    
+    /* タッチ時のハイライト・範囲選択の無効化 */
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+/* ★ フォーカス・クリック中（active）も含め白枠の発生を防止 */
+.outrigger-btn:focus,
+.outrigger-btn:focus-visible,
+.outrigger-btn:active {
+    border: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* 左側（前左・後左）は橙色 */
+.outrigger-btn[data-position="fl"],
+.outrigger-btn[data-position="rl"] {
+    background-color: #e67e22; 
+}
+
+/* 右側（前右・後右）は黄緑色 */
+.outrigger-btn[data-position="fr"],
+.outrigger-btn[data-position="rr"] {
+    background-color: #2ecc71; 
+}
+
+/* ALLボタン */
+.outrigger-btn.btn-all {
+    width: 40px;
+    height: 40px;
+    background-color: #fff;
+    color: #000;
+}
+
+/* ★ 複数選択時の強調スタイル（box-shadow で枠線を再現するため崩れません） */
+.outrigger-btn.selected {
+    box-shadow: 0 0 0 3px #ffff00, 0 0 8px rgba(255, 255, 0, 0.8) !important;
+    transform: scale(1.05);
+}
+
+
+/* #boom-trigger にマウスを乗せたときにカーソルを🪝に変更 */
+#boom-trigger {
+    cursor: 
+        /* 第1候補: オレンジブーム ＋ ワイヤー ＋ 反転フック */
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><path d='M3 29 L22 10' stroke='%23e67e22' stroke-width='3.5' stroke-linecap='round'/><path d='M22 10 L22 18' stroke='%23666' stroke-width='1.5' stroke-dasharray='2 2'/><text x='14' y='30' font-size='15'>🪝</text></svg>") 22 24,
+        
+        /* 第2候補（フォールバック）: フック絵文字（🪝）単体 */
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='font-size:24px;'><text y='24'>🪝</text></svg>") 4 4,
+        
+        /* 最終フォールバック: ブラウザ標準のポインター */
+        pointer;
 }
