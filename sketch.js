@@ -769,7 +769,7 @@ function logCurrentSelection(actionType) {
     }).join(', ');
 
     // ログ出力
-    //console.log(`[${actionType}] 選択状態: [${selectStatusStr}] | 保持データ: { ${valuesStr} }`);
+    console.log(`[${actionType}] 選択状態: [${selectStatusStr}] | 保持データ: { ${valuesStr} }`);
 }
 
 
@@ -1165,7 +1165,7 @@ const boomDialog = document.getElementById('boom-angle-dialog');
 
             if (pos === 'all') {
                 // ALLボタンを押した場合：全てのアウトリガーに現在のセレクト値を一括適用
-                const selectedState = stateSelect.value;
+                const selectedState = stateSelect?.value;
                 outriggerBtns.forEach(b => {
                     if (b.dataset.position !== 'all') {
                         applyStateToBtn(b, selectedState);
