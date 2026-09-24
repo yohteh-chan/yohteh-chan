@@ -216,6 +216,8 @@ async function loadCraneBaseData(model) {
 
     let BSet2 = [], Bset0 = [], BSsetA = [];
 
+    let WRval;//作業半径
+
     for (let i = 1; i <= BN; i++) {
         window[`Boom${i}th`] = BaseData[i + 3][15];
     }
@@ -438,6 +440,8 @@ async function loadCraneBaseData(model) {
         const rad = -angle * Math.PI / 180;
         const radLocal = -rad;
 
+        
+
         const localCX = DHCdata[14] / 100;
         const localCY = 7.54 + BoomShift;
 
@@ -488,8 +492,18 @@ async function loadCraneBaseData(model) {
         const length = parseFloat(e.target.value);
         resetAllBoomLength();
 
+        const round1 = num => Math.floor(num * 10) / 10;
+
+        // 計算式（定数除算を共通化して簡略化）
+        const rad = toRad(BoomAngle);
+        const value = (100 * length * Math.cos(rad) + BoomWidth * Math.sin(rad) - footpinX) / 1000;
+
+        WRval = round1(value);
+
+        
+        //作業半径
         if (WorkingRadius) {
-            WorkingRadius.textContent = String(Number(Math.floor(((length / 10) * Math.cos(toRad(BoomAngle)) + BoomWidth / 1000 * Math.sin(toRad(BoomAngle)) - footpinX / 1000) * 10) / 10).toFixed(1)).padStart(4, ' ');
+            WorkingRadius.textContent = String(WRval).padStart(4, ' ');
         }
 
         let baseValues;
@@ -630,10 +644,14 @@ async function loadCraneBaseData(model) {
 
         let jibD = (jibLength ? jibLength.value : 0) / 10 * Math.cos(toRad(boom_jib)) - jibY[jibHookPoint] / 1000 * Math.sin(toRad(boom_jib));
         let boomD = (length / 10) * Math.cos(toRad(BoomAngle)) + BoomWidth / 1000 * Math.sin(toRad(BoomAngle)) - footpinX / 1000;
+        WRval =Math.floor((boomD + jibD * jibB) * 10) / 10;
 
+        //作業半径
         if (WorkingRadius) {
-            WorkingRadius.textContent = (Math.floor((boomD + jibD * jibB) * 10) / 10).toFixed(1).padStart(4, ' ');
+            WorkingRadius.textContent = WRval.toFixed(1).padStart(4, ' ');
         }
+
+        
     });
 
 
