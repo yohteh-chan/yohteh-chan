@@ -756,20 +756,22 @@ if (outriggerSelect) {
 function logCurrentSelection(actionType) {
     const positions = ['fl', 'fr', 'rl', 'rr'];
     
-    // ① 現在選択されているかどうかのフラグ (1 or 0)
-    const selectStatusStr = positions.map(pos => {
+
+
+    const statuses = positions.map(pos => {
         const btn = document.querySelector(`.outrigger-btn[data-position="${pos}"]`);
-        const isSelected = btn && btn.classList.contains('selected') ? 1 : 0;
-        return `${pos.toUpperCase()} ${isSelected}`;
-    }).join(', ');
+        return btn && btn.classList.contains('selected') ? 1 : 0;
+    });
 
-    // ② 保持している各箇所の長さの値 (FL: max, FR: mid など)
-    const valuesStr = positions.map(pos => {
-        return `${pos.toUpperCase()}: ${outriggerStates[pos]}`;
-    }).join(', ');
+    const isAnySelected = statuses.some(status => status === 1); // 1つでも1があれば true
+    const isAllUnselected = !isAnySelected;                       // 全部0なら true
 
-    // ログ出力
-    console.log(`[${actionType}] 選択状態: [${selectStatusStr}] | 保持データ: { ${valuesStr} }`);
+
+    if (isAllUnselected) {
+        document.getElementById('outrigger-select').disabled = true;
+    } else if (isAnySelected) {
+        document.getElementById('outrigger-select').disabled = false;
+    }
 }
 
 
@@ -1137,6 +1139,13 @@ function makeElementDraggable(dialogEl, headerEl) {
     // 開く処理
     if (powerTrainEl && outriggerDialog) {
         powerTrainEl.addEventListener('click', (e) => {
+            document.getElementById('outrigger-select').disabled = true;
+            if (typeof outriggerBtns !== 'undefined' && outriggerBtns) {
+                outriggerBtns.forEach(btn => {
+                    if (btn) btn.classList.remove('selected');
+                });
+            }
+
             e.stopPropagation();
             outriggerDialog.setAttribute('open', '');
             bringToFront(outriggerDialog); // 最前面化
