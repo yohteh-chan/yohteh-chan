@@ -1374,22 +1374,30 @@ function initArcSlider() {
 
     updateSliderUI(parseFloat(mainSlider ? mainSlider.value : minAngle));
 }
-
+// サイドバー折りたたみ切替関数
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   const btn = document.getElementById('toggle-sidebar-btn');
   
-  sidebar.classList.toggle('collapsed');
-  
-  // ボタンの矢印向きを変更
-  if (sidebar.classList.contains('collapsed')) {
+  if (!sidebar || !btn) {
+    console.error('sidebar または toggle-sidebar-btn が見つかりません。');
+    return;
+  }
+
+  const isCollapsed = sidebar.classList.toggle('collapsed');
+  document.body.classList.toggle('sidebar-collapsed', isCollapsed);
+
+  // ボタンの矢印の向きとボタン位置の更新
+  if (isCollapsed) {
     btn.textContent = '▶';
+    btn.style.left = '0px';
   } else {
     btn.textContent = '◀';
+    btn.style.left = '320px'; // CSSの#sidebarの幅に合わせる
   }
-  
-  // p5.js のキャンバスサイズを再計算・自動リサイズしたい場合はここに追加
+
+  // p5.js キャンバスの再描画・リサイズ処理（定義されている場合）
   if (typeof windowResized === 'function') {
-    setTimeout(windowResized, 300); // アニメーション完了後にリサイズ
+    setTimeout(windowResized, 300);
   }
 }
