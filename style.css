@@ -790,7 +790,7 @@ body {
 
 /* サイドバー（赤枠の位置）のスタイル */
 #sidebar {
-    width: 280px;            /* 赤枠の幅に合わせて調整 */
+    width: 200px;            /* 赤枠の幅に合わせて調整 */
     min-width: 20px;
     height: 100%;
     background-color: #2a2a2a; /* 背景色（枠の内側に合わせる） */
@@ -816,11 +816,27 @@ body {
     position: relative;
 }
 
+/* キャンバスエリアを親要素の幅いっぱいに広げる */
+#canvas-container {
+    position: relative;     /* ボタンの位置基準 */
+    width: 100%;            /* 横幅いっぱいに広げる */
+    flex: 1;                /* 横並び時に残りのスペースをすべて占有する */
+    min-width: 0;           /* flex要素の縮小崩れを防ぐ */
+}
+
+
 /* ボタンをキャンバスの左上に配置 */
 #toggle-sidebar-btn {
     position: absolute;
     top: 0px;               /* キャンバス枠の上端からの位置 */
-    left: -35px;              /* キャンバス枠の左端からの位置 */
+    left: -30px;              /* キャンバス枠の左端からの位置 */
+
+    width: 32px;            /* ボタンの幅 */
+    height: 32px;           /* ボタンの高さ */
+    font-size: 16px;        /* 矢印（◀▶）の大きさ */
+    padding: 0;             /* 幅と高さを優先するため余白を0にする */
+
+
     z-index: 100;
     background-color: #444;
     color: #fff;
