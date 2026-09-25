@@ -764,3 +764,49 @@ body {
         pointer;
 }
 
+/* サイドバーの折りたたみスタイル */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 320px;
+  height: 100vh;
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
+  z-index: 1000;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 15px;
+  box-sizing: border-box;
+}
+
+/* 折りたたまれた状態（左外に隠す） */
+#sidebar.collapsed {
+  transform: translateX(-100%);
+}
+
+/* トグルボタンの位置と見た目 */
+#toggle-sidebar-btn {
+  position: fixed;
+  top: 15px;
+  left: 320px;
+  width: 36px;
+  height: 40px;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  border-radius: 0 6px 6px 0;
+  cursor: pointer;
+  font-size: 14px;
+  z-index: 1001;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* サイドバーが閉じている時のボタン位置 */
+#sidebar.collapsed ~ #toggle-sidebar-btn,
+body.sidebar-collapsed #toggle-sidebar-btn {
+  left: 0;
+}
