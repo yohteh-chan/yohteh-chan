@@ -1389,10 +1389,10 @@ function toggleSidebar() {
   if (isCollapsed) {
     // 閉じた状態
     body.classList.remove('sidebar-open');
-    btn.textContent = '▶';
+    btn.textContent = '▶クレーン';
   } else {
     // 開いた状態
     body.classList.add('sidebar-open');
-    btn.textContent = '◀';
+    btn.textContent = '◀クレーン';
   }
 }
