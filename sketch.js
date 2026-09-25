@@ -1,3 +1,24 @@
+// Ctrl + ホイールによるズームを禁止
+window.addEventListener('wheel', function(e) {
+    if (e.ctrlKey) {
+        e.preventDefault();
+    }
+}, { passive: false });
+
+// Ctrl + プラス / マイナス キーでのズームを禁止
+window.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && (
+        e.key === '+' || 
+        e.key === '-' || 
+        e.key === '=' || 
+        e.code === 'NumpadAdd' || 
+        e.code === 'NumpadSubtract' || 
+        e.key === '0'
+    )) {
+        e.preventDefault();
+    }
+});
+
 const craneMaster = {
     "13t クラス": [{ id: "KRM-13H-F2H", name: "KRM-13H-F2H" }],
     "16t・20t クラス": [
