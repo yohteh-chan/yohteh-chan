@@ -73,16 +73,24 @@ body {
     background-color: #1a1e22;
     color: #e0e0e0;
     font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* 画面全体の余白をなくし、スクロールバーによるズレを防止 */
+html, body {
     margin: 0;
-    padding: 20px;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* 必要に応じて全画面表示時にスクロールバーを消去 */
 }
 
 
 
 /* SVGを囲う枠 */
 .canvas-wrapper {
-    width: 100%;
-    max-width: 600px;
+    width: 100vw;
+    max-width: none;
+    width: 65%;/*仮*/
     aspect-ratio: 1 / 1;
     background-color: #15191c; /* グラフ内の背景はさらに暗く */
     border-radius: 6px;
@@ -810,8 +818,18 @@ body {
 /* キャンバスエリアを親枠内でいっぱいに広げる */
 #canvas-container {
     position: relative;
-    width: 100%;
-    height: 100%;
+    width: 100vw;            /* 画面横幅いっぱい */
+    height: 100%;           /* 画面高さいっぱい */
+    margin: 10;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+#canvas-container canvas,
+#canvas-container svg {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
 }
 
 /* 開閉ボタンの基本設定（最初の位置） */

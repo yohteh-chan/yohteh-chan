@@ -1379,19 +1379,20 @@ function initArcSlider() {
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   const btn = document.getElementById('toggle-sidebar-btn');
-  const body = document.body; // body要素を取得
+  const body = document.body;
   
   if (!sidebar || !btn) return;
 
-  // サイドバーの開閉クラスをトグル
+  // collapsed クラスの有無を切り替え
   const isCollapsed = sidebar.classList.toggle('collapsed');
 
-  // ★bodyに「開いている状態」のクラスを付与/削除する（CSSで使用するため）
   if (isCollapsed) {
-    body.classList.remove('sidebar-open'); // 閉じた
-    btn.textContent = '▶';                  // アイコンを▶に変更
+    // 閉じた状態
+    body.classList.remove('sidebar-open');
+    btn.textContent = '▶';
   } else {
-    body.classList.add('sidebar-open');    // 開いた
-    btn.textContent = '◀';                  // アイコンを◀に変更
+    // 開いた状態
+    body.classList.add('sidebar-open');
+    btn.textContent = '◀';
   }
 }
