@@ -1375,22 +1375,23 @@ function initArcSlider() {
     updateSliderUI(parseFloat(mainSlider ? mainSlider.value : minAngle));
 }
 
+
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   const btn = document.getElementById('toggle-sidebar-btn');
+  const body = document.body; // body要素を取得
   
   if (!sidebar || !btn) return;
 
+  // サイドバーの開閉クラスをトグル
   const isCollapsed = sidebar.classList.toggle('collapsed');
 
+  // ★bodyに「開いている状態」のクラスを付与/削除する（CSSで使用するため）
   if (isCollapsed) {
-    btn.textContent = '▶';
+    body.classList.remove('sidebar-open'); // 閉じた
+    btn.textContent = '▶';                  // アイコンを▶に変更
   } else {
-    btn.textContent = '◀';
-  }
-
-  // キャンバスの再描画
-  if (typeof windowResized === 'function') {
-    setTimeout(windowResized, 300);
+    body.classList.add('sidebar-open');    // 開いた
+    btn.textContent = '◀';                  // アイコンを◀に変更
   }
 }
