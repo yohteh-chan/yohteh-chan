@@ -1382,16 +1382,14 @@ function toggleSidebar() {
   if (!sidebar || !btn) return;
 
   const isCollapsed = sidebar.classList.toggle('collapsed');
-  document.body.classList.toggle('sidebar-collapsed', isCollapsed);
 
   if (isCollapsed) {
     btn.textContent = '▶';
-    btn.style.left = '0px';
   } else {
     btn.textContent = '◀';
-    btn.style.left = '320px';
   }
 
+  // キャンバスの再描画
   if (typeof windowResized === 'function') {
     setTimeout(windowResized, 300);
   }
