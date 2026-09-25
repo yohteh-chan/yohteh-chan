@@ -785,28 +785,29 @@ body {
   transform: translateX(-100%);
 }
 
-/* トグルボタンの位置と見た目 */
+/* 折りたたみ切替ボタンの位置調整 */
 #toggle-sidebar-btn {
-  position: fixed;
-  top: 15px;
-  left: 320px;
-  width: 36px;
-  height: 40px;
-  background-color: #333;
-  color: #fff;
-  border: none;
-  border-radius: 0 6px 6px 0;
-  cursor: pointer;
-  font-size: 14px;
-  z-index: 1001;
-  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    position: fixed;
+    top: 100px;              /* 上からの位置（メイン枠の高さに合わせて調整） */
+    left: 320px;             /* サイドバーが開いている時の位置 */
+    width: 36px;
+    height: 40px;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 0 6px 6px 0;
+    cursor: pointer;
+    font-size: 14px;
+    z-index: 1001;
+    transition: left 0.3s ease, top 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.2);
 }
 
-/* サイドバーが閉じている時のボタン位置 */
+/* サイドバーが折りたたまれた時のボタン位置 */
 #sidebar.collapsed ~ #toggle-sidebar-btn,
 body.sidebar-collapsed #toggle-sidebar-btn {
-  left: 0;
+    left: 20px;              /* 折りたたんだ時に矢印の先（枠の左端付近）に固定 */
 }
