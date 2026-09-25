@@ -764,3 +764,38 @@ body {
         pointer;
 }
 
+/* サイドバーの基本スタイル（位置関係の調整） */
+#sidebar {
+  position: relative;
+  width: 300px; /* 既存の幅に合わせて調整 */
+  transition: transform 0.3s ease, margin-left 0.3s ease;
+  z-index: 10;
+}
+
+/* 折りたたまれた状態のクラス */
+#sidebar.collapsed {
+  transform: translateX(-100%); /* 左に隠す */
+  margin-right: -300px; /* レイアウトの隙間を詰める場合 */
+}
+
+/* トグルボタンのスタイル */
+#toggle-sidebar-btn {
+  position: absolute;
+  top: 10px;
+  right: -35px; /* サイドバーの外側に飛び出させて常にクリック可能にする */
+  width: 35px;
+  height: 40px;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  border-radius: 0 5px 5px 0;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#toggle-sidebar-btn:hover {
+  background-color: #555;
+}

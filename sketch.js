@@ -1374,3 +1374,22 @@ function initArcSlider() {
 
     updateSliderUI(parseFloat(mainSlider ? mainSlider.value : minAngle));
 }
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const btn = document.getElementById('toggle-sidebar-btn');
+  
+  sidebar.classList.toggle('collapsed');
+  
+  // ボタンの矢印向きを変更
+  if (sidebar.classList.contains('collapsed')) {
+    btn.textContent = '▶';
+  } else {
+    btn.textContent = '◀';
+  }
+  
+  // p5.js のキャンバスサイズを再計算・自動リサイズしたい場合はここに追加
+  if (typeof windowResized === 'function') {
+    setTimeout(windowResized, 300); // アニメーション完了後にリサイズ
+  }
+}
