@@ -802,7 +802,7 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    width: 280px;            /* サイドバーの幅 */
+    width: 30vw;            /* サイドバーの幅 */
     height: 100vh;
     background-color: rgba(42, 42, 42, 0.95);
     z-index: 900;
@@ -857,5 +857,5 @@ body {
 }
 
 body.sidebar-open #toggle-sidebar-btn {
-    left: 295px;             /* ★サイドバーの幅(280px) + ボタンの余白(15px) = 295px に移動 */
+    left: 31vw;             /* ★サイドバーの幅(280px) + ボタンの余白(15px) = 295px に移動 */
 }
