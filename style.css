@@ -811,11 +811,16 @@ body {
     overflow: hidden;
 }
 
-/* 開閉ボタンの配置（グラフの左上またはサイドバーのすぐ横） */
+.crane-chart {
+    position: relative; /* ボタンの位置基準になります */
+    display: inline-block;
+}
+
+/* ボタンをSVGのすぐ左上に絶対配置 */
 #toggle-sidebar-btn {
     position: absolute;
-    top: 150px;
-    left: 420px;
+    top: 10px;               /* SVGの上端からの距離 */
+    left: 10px;              /* SVGの左端からの距離 */
     z-index: 10;
     background-color: #444;
     color: #fff;
@@ -823,4 +828,9 @@ body {
     border-radius: 4px;
     padding: 6px 10px;
     cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#toggle-sidebar-btn:hover {
+    background-color: #666;
 }
