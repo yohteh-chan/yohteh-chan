@@ -896,12 +896,12 @@ function logCurrentSelection(actionType) {
 
 
 //定格荷重
-function MaxWait(WorkingRadius){
+function MaxWait(judgeVal){
 
 
  //定格荷重
     if(jibB==0){
-       //console.log(WorkingRadius);
+       console.log(judgeVal);
         
     }
 }
