@@ -175,6 +175,13 @@ let jibB = 0;
 let minAngle;
 let maxAngle;
 
+//定格荷重
+let minFrontNumber=1;
+let minRearNumber=1;
+let outriggerLength=[1,1,1,1];//仮
+let FrontAngle;
+let RearAngle;
+
 // ボタンイベント設定
 const SBB = document.getElementById('specail-boom-button');
 if (SBB) {
@@ -210,7 +217,8 @@ async function loadCraneBaseData(model) {
 
     const BaseData = data["製品情報"],
         DAData = data["危険角度"],
-        DDData = data["描画情報"];
+        DDData = data["描画情報"],
+        J0Data = data["J0"];
 
     minAngle = 0;
     maxAngle = Number(BaseData[4][1]); // 最大角度セット
@@ -237,7 +245,17 @@ async function loadCraneBaseData(model) {
 
     let BSet2 = [], Bset0 = [], BSsetA = [];
 
+
+
+    //定格荷重用
     let WRval;//作業半径
+    let cabinAngle = 0 ;//旋回角度
+    let RadiusORAngle = J0Data[1][0]=="作業半径"?1:0;
+    FrontAngle=BaseData[31][2];
+    RearAngle=BaseData[31][16];
+   
+   
+
 
     for (let i = 1; i <= BN; i++) {
         window[`Boom${i}th`] = BaseData[i + 3][15];
@@ -302,14 +320,16 @@ async function loadCraneBaseData(model) {
     let tireY = DDData[8][20] / 100;
     let FootpinTransY = MaxHight - footpinY / 100 + BoomWidth / 100 / 2;
 
+    let outriggerNumber =BaseData[1][3];
+    
     const outriggerStates = {
-        fl: 'max',
-        fr: 'max',
-        rl: 'max',
-        rr: 'max'
+        fl: outriggerNumber,
+        fr: outriggerNumber,
+        rl: outriggerNumber,
+        rr: outriggerNumber
     };
 
-    let outriggerNumber =BaseData[1][3];
+    
     
 
     const TireD = document.querySelectorAll('.Tire circle');
@@ -525,6 +545,10 @@ async function loadCraneBaseData(model) {
         //作業半径
         if (WorkingRadius) {
             WorkingRadius.textContent = String(WRval).padStart(4, ' ');
+
+            if(RadiusORAngle==1&&jibB==0){
+            MaxWait(parseFloat(WorkingRadius.textContent));//定格荷重
+            }
         }
 
         let baseValues;
@@ -670,6 +694,10 @@ async function loadCraneBaseData(model) {
         //作業半径
         if (WorkingRadius) {
             WorkingRadius.textContent = WRval.toFixed(1).padStart(4, ' ');
+
+            if(RadiusORAngle==1&&jibB==0){
+            MaxWait(parseFloat(WorkingRadius.textContent));//定格荷重
+            }
         }
 
         
@@ -788,30 +816,71 @@ if (outriggerSelect) {
         });
 
         logCurrentSelection('長さ変更');
+      
+
+
+        //旋回角度による定格荷重の変化
+           if(BaseData[1+minFrontNumber][30+minRearNumber]=""){
+            FrontAngle=180;
+           }else{
+            FrontAngle=BaseData[1+minFrontNumber][30+minRearNumber];
+           }
+           
+
+           if(BaseData[15+minFrontNumber][30+minRearNumber]=""){
+            RearAngle=180;
+           }else{
+            RearAngle=BaseData[15+minFrontNumber][30+minRearNumber];
+           }
+           
+
     });
 }
+
+
 
 // ★ 3. 選択状態(1/0)と、保持している各アウトリガーの数値を出力する関数
 function logCurrentSelection(actionType) {
     const positions = ['fl', 'fr', 'rl', 'rr'];
     
 
-
-    const statuses = positions.map(pos => {
+    // ① 各位置の選択状態(1/0)と、保持している張り出し段階(値)を一緒に取得
+    const detailList = positions.map(pos => {
         const btn = document.querySelector(`.outrigger-btn[data-position="${pos}"]`);
-        return btn && btn.classList.contains('selected') ? 1 : 0;
+        const isSelected = btn && btn.classList.contains('selected') ? 1 : 0;
+        
+        // outriggerStates から値（例: "max", "mid", "min", 0, 1, 2 など）を取得
+        const level = typeof outriggerStates !== 'undefined' ? outriggerStates[pos] : 'unknown';
+
+        return {
+            pos: pos.toUpperCase(),
+            isSelected: isSelected,
+            level: level
+        };
     });
 
-    const isAnySelected = statuses.some(status => status === 1); // 1つでも1があれば true
-    const isAllUnselected = !isAnySelected;                       // 全部0なら true
+    // 1つでも1があれば true
+    const isAnySelected = detailList.some(item => item.isSelected === 1);
 
-
-    if (isAllUnselected) {
-        document.getElementById('outrigger-select').disabled = true;
-    } else if (isAnySelected) {
-        document.getElementById('outrigger-select').disabled = false;
+    // ② UIロック制御（簡略版）
+    const selectEl = document.getElementById('outrigger-select');
+    if (selectEl) {
+        selectEl.disabled = !isAnySelected;
     }
+
+    // ③ 「位置: 選択状態 (〇段目/段階)」 が一目で分かるログ形式で出力
+    // 結果: [0, 2, 1, 0] のような数値配列
+    outriggerLength = detailList.map(item => Number(item.level));
+
+    minFrontNumber= Math.min(outriggerLength[0], outriggerLength[1]);
+    minRearNumber= Math.min(outriggerLength[2], outriggerLength[3]);
+
+   
+
 }
+
+
+
 
 
     slider?.dispatchEvent(new Event('input'));
@@ -821,6 +890,24 @@ function logCurrentSelection(actionType) {
     // データ読み込みがすべて完了してから円弧スライダーを初期化
     initArcSlider();
 }
+
+
+
+
+
+//定格荷重
+function MaxWait(WorkingRadius){
+
+
+ //定格荷重
+    if(jibB==0){
+       //console.log(WorkingRadius);
+        
+    }
+}
+
+
+
 
 function resetAllBoomLength() {
     document.querySelectorAll('[id^="boom-line-"]:not(#boom-line-1)').forEach(line => line.setAttribute('x2', 0));
@@ -1224,8 +1311,11 @@ const boomDialog = document.getElementById('boom-angle-dialog');
                 outriggerBtns.forEach(b => b.style.outline = 'none');
                 e.currentTarget.style.outline = '2px solid #fff';
                 activeBtn = e.currentTarget;
+                
             }
         });
+
+          
     });
 
     // 状態（セレクトボックス）が変更されたら選択中のボタンに反映
@@ -1235,6 +1325,8 @@ const boomDialog = document.getElementById('boom-angle-dialog');
                 applyStateToBtn(activeBtn, e.target.value);
             }
         });
+
+        
     }
 
     // ボタンに状態クラスを付与するヘルパー関数
@@ -1243,6 +1335,7 @@ const boomDialog = document.getElementById('boom-angle-dialog');
         btnElement.classList.add(`is-${stateValue}`);
     }
 
+   
 
 
 
@@ -1419,3 +1512,25 @@ function toggleSidebar() {
 }
 
 
+
+
+function updateSidebarHeight() {
+// 要素の取得
+const mainWorkspace = document.querySelector('.main-workspace');
+const sidebar = document.querySelector('#sidebar'); // #sidebar で取得
+
+if (mainWorkspace && sidebar) {
+  // パディングを含めた表示上の高さを取得（px単位の数値）
+  const height = mainWorkspace.clientHeight;
+  console.log("高さ:", height + "px");
+
+  // スタイルプロパティを使って高さを設定
+  sidebar.style.height = `calc(${height}px)`;
+}
+
+}
+
+updateSidebarHeight();
+
+// ウィンドウリサイズ時にも実行
+window.addEventListener('resize', updateSidebarHeight);

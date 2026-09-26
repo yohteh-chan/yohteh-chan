@@ -55,6 +55,8 @@
     max-width: 100%;
     margin: 0 auto;
     gap: 15px; /* 上下のすき間 */
+
+    align-items: stretch;
 }
 
 
@@ -64,13 +66,13 @@
 .page-title {
     text-align: center;
     color: #fff;
-    
-    border: 2px solid #3a444d;
+    font-size: 3vh;
+    border: 0.1vw solid #3a444d;
     border-radius: 8px;
     padding: 0px 10px;
     background: #252b31;
     display: block; 
-    width: 80%;
+    width: 24vw;
     max-width: 30vw;
     margin-left: auto;
     margin-right: auto;
@@ -203,9 +205,10 @@ font-size: 20px;
 .main-workspace {
     flex: 1; /* 横幅の残りをすべて使う */
     background-color: #22272d; /* 左右のパネルと同じ背景色 */
-    border: 1px solid #2d343f; /* 外枠の線 */
+    
     border-radius: 8px; /* 角丸 */
     padding: 1vw; /* 内側の余白 */
+  
 }
 
 #working-radius {
@@ -825,6 +828,10 @@ font-size: 20px;
 
 
 
+
+
+
+
 /* メイン枠（グレーの大きな枠）を横並びレイアウトにする */
 .main-content {
     position: relative;
@@ -837,14 +844,18 @@ font-size: 20px;
 /* サイドバーの基本設定 */
 #sidebar {
     position: fixed;
-    top: 0;
-    left: 0;
+    top: 8px;
+    left: 8px;
     width: 30vw;            /* サイドバーの幅 */
-    height: 80vh;
+    height: auto;
     background-color: rgba(42, 42, 42, 0.95);
     z-index: 900;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    
     transform: translateX(0); /* 通常（開いている）状態 */
+    border-radius: 8px; /* 角丸 */
+
+    align-self: stretch;
+    flex: 1; /* 横幅の残りをすべて使う */
 }
 
 /* サイドバーを折りたたんだ状態 */
