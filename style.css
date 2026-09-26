@@ -1,75 +1,77 @@
 /* カテゴリーの枠 */
-.crane-section { margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+.crane-section { 
+    margin-bottom: 10px; 
+    border: 1px solid #ddd; 
+    border-radius: 8px; 
+    overflow: hidden; }
 
 /* カテゴリーのヘッダー */
 .crane-header { 
-    background: #f8f9fa; padding: 15px; cursor: pointer; font-weight: bold; 
-    border-bottom: 1px solid #ddd; user-select: none;
+    background: #f8f9fa; 
+    padding: 15px; cursor: 
+    pointer; font-weight: bold; 
+    border-bottom: 1px solid #ddd; 
+    user-select: none;
 }
 
 /* 中身のエリア */
-.crane-content { display: none; padding: 10px; background: #fff; }
-.crane-section.open .crane-content { display: block; }
+.crane-content { 
+    display: none; 
+    padding: 10px; 
+    background: #fff; }
+
+.crane-section.open .crane-content { 
+    display: block;
+}
 
 /* 🟢 ボタン風のスタイル（初期値：緑） */
 .crane-btn {
-    display: block; width: 100%; padding: 12px; margin-bottom: 8px;
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 8px;
     background-color: #28a745; /* 緑色 */
-    color: white; border: none; border-radius: 5px;
-    font-weight: bold; cursor: pointer; text-align: center;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
     transition: background 0.2s, transform 0.1s;
 }
-.crane-btn:hover { background-color: #218838; }
-.crane-btn:active { transform: scale(0.98); }
+
+.crane-btn:hover { 
+    background-color: #218838;
+}
+
+.crane-btn:active { 
+    transform: scale(0.98);
+}
 
 /* 🟢 app-container を修正：上（ワークスペース）と下（結果パネル）の縦並びに変更 */
 .app-container {
     display: flex;
     flex-direction: column; /* 縦に並べる */
-    max-width: 1200px;
+    max-width: 100%;
     margin: 0 auto;
     gap: 15px; /* 上下のすき間 */
 }
 
-/* 左と中央を囲む大きな枠 */
-.main-workspace {
-    width: 100%; /* 横幅いっぱいに広げる */
-    display: flex;
-    gap: 15px;
-    background-color: #22272d;
-    border: 1px solid #2d343f;
-    border-radius: 8px;
-    padding: 15px;
-    box-sizing: border-box;
-}
 
 
-
-/* 中央グラフは残りの幅いっぱいに広がる */
-.chart-container {
-    flex: 1;             /* 下部パネルを除いた縦幅の限界まで自動拡大 */
-    width: 100%;
-    min-height: 0;       /* flexアイテムの縮小崩れを防ぐ必須プロパティ */
-    position: relative;
-    box-sizing: border-box;
-
-    display: flex;
-    justify-content: center; /* 左右中央揃え */
-    align-items: center;
-}
 
 /* タイトル（上部リボン）のデザインをダークモードに合わせる */
 .page-title {
     text-align: center;
     color: #fff;
-    margin-bottom: 20px;
+    
     border: 2px solid #3a444d;
     border-radius: 8px;
-    padding: 10px;
+    padding: 0px 10px;
     background: #252b31;
     display: block; 
-    width: 90%;
-    max-width: 400px;
+    width: 80%;
+    max-width: 30vw;
     margin-left: auto;
     margin-right: auto;
 }
@@ -84,9 +86,10 @@ body {
 
 /* SVGを囲う枠 */
 .canvas-wrapper {
-    width: 100vw;
-    max-width: none;
-    width: 65%;/*仮*/
+    height: 100%;       /* 基本は高さいっぱいを目指す */
+    width: 80vh;         /* 幅は比率に応じて自動決定 */
+
+
     aspect-ratio: 1 / 1;
     background-color: #15191c; /* グラフ内の背景はさらに暗く */
     border-radius: 6px;
@@ -118,7 +121,40 @@ body {
     margin-bottom: 10px;
     padding-bottom: 5px;
     border-bottom: 1px solid #2d343f;
+    margin-left:10px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
 }
+
+.panel-section{
+    text-align: center;
+    color: #fff;
+}
+
+.panel-val{
+    position: relative;
+    justify-content: flex-end;
+    align-items: baseline;
+
+    left: -5vw;
+
+font-size: 20px;
+    display: flex;
+  justify-content: flex-end; /* 右詰め配置 */
+  align-items: baseline;    /* 文字の底辺を揃える */
+
+  flex-shrink: 0;
+  text-align: right;
+
+  font-variant-numeric: tabular-nums;
+
+  display: inline-block;
+}
+
+
 
 
 /* 🟢 【新設】下部に横一列で並べるパネルの設定 */
@@ -127,8 +163,7 @@ body {
     justify-content: space-between; /* 3つのボックスを均等に配置 */
     gap: 15px; /* ボックス同士のすき間 */
     width: 100%;
-
-    
+    max-height: 20vh;
 }
 
 /* 🟢 【修正】情報ボックスを横に引き伸ばす */
@@ -147,6 +182,7 @@ body {
     color: #888;
     margin-bottom: 5px;
 }
+
 .info-value {
     font-size: 36px; /* 下に並んで見やすくなったので少し大きく */
     font-weight: bold;
@@ -154,6 +190,7 @@ body {
     font-family: monospace;
     display: inline-block;
 }
+
 .info-unit {
     font-size: 16px;
     color: #888;
@@ -162,15 +199,13 @@ body {
 }
 
 
-/* 🟢 【新設】左と中央を囲む一つの大きな枠（グレーの背景を付けて一体感を出す） */
+/* 🟢 大きな枠（グレーの背景） */
 .main-workspace {
     flex: 1; /* 横幅の残りをすべて使う */
-    display: flex; /* 中にある左パネルと中央グラフを横並びにする */
-    gap: 15px; /* 左パネルと中央グラフの間のすき間 */
     background-color: #22272d; /* 左右のパネルと同じ背景色 */
     border: 1px solid #2d343f; /* 外枠の線 */
     border-radius: 8px; /* 角丸 */
-    padding: 15px; /* 内側の余白 */
+    padding: 1vw; /* 内側の余白 */
 }
 
 #working-radius {
@@ -192,6 +227,7 @@ body {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease; /* 切り替えアニメーション */
+
 }
 
 /*特殊伸縮のボタン クリック後（activeクラス付与時）：淡い青 */
@@ -795,6 +831,7 @@ body {
     display: flex;
     align-items: flex-start;
     gap: 0px;
+    height: 80%;
 }
 
 /* サイドバーの基本設定 */
@@ -803,7 +840,7 @@ body {
     top: 0;
     left: 0;
     width: 30vw;            /* サイドバーの幅 */
-    height: 100vh;
+    height: 80vh;
     background-color: rgba(42, 42, 42, 0.95);
     z-index: 900;
     transition: transform 0.3s ease, opacity 0.3s ease;
@@ -819,7 +856,7 @@ body {
 /* キャンバスエリアを親枠内でいっぱいに広げる */
 #canvas-container {
     position: relative;
-    width: 100vw;            /* 画面横幅いっぱい */
+    width: 100%;            /* 画面横幅いっぱい */
     height: 100%;           /* 画面高さいっぱい */
     margin: 10;
     padding: 0;
@@ -828,9 +865,14 @@ body {
 
 .chart-container canvas,
 .chart-container svg {
-    width: 100% !important;
-    height: 100% !important;
+    width: 100% ;
+    height: 100% ;
     display: block;
+}
+
+.crane-chart{
+    width: 100% ;
+    height: 100% ;
 }
 
 /* 開閉ボタンの基本設定（最初の位置） */

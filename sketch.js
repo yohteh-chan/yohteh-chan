@@ -405,7 +405,7 @@ async function loadCraneBaseData(model) {
     }
 
     jibAngle?.addEventListener('input', (e) => {
-        if (jibAngleVal) jibAngleVal.textContent = Number(e.target.value).toFixed(0);
+        if (jibAngleVal) jibAngleVal.textContent = Number(e.target.value).toFixed(0)+"°";
         lengthSlider?.dispatchEvent(new Event('input'));
     });
 
@@ -428,7 +428,7 @@ async function loadCraneBaseData(model) {
             val = getNearest(JibSteps, val);
             e.target.value = val;
         }
-        if (jibLengthVal) jibLengthVal.textContent = Number(val / 10).toFixed(2);
+        if (jibLengthVal) jibLengthVal.textContent = Number(val / 10).toFixed(2) + "m";
         lengthSlider?.dispatchEvent(new Event('input'));
     });
 
@@ -448,7 +448,7 @@ async function loadCraneBaseData(model) {
         DHCT?.setAttribute('transform', `translate(${-footpinX / 100}, ${MaxHight - footpinY / 100}) rotate(${-angle},0,0)`);
         DHCF?.setAttribute('transform', `rotate(${-angle},${pivotX},${pivotY})`);
 
-        if (angleVal) angleVal.textContent = Number(angle).toFixed(0);
+        if (angleVal) angleVal.textContent = Number(angle).toFixed(0)+"°";
         BoomAngle = Number(angle).toFixed(0);
 
         DHCFcircle?.setAttribute('r', DHCdata[3] / 100);
@@ -658,7 +658,7 @@ async function loadCraneBaseData(model) {
             setLine(TensionRodLine, BaseBoom1, jibHeadTipX, tensionY, tensionY);
         }
 
-        if (lengthVal) lengthVal.textContent = Number(length / 10).toFixed(1);
+        if (lengthVal) lengthVal.textContent = Number(length / 10).toFixed(1) + "m";
 
         let jibHookPoint = Number(JibSteps[0]) >= Number(jibLength ? jibLength.value : 0) ? 0 : jibNumber - 1;
         let boom_jib = Number(BoomAngle) - Number(jibAngle ? jibAngle.value : 0);
@@ -1417,3 +1417,5 @@ function toggleSidebar() {
     btn.textContent = '◀クレーン';
   }
 }
+
+
