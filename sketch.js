@@ -220,6 +220,7 @@ jibBtn?.addEventListener('click', () => {
 
 
 
+
 async function loadCraneBaseData(model) {
     const data = await getCraneData(model);
     if (!data) return;
@@ -573,6 +574,7 @@ async function loadCraneBaseData(model) {
                 lengthSlider?.dispatchEvent(new Event('input'));
             }
 
+         
         
         // フラグを解除して次のフレーム描画を許可
             isSliderTicking = false;
@@ -582,7 +584,11 @@ async function loadCraneBaseData(model) {
     });
 
     lengthSlider?.addEventListener('input', (e) => {
+        
+        
         const length = parseFloat(e.target.value);
+
+      
         resetAllBoomLength();
 
         const round1 = num => Math.floor(num * 10) / 10;
@@ -754,7 +760,7 @@ async function loadCraneBaseData(model) {
 
         colVal2=BoomLength.findIndex(val => val >= length*100);
 
-     
+
         initArcSlider();
     });
 
@@ -883,8 +889,7 @@ if (outriggerSelect) {
                 // 値を空文字にして「未設定」にする
                 outriggerSelect.label = '未選択';
                 outriggerSelect.value = outriggerNumber+1;
-               
-                    
+                  slider?.dispatchEvent(new Event('input'));
                 });
                
         });
@@ -967,7 +972,6 @@ function logCurrentSelection(actionType) {
 
 
 
-
     slider?.dispatchEvent(new Event('input'));
     lengthSlider?.dispatchEvent(new Event('input'));
     jibAngle?.dispatchEvent(new Event('input'));
@@ -1007,7 +1011,7 @@ function MaxWeit(judgeVal){
 
         }
     }else{//ジブモード
-       weight="未設定";
+       weight="未設定";//ここ
     }
 
 
@@ -1055,6 +1059,8 @@ function CabinAngle(){
         colVal1=minLeftNumber;
     break;
 }   
+
+dengerAngle();
 
 }
 
@@ -1244,6 +1250,7 @@ let isUpdatingUI = false;
         // イベントを発火させても、isUpdatingUI が true なのでループしない
         if (lengthSlider) {
             lengthSlider.dispatchEvent(new Event('input', { bubbles: true }));
+       
         }
     } finally {
         isUpdatingUI = false; // 処理が終わったら必ずフラグをオフに戻す
@@ -1295,6 +1302,7 @@ let isUpdatingUI = false;
     
     // 初期値の反映
     updateLengthUI(lengthSlider.value);
+
 }
 
 
@@ -1536,13 +1544,13 @@ function initArcSlider() {
 
 
     dengerAngle();
-    //console.log("AAA");
+
     
    
 
-    const attentionStart = minAngle + 5;
+    const attentionStart = DA + 5;
     const dangerStart = DA + 3;
-    const dangerEnd = DA;
+
 
     pathBg.setAttribute('d', describeArc(cx, cy, r, dangerStart, maxAngle));
     if (pathAttention) {
@@ -1553,9 +1561,14 @@ function initArcSlider() {
         pathDanger.setAttribute('d', describeArc(cx, cy, r, DA, dangerStart));
     }
 
-    if (pathDangerEdge) {
+    if (pathDangerEdge&&DA==0) {
+        pathDangerEdge.style.opacity = '1';
         pathDangerEdge.setAttribute('d', describeArc(cx, cy, r, 0, 1));
+      }else{
+        pathDangerEdge.style.opacity = '0';
     }
+
+
 
     function updateSliderUI(angle) {
         const clampedAngle = Math.max(DA, Math.min(maxAngle, angle));
@@ -1578,7 +1591,9 @@ function initArcSlider() {
             pathActiveEdge.setAttribute('d', describeArc(cx, cy, r, attentionStart, clampedAngle));
         }
 
-        pathActive.setAttribute('d', describeArc(cx, cy, r, DA, clampedAngle));
+
+
+     pathActive.setAttribute('d', describeArc(cx, cy, r, DA, clampedAngle));
 
         if (handle) {
             handle.classList.remove('is-attention', 'is-danger');
@@ -1712,5 +1727,117 @@ if (outriggerSelect) {
   outriggerSelect.addEventListener('change', () => {
     // 既存の処理...
     updateDangerousAngleCache(); // 条件変更時のみ1回実行
+    
   });
 }
+
+
+
+
+
+
+
+
+
+const boomSlider = document.getElementById('boom-slider');
+const lengthSlider = document.getElementById('boom-length-slider');
+let CCC=0;
+
+
+// スライダー値を安全に更新して input イベントを発火する共通関数
+function changeBoomSliderValue(delta) {
+    if (!boomSlider) return;
+
+    const min = parseFloat(boomSlider.min) || 0;//仮
+    const max = parseFloat(boomSlider.max) || 82;//仮
+    let currentVal = parseFloat(boomSlider.value) || 0;
+    
+    // 値を更新（最小値〜最大値の範囲内に収める）
+    let newVal = currentVal + delta;
+    newVal = Math.min(max, Math.max(min, newVal));
+
+    if (newVal !== currentVal) {
+        boomSlider.value = newVal;
+        // 連動する描画処理・計算を動かすために input イベントを発火
+        boomSlider.dispatchEvent(new Event('input'));
+    }
+
+
+}
+
+
+// スライダー値を安全に更新する共通関数
+function changeLengthSliderValue(delta) {
+    if (!lengthSlider) return;
+
+    const min = parseFloat(lengthSlider.min) || 53;//仮
+    const max = parseFloat(lengthSlider.max) || 240;//仮
+    let currentVal = parseFloat(lengthSlider.value) || 0;
+    
+    // 値を最小値〜最大値の範囲内に収める
+    let newVal = currentVal + delta;
+
+    
+    newVal = Math.min(max, Math.max(min, newVal));
+
+
+    if (newVal !== currentVal) {
+        lengthSlider.value = newVal;
+
+        // updateLength 関数が定義されていれば直接呼び出し、無ければ input イベントを発火
+        
+            lengthSlider.dispatchEvent(new Event('input'));
+        
+    }
+
+
+
+}
+
+// 1. マウスホイールでの操作
+window.addEventListener('wheel', (e) => {
+    const step = 1;
+    // ホイール上スクロール（deltaY < 0）で増加、下スクロールで減少
+    if (e.deltaY < 0) {
+        changeBoomSliderValue(step);
+    } else if (e.deltaY > 0) {
+        changeBoomSliderValue(-step);
+    }
+
+}, { passive: true });
+
+// 2. キーボード操作（↑ / ↓ / W / S）
+window.addEventListener('keydown', (e) => {
+    // 入力フォーム（input, textarea）にフォーカスがある時はスキップ
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
+        // 操作対象のスライダー自体にフォーカスがある場合を除く
+        if (document.activeElement !== lengthSlider) {
+            return;
+        }
+    }
+
+    const step = 0.5;
+    const key = e.key.toLowerCase();
+
+    if (key === 'arrowup' || key === 'w') {
+        e.preventDefault(); // 画面スクロールを防ぐ
+        changeBoomSliderValue(step);   // 増加
+    } else if (key === 'arrowdown' || key === 's') {
+        e.preventDefault(); // 画面スクロールを防ぐ
+        changeBoomSliderValue(-step);  // 減少
+    }
+
+    if (key === 'arrowleft' || key === 'a') {
+        e.preventDefault(); // 横スクロールなどの既定動作を防止
+        changeLengthSliderValue(-step);
+    } else if (key === 'arrowright' || key === 'd') {
+        e.preventDefault(); // 横スクロールなどの既定動作を防止
+        changeLengthSliderValue(step);  // 増加
+    }
+
+});
+
+
+
+
+

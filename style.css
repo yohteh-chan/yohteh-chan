@@ -368,7 +368,7 @@ font-size: 20px;
 
 /* ★ arc-bg が危険領域（赤色）に入ったとき */
 .arc-bg.is-danger {
-  stroke: #e74c3c !important;
+  stroke: #e74c3c;
 }
 
 .arc-attention {
