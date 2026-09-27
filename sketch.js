@@ -214,7 +214,7 @@ jibBtn?.addEventListener('click', () => {
     jibBtn.classList.toggle('active', jibB === 1);
     const lengthSlider = document.getElementById('boom-length-slider');
     lengthSlider?.dispatchEvent(new Event('input', { bubbles: true }));
-    initArcSlider();
+    
 });
 
 
@@ -456,7 +456,7 @@ async function loadCraneBaseData(model) {
     jibAngle?.addEventListener('input', (e) => {
         if (jibAngleVal) jibAngleVal.textContent = Number(e.target.value).toFixed(0)+"°";
         lengthSlider?.dispatchEvent(new Event('input'));
-        initArcSlider();
+        
     });
 
     const getNearest = (arr, val) => {
@@ -480,7 +480,7 @@ async function loadCraneBaseData(model) {
         }
         if (jibLengthVal) jibLengthVal.textContent = Number(val / 10).toFixed(2) + "m";
         lengthSlider?.dispatchEvent(new Event('input'));
-        initArcSlider();
+       
     });
 
     slider?.addEventListener('input', (e) => {
@@ -733,8 +733,8 @@ async function loadCraneBaseData(model) {
 
         colVal2=BoomLength.findIndex(val => val >= length*100);
 
+     
         initArcSlider();
-        
     });
 
 
@@ -862,7 +862,7 @@ if (outriggerSelect) {
                 // 値を空文字にして「未設定」にする
                 outriggerSelect.label = '未選択';
                 outriggerSelect.value = outriggerNumber+1;
-                initArcSlider();
+               
                     
                 });
                
@@ -953,6 +953,7 @@ function logCurrentSelection(actionType) {
 
     // データ読み込みがすべて完了してから円弧スライダーを初期化
     initArcSlider();
+    
 }
 
 
@@ -988,7 +989,6 @@ function MaxWeit(judgeVal){
        weight="未設定";
     }
 
-    console.log(jibB);
 
     //定格荷重　表示
     MaxWeight.textContent=weight;
@@ -1007,6 +1007,7 @@ function dengerAngle(){
 
     }
 
+    console.log("DA",DA);
     
     
 }
@@ -1513,12 +1514,14 @@ function initArcSlider() {
     const cx = 100, cy = 100, r = 70;
 
 
-    //dengerAngle();
-    //console.log("DA",DA);
+    dengerAngle();
+    //console.log("AAA");
+    
+   
 
     const attentionStart = minAngle + 5;
-    const dangerStart = minAngle + 3;
-    const dangerEnd = minAngle;
+    const dangerStart = DA + 3;
+    const dangerEnd = DA;
 
     pathBg.setAttribute('d', describeArc(cx, cy, r, dangerStart, maxAngle));
     if (pathAttention) {
@@ -1526,7 +1529,7 @@ function initArcSlider() {
     }
 
     if (pathDanger) {
-        pathDanger.setAttribute('d', describeArc(cx, cy, r, dangerEnd, dangerStart));
+        pathDanger.setAttribute('d', describeArc(cx, cy, r, DA, dangerStart));
     }
 
     if (pathDangerEdge) {
@@ -1534,7 +1537,7 @@ function initArcSlider() {
     }
 
     function updateSliderUI(angle) {
-        const clampedAngle = Math.max(minAngle, Math.min(maxAngle, angle));
+        const clampedAngle = Math.max(DA, Math.min(maxAngle, angle));
 
         const handlePos = polarToCartesian(cx, cy, r, clampedAngle);
         handle.setAttribute('cx', handlePos.x);
@@ -1547,14 +1550,14 @@ function initArcSlider() {
 
         const shadowBox = document.getElementById('arc-shadow-box');
         if (shadowBox) {
-            shadowBox.setAttribute('d', describeArc(cx, cy, r, 0, minAngle));
+            shadowBox.setAttribute('d', describeArc(cx, cy, r, 0, DA));
         }
 
         if (pathActiveEdge) {
             pathActiveEdge.setAttribute('d', describeArc(cx, cy, r, attentionStart, clampedAngle));
         }
 
-        pathActive.setAttribute('d', describeArc(cx, cy, r, minAngle, clampedAngle));
+        pathActive.setAttribute('d', describeArc(cx, cy, r, DA, clampedAngle));
 
         if (handle) {
             handle.classList.remove('is-attention', 'is-danger');
@@ -1605,7 +1608,7 @@ function initArcSlider() {
 
         if (deg > maxAngle && deg < 360) {
             const midPoint = maxAngle + (360 - maxAngle) / 2;
-            deg = (deg < midPoint) ? maxAngle : minAngle;
+            deg = (deg < midPoint) ? maxAngle : DA;
         }
 
         updateSliderUI(deg);
@@ -1620,7 +1623,7 @@ function initArcSlider() {
     window.addEventListener('pointermove', handleMove);
     window.addEventListener('pointerup', () => { isDragging = false; });
 
-    updateSliderUI(parseFloat(mainSlider ? mainSlider.value : minAngle));
+    updateSliderUI(parseFloat(mainSlider ? mainSlider.value : DA));
 }
 
 
