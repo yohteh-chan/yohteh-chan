@@ -214,6 +214,7 @@ jibBtn?.addEventListener('click', () => {
     jibBtn.classList.toggle('active', jibB === 1);
     const lengthSlider = document.getElementById('boom-length-slider');
     lengthSlider?.dispatchEvent(new Event('input', { bubbles: true }));
+    initArcSlider();
 });
 
 
@@ -455,6 +456,7 @@ async function loadCraneBaseData(model) {
     jibAngle?.addEventListener('input', (e) => {
         if (jibAngleVal) jibAngleVal.textContent = Number(e.target.value).toFixed(0)+"°";
         lengthSlider?.dispatchEvent(new Event('input'));
+        initArcSlider();
     });
 
     const getNearest = (arr, val) => {
@@ -478,6 +480,7 @@ async function loadCraneBaseData(model) {
         }
         if (jibLengthVal) jibLengthVal.textContent = Number(val / 10).toFixed(2) + "m";
         lengthSlider?.dispatchEvent(new Event('input'));
+        initArcSlider();
     });
 
     slider?.addEventListener('input', (e) => {
@@ -730,6 +733,7 @@ async function loadCraneBaseData(model) {
 
         colVal2=BoomLength.findIndex(val => val >= length*100);
 
+        initArcSlider();
         
     });
 
@@ -858,6 +862,7 @@ if (outriggerSelect) {
                 // 値を空文字にして「未設定」にする
                 outriggerSelect.label = '未選択';
                 outriggerSelect.value = outriggerNumber+1;
+                initArcSlider();
                     
                 });
                
@@ -870,7 +875,7 @@ if (outriggerSelect) {
         FrontAngle=BaseData[1+minFrontNumber][30+minRearNumber];
         RearAngle=BaseData[15+minFrontNumber][30+minRearNumber];
 
-        console.log(minFrontNumber + " / " +minRearNumber);
+       
 
         //前方・後方吊り　判定
 
@@ -989,11 +994,20 @@ function MaxWeit(judgeVal){
     MaxWeight.textContent=weight;
 }
 
+
+let DA;
 //危険角度
 function dengerAngle(){
+    
+    
     if(jibB==0){
-        //colVal1
+        DA=DAData[4][(outriggerNumber-colVal1)*BN+colVal2+1];        
+    }else{
+
+
     }
+
+    
     
 }
 
@@ -1497,6 +1511,10 @@ function initArcSlider() {
     if (!svg || !pathBg || !pathActive || !handle) return;
 
     const cx = 100, cy = 100, r = 70;
+
+
+    //dengerAngle();
+    //console.log("DA",DA);
 
     const attentionStart = minAngle + 5;
     const dangerStart = minAngle + 3;
