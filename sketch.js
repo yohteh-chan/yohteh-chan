@@ -180,6 +180,7 @@ let J0Data =[];
 let DAData;
 let MaxWeight;//定格荷重
 let DengerAngle;//危険角度
+let cachedLimitIndex = -1;// 危険角度のインデックス保持用キャッシュ変数
 
 //定格荷重
 let minFrontNumber=1;
@@ -483,7 +484,15 @@ async function loadCraneBaseData(model) {
        
     });
 
+    let isSliderTicking = false;
+
     slider?.addEventListener('input', (e) => {
+
+        if (!isSliderTicking) {
+        isSliderTicking = true;
+
+        requestAnimationFrame(() => {
+
         const angle = e.target.value;
         const pivotX = DHCdata[19] / 100;
         const pivotY = MaxHight - DHCdata[18] / 100;
@@ -557,7 +566,19 @@ async function loadCraneBaseData(model) {
             'y2': Y2_0
         });
 
-        lengthSlider?.dispatchEvent(new Event('input'));
+        // 連動させる関数の呼び出し（dispatchEvent の代わりに処理関数を直接呼び出すと軽量）
+            if (typeof updateLength === 'function') {
+                updateLength();
+            } else {
+                lengthSlider?.dispatchEvent(new Event('input'));
+            }
+
+        
+        // フラグを解除して次のフレーム描画を許可
+            isSliderTicking = false;
+
+            });
+        }
     });
 
     lengthSlider?.addEventListener('input', (e) => {
@@ -1670,3 +1691,26 @@ updateSidebarHeight();
 
 // ウィンドウリサイズ時にも実行
 window.addEventListener('resize', updateSidebarHeight);
+
+
+
+
+
+function updateDangerousAngleCache() {
+  if (!J0Data || J0Data.length <= 2) return;
+
+  // A列（2行目以降）を抽出して検索
+  const targetArray = J0Data.slice(2).map(row => row[0]);
+  
+  // 条件を満たす最初のインデックスを取得して保持
+  cachedLimitIndex = targetArray.findIndex(val => val > valForJadge);
+}
+
+// outriggerList などの change イベントリスナー内で実行
+const outriggerSelect = document.getElementById('outriggerList');
+if (outriggerSelect) {
+  outriggerSelect.addEventListener('change', () => {
+    // 既存の処理...
+    updateDangerousAngleCache(); // 条件変更時のみ1回実行
+  });
+}
