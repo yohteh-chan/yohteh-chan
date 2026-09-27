@@ -175,6 +175,11 @@ let jibB = 0;
 let minAngle;
 let maxAngle;
 let BN;
+let outriggerNumber;
+let J0Data =[];
+let DAData;
+let MaxWeight;//定格荷重
+let DengerAngle;//危険角度
 
 //定格荷重
 let minFrontNumber=1;
@@ -226,9 +231,10 @@ async function loadCraneBaseData(model) {
     const toRad = (deg) => (deg * Math.PI) / 180;
 
     const BaseData = data["製品情報"],
-        DAData = data["危険角度"],
-        DDData = data["描画情報"],
-        J0Data = data["J0"];
+        DDData = data["描画情報"];
+    
+    J0Data = data["J0"];
+    DAData = data["危険角度"];
 
     minAngle = 0;
     maxAngle = Number(BaseData[4][1]); // 最大角度セット
@@ -340,7 +346,7 @@ async function loadCraneBaseData(model) {
     let tireY = DDData[8][20] / 100;
     let FootpinTransY = MaxHight - footpinY / 100 + BoomWidth / 100 / 2;
 
-    let outriggerNumber =BaseData[1][3];//アウトリガーの段数
+    outriggerNumber =BaseData[1][3];//アウトリガーの段数
     
     const outriggerStates = {
         fl: outriggerNumber,
@@ -437,6 +443,8 @@ async function loadCraneBaseData(model) {
         jibAngleVal = $('jib-angle-val'),
         jibLength = $('jib-length-slider'),
         jibLengthVal = $('jib-length-val');
+
+        MaxWeight=$('Max-weight');
 
     const jibShift = boomVerticalLength * (BN - 1) + 7.54 / 4;
 
@@ -567,7 +575,7 @@ async function loadCraneBaseData(model) {
             WorkingRadius.textContent = String(WRval).padStart(4, ' ');
 
             if(RadiusORAngle==1&&jibB==0){
-            MaxWait(parseFloat(WorkingRadius.textContent));//定格荷重
+                MaxWeit(parseFloat(WorkingRadius.textContent));//定格荷重
             }
         }
 
@@ -716,7 +724,7 @@ async function loadCraneBaseData(model) {
             WorkingRadius.textContent = WRval.toFixed(1).padStart(4, ' ');
 
             if(RadiusORAngle==1&&jibB==0){
-            MaxWait(parseFloat(WorkingRadius.textContent));//定格荷重
+                MaxWeit(parseFloat(WorkingRadius.textContent));//定格荷重
             }
         }
 
@@ -878,9 +886,9 @@ if (outriggerSelect) {
             alert("未設定");//消すな
         }
 
-        //console.log(FrontAngle + " / " +RearAngle);
+
           
-          MaxWait();//定格荷重ファッション　呼び出し
+          MaxWeit();//定格荷重ファッション　呼び出し
           
 
     });
@@ -947,15 +955,53 @@ function logCurrentSelection(actionType) {
 
 
 //定格荷重
-function MaxWait(judgeVal){
+function MaxWeit(judgeVal){
     //作業半径　or 作業角度　の縦方向の情報　位置　0スタート
-    const rowVal= valForJadge.findIndex(val => val > judgeVal);
+    const rowVal= valForJadge.findIndex(val => val >= judgeVal)+2;
+    let weight;
     if(WeightJadge=="undefined"){
         WeightJadge=0;
     }
+    
+    CabinAngle();
+    
 
-    cabinAngle=205; //確認用
+ //J0
+    if(jibB==0){
+        if(WeightJadge==0){//前方吊りでない
+            colVal=2+(outriggerNumber-colVal1)*BN+colVal2;
+            if(2<=rowVal&&rowVal<=valForJadge.length&&2<=colVal&&colVal<=(BN*outriggerNumber+1)){
+                weight=J0Data[rowVal][colVal];
+            }else{
+                weight="";
+            }
+        }else{//前方吊り
 
+
+        }
+    }else{//ジブモード
+       weight="未設定";
+    }
+
+    console.log(jibB);
+
+    //定格荷重　表示
+    MaxWeight.textContent=weight;
+}
+
+//危険角度
+function dengerAngle(){
+    if(jibB==0){
+        //colVal1
+    }
+    
+}
+
+function CabinAngle(){
+
+    cabinAngle=205; //仮
+
+    
     switch (true){
     case cabinAngle <= 45 || 315 < cabinAngle :
         colVal1=minFrontNumber;
@@ -973,35 +1019,8 @@ function MaxWait(judgeVal){
         colVal1=minLeftNumber;
     break;
 }   
- //J0
-    if(jibB==0){
-        if(WeightJadge==0){
-            
 
-
-        }else{
-
-
-        }
-       
-
-
-           console.log("WeightJadge/ ", WeightJadge );
-      
-
-       //    console.log("outriggerLength/ ",outriggerLength);
-       
-
-       colVal=1+(BN-colVal1)*BN+colVal2;//ここ
-       
-       console.log(colVal1);
-       console.log(colVal2);
-       console.log(colVal);
-    }else{
-        alert("未設定");
-    }
 }
-
 
 
 
