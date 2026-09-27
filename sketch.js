@@ -1199,6 +1199,8 @@ function bringToFront(dialogEl) {
 
 
 function updateBoomFill() {
+
+   
     if (!lengthSlider) return;
 
     const min = parseFloat(lengthSlider.min) || 53; //仮
@@ -1220,6 +1222,7 @@ function updateBoomFill() {
 
     // CSS変数を更新
     trackBg.style.setProperty('--boom-fill', fillGradient);
+     
 }
 
 // スライダー操作イベントに紐付け
@@ -1232,6 +1235,7 @@ let isUpdatingUI = false;
 
     // UI更新関数 (※dispatchEvent は削除)
    function updateLengthUI(value) {
+      
     // 処理中の場合は処理を中断して無限ループを防ぐ
     if (isUpdatingUI) return;
 
@@ -1241,7 +1245,7 @@ let isUpdatingUI = false;
         const valNum = parseFloat(value);
         
         if (lengthSlider) lengthSlider.value = value;
-        
+   
         const displayVal = (valNum / 10).toFixed(1);
 
         if (popupLengthVal) popupLengthVal.textContent = displayVal;
@@ -1255,9 +1259,11 @@ let isUpdatingUI = false;
     } finally {
         isUpdatingUI = false; // 処理が終わったら必ずフラグをオフに戻す
     }
+     
 }
     // 点（目盛り）を生成する関数
     function generatePresetTicks(values) {
+        
         const ticksContainer = document.getElementById('preset-ticks');
         if (!ticksContainer || !lengthSlider || values.length === 0) return;
 
