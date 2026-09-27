@@ -1007,7 +1007,7 @@ function dengerAngle(){
 
     }
 
-    console.log("DA",DA);
+   // console.log("DA",DA);
     
     
 }
