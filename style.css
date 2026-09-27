@@ -448,6 +448,7 @@ font-size: 20px;
     padding: 2px 4px;
     border-radius: 3px;
     transition: color 0.2s, background 0.2s;
+    filter: grayscale(100%);
 }
 
 .pin-btn:hover {
@@ -459,6 +460,7 @@ font-size: 20px;
 .pin-btn.pinned {
     color: #f39c12; /* オレンジ色で固定中を主張 */
     background: rgba(243, 156, 18, 0.2);
+    filter: grayscale(0%);
 }
 
 /* ブーム角度パネルのクリック可能エリア */
