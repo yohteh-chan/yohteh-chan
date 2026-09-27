@@ -174,16 +174,23 @@ let SB = 0;
 let jibB = 0;
 let minAngle;
 let maxAngle;
+let BN;
 
 //定格荷重
 let minFrontNumber=1;
 let minRearNumber=1;
+let minRightNumber=1;
+let minLeftNumber=1;
 let outriggerLength=[1,1,1,1];//仮
 let FrontAngle;
 let RearAngle;
 let valForJadge=[];//J0 A3~
-let FrontJadge;//前方吊り判定
-let RearJadge;//後方吊り判定
+let WeightJadge;//前方・後方吊り判定
+let cabinAngle = 0 ;//旋回角度
+let colVal=0;
+let colVal1=0;//J0 アウトリガー幅
+let colVal2=0;//J0 ブーム長
+
 
 // ボタンイベント設定
 const SBB = document.getElementById('specail-boom-button');
@@ -233,8 +240,11 @@ async function loadCraneBaseData(model) {
         SL = BaseData[22][1];
 
     let BoomShift = DDData[3][2] / 100;
-    let BN = BaseData[1][15],
-        BoomSet = BaseData[2][15];
+    let BoomSet = BaseData[2][15];
+        BN = BaseData[1][15];
+
+    let BoomLength= BaseData.slice(4).map(row => row[15]);//ブーム格段の長さ
+  
 
     let footpinX = BaseData[1][9],
         footpinY = BaseData[2][9] - BoomShift;
@@ -252,14 +262,15 @@ async function loadCraneBaseData(model) {
 
     //定格荷重用
     let WRval;//作業半径
-    let cabinAngle = 0 ;//旋回角度
     let RadiusORAngle = J0Data[1][0]=="作業半径"?1:0;
     FrontAngle=BaseData[31][2];
     RearAngle=BaseData[31][16];
     valForJadge= J0Data.slice(2).map(row => row[0]);//J0 A3~
+    let FrontMode = BaseData[29][1];//前方吊りモードがあるかどうか
+    
 
-    FrontJadge = 0 ;//前方吊り判定
-    RearJadge = 0 ;//後方吊り判定
+    WeightJadge = 0 ;//前方・後方吊り判定
+
 
 
     
@@ -408,8 +419,8 @@ async function loadCraneBaseData(model) {
         DHCFcircle = $(`DHC-F-circle`),
         DHCTcircle = $(`DHC-T-circle`);
 
-    const boomEdgeLength = 0.4;
-    const boomVerticalLength = BoomWidth / 1000 / 5;
+    const boomEdgeLength = 0.4;//仮
+    const boomVerticalLength = BoomWidth / 1000 / 5;//仮
     boomLines[1]?.setAttribute('x2', window.Boom1th / 100 - boomEdgeLength * (BN - 1));
 
     for (let i = 2; i <= BN; i++) {
@@ -709,6 +720,8 @@ async function loadCraneBaseData(model) {
             }
         }
 
+        colVal2=BoomLength.findIndex(val => val >= length*100);
+
         
     });
 
@@ -832,44 +845,41 @@ if (outriggerSelect) {
   
                 outriggerBtns.forEach(btn => {
                     btn.classList.remove('selected'); // 全解除
+                    allBtn.classList.remove('selected');
 
-                    outriggerList.push({
-                        value: outriggerNumber+1,
-                        label: "未選択"
-                    });
+                // 値を空文字にして「未設定」にする
+                outriggerSelect.label = '未選択';
+                outriggerSelect.value = outriggerNumber+1;
+                    
                 });
                
         });
 
         logCurrentSelection('長さ変更');
       
-        cabinAngle=90; //確認用
+        
 
         FrontAngle=BaseData[1+minFrontNumber][30+minRearNumber];
         RearAngle=BaseData[15+minFrontNumber][30+minRearNumber];
 
-        //前方吊り　判定
-           if(minFrontNumber==outriggerNumber){
-                FrontJadge=1;
-           }else{
-            if((360-FrontAngle)<=cabinAngle||cabinAngle<=FrontAngle){
-                FrontJadge=1;
-            }else{
-                FrontJadge=0;
-            }
-           }
-           
-           //後方吊り　判定
-           if(minRearNumber==outriggerNumber){
-                RearJadge=1;
-           }else{
-            if((180-RearAngle)<=cabinAngle&&cabinAngle<=(180+RearAngle)){
-                RearJadge=1;
-            }else{
-                RearJadge=0;
-            }
-           }
+        console.log(minFrontNumber + " / " +minRearNumber);
 
+        //前方・後方吊り　判定
+
+        if(FrontMode==0){//前方吊りの有無
+            
+            if(cabinAngle<=FrontAngle||(180-RearAngle)<=cabinAngle&&cabinAngle<=(180+RearAngle)||cabinAngle>=(360-FrontAngle)){
+                WeightJadge=1;//最大張り出しでの定格荷重　適用
+            }else{
+                WeightJadge=0;//最大張り出しでの定格荷重　不適用
+            }
+        }else{
+
+            alert("未設定");//消すな
+        }
+
+        //console.log(FrontAngle + " / " +RearAngle);
+          
           MaxWait();//定格荷重ファッション　呼び出し
           
 
@@ -913,7 +923,10 @@ function logCurrentSelection(actionType) {
     minFrontNumber= Math.min(outriggerLength[0], outriggerLength[1]);//前方　張り出し具合
     minRearNumber= Math.min(outriggerLength[2], outriggerLength[3]);//後方　張り出し具合
 
-   
+    minRightNumber = Math.min(outriggerLength[1], outriggerLength[3]);
+    minLeftNumber = Math.min(outriggerLength[0], outriggerLength[2]);
+
+
 
 }
 
@@ -935,23 +948,57 @@ function logCurrentSelection(actionType) {
 
 //定格荷重
 function MaxWait(judgeVal){
+    //作業半径　or 作業角度　の縦方向の情報　位置　0スタート
+    const rowVal= valForJadge.findIndex(val => val > judgeVal);
+    if(WeightJadge=="undefined"){
+        WeightJadge=0;
+    }
 
+    cabinAngle=205; //確認用
 
- //定格荷重
+    switch (true){
+    case cabinAngle <= 45 || 315 < cabinAngle :
+        colVal1=minFrontNumber;
+    break;
+
+    case 45 < cabinAngle && cabinAngle <=135:
+        colVal1=minRightNumber;
+    break;
+
+    case 135 < cabinAngle && cabinAngle <=225:
+        colVal1=minRearNumber;
+    break;
+
+    case 225 < cabinAngle && cabinAngle <=315:
+        colVal1=minLeftNumber;
+    break;
+}   
+ //J0
     if(jibB==0){
-       
-       //作業半径　or 作業角度　の縦方向の情報　位置　0スタート
-       const rowVal= valForJadge.findIndex(val => val > judgeVal);
+        if(WeightJadge==0){
+            
 
 
-           console.log("FrontJadge/ ", FrontJadge );
-           console.log("RearJadge/ ",RearJadge);
+        }else{
 
-           //console.log("outriggerLength/ ",outriggerLength);
+
+        }
        
+
+
+           console.log("WeightJadge/ ", WeightJadge );
+      
+
+       //    console.log("outriggerLength/ ",outriggerLength);
        
+
+       colVal=1+(BN-colVal1)*BN+colVal2;//ここ
        
-       //console.log(rowVal);
+       console.log(colVal1);
+       console.log(colVal2);
+       console.log(colVal);
+    }else{
+        alert("未設定");
     }
 }
 
