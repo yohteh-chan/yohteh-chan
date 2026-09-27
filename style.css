@@ -449,6 +449,11 @@ font-size: 20px;
     border-radius: 3px;
     transition: color 0.2s, background 0.2s;
     filter: grayscale(100%);
+
+
+    position: static;
+  z-index: 99999;      /* サイドバーより確実に前面に出す */
+  pointer-events: auto; /* クリックイベントを確実に受け取る */
 }
 
 .pin-btn:hover {
@@ -858,6 +863,8 @@ font-size: 20px;
 
     align-self: stretch;
     flex: 1; /* 横幅の残りをすべて使う */
+
+    z-index: 1000;
 }
 
 /* サイドバーを折りたたんだ状態 */
