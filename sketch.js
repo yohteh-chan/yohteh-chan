@@ -82,7 +82,7 @@ async function getCraneData(model) {
         try {
             const parsedData = JSON.parse(localData);
             craneDataCache[model] = parsedData;
-            console.log(`[Cache Hit] localStorageから ${model} のデータを読み出しました`);
+
             return parsedData;
         } catch (e) {
             console.warn("キャッシュのパースに失敗したため再取得します", e);
@@ -626,17 +626,17 @@ async function loadCraneBaseData(model) {
         setAttrs(headLine, {
             'x1': length,
             'x2': length,
-            'y1': -7.54 / 2,
-            'y2': 8.6936 - 7.54 / 2,
-            'stroke-width': 2.51
+            'y1': -7.54 / 2,//仮
+            'y2': 8.6936 - 7.54 / 2,//仮
+            'stroke-width': 2.51//仮
         });
 
         let JAangle = toRad(jibAngle ? jibAngle.value : 0);
-        let jibHeadLineDist = 2;
-        let jibHeadY = 1.454;
-        let jibLine1thY = 1.454;
-        let jibLine2thY = 1.11;
-        let TenshionRodR = 2.72 / 10;
+        let jibHeadLineDist = 2;//仮
+        let jibHeadY = 1.454;//仮
+        let jibLine1thY = 1.454;//仮
+        let jibLine2thY = 1.11;//仮
+        let TenshionRodR = 2.72 / 10;//仮
 
         const setLine = (line, x1, x2, y1, y2) => {
             if (!line) return;
@@ -657,7 +657,7 @@ async function loadCraneBaseData(model) {
                 'stroke-width': TenshionRodR,
                 'x1': length,
                 'x2': length + window.jib1th * cosA,
-                'y1': -7.54 / 2,
+                'y1': -7.54 / 2,//仮
                 'y2': jibShift + window.jib1th * sinA
             });
 
@@ -721,15 +721,19 @@ async function loadCraneBaseData(model) {
 
 
     //BaseData[12+i][3]
-for (let i = outriggerNumber; i >= 1; i--) {
+for (let i = outriggerNumber+1; i >= 1; i--) {
     let labelText;
     const distanceVal = BaseData[11 + i][3]/1000; // 例: "7.0m" または 7.0
+
+    if (i === outriggerNumber+1) {
+        labelText = "未選択";
+    }
 
     if (i === outriggerNumber) {
         labelText = "最大 (" + distanceVal + "m)";
     } else if (i === 1) {
         labelText = "最小 (" + distanceVal + "m)";
-    } else {
+    } else if(i !=0 && i<outriggerNumber){
         labelText = "中間 (" + distanceVal + "m)";
     }
 
@@ -794,6 +798,8 @@ if (allBtn) {
             }
         });
 
+      
+
         updateAllBtnState();
         logCurrentSelection('ALLボタン操作');
     });
@@ -820,13 +826,24 @@ if (outriggerSelect) {
         selectedBtns.forEach(btn => {
             const pos = btn.dataset.position;
             if (pos && outriggerStates.hasOwnProperty(pos)) {
-                outriggerStates[pos] = selectedVal; // データを書き換え
+                outriggerStates[pos] = selectedVal; // データを書き換え   
             }
+
+  
+                outriggerBtns.forEach(btn => {
+                    btn.classList.remove('selected'); // 全解除
+
+                    outriggerList.push({
+                        value: outriggerNumber+1,
+                        label: "未選択"
+                    });
+                });
+               
         });
 
         logCurrentSelection('長さ変更');
       
-        //cabinAngle=0; //確認用
+        cabinAngle=90; //確認用
 
         FrontAngle=BaseData[1+minFrontNumber][30+minRearNumber];
         RearAngle=BaseData[15+minFrontNumber][30+minRearNumber];
@@ -923,11 +940,14 @@ function MaxWait(judgeVal){
  //定格荷重
     if(jibB==0){
        
-       //作業半径　or 作業角度
+       //作業半径　or 作業角度　の縦方向の情報　位置　0スタート
        const rowVal= valForJadge.findIndex(val => val > judgeVal);
+
 
            console.log("FrontJadge/ ", FrontJadge );
            console.log("RearJadge/ ",RearJadge);
+
+           //console.log("outriggerLength/ ",outriggerLength);
        
        
        
@@ -997,7 +1017,6 @@ function bringToFront(dialogEl) {
             e.stopPropagation();
             isBoomDialogPinned = !isBoomDialogPinned;
             pinBtn.classList.toggle('pinned', isBoomDialogPinned);
-            console.log('Pinned:', isBoomDialogPinned);
         });
     }
 
@@ -1352,11 +1371,13 @@ const boomDialog = document.getElementById('boom-angle-dialog');
         stateSelect.addEventListener('change', (e) => {
             if (activeBtn && activeBtn.dataset.position !== 'all') {
                 applyStateToBtn(activeBtn, e.target.value);
+                
             }
-        });
-
-        
+        });        
     }
+
+
+    
 
     // ボタンに状態クラスを付与するヘルパー関数
     function applyStateToBtn(btnElement, stateValue) {
@@ -1551,7 +1572,6 @@ const sidebar = document.querySelector('#sidebar'); // #sidebar で取得
 if (mainWorkspace && sidebar) {
   // パディングを含めた表示上の高さを取得（px単位の数値）
   const height = mainWorkspace.clientHeight;
-  console.log("高さ:", height + "px");
 
   // スタイルプロパティを使って高さを設定
   sidebar.style.height = `calc(${height}px)`;
