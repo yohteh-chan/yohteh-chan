@@ -99,7 +99,7 @@ body {
 /* SVGを囲う枠 */
 .canvas-wrapper {
     height: 100%;       /* 基本は高さいっぱいを目指す */
-    width: 80%;         /* 幅は比率に応じて自動決定 */
+    width: 80vh;         /* 幅は比率に応じて自動決定 */
     aspect-ratio: 1 / 1;
     background-color: #15191c; /* グラフ内の背景はさらに暗く */
     border-radius: 6px;
