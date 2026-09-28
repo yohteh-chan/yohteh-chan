@@ -347,19 +347,7 @@ font-size: 20px;
   color: #ccc;
 }
 
-/* 閉じるボタン */
-.close-btn {
-  background: none;
-  border: none;
-  color: #aaa;
-  font-size: 20px;
-  cursor: pointer;
-  line-height: 1;
-}
 
-.close-btn:hover {
-  color: #fff;
-}
 
 /* SVG内のブーム要素をホバーしたときにカーソルをポインターにする */
 #boom {
@@ -468,22 +456,22 @@ font-size: 20px;
 
 }
 
-/* ピンボタンのスタイル */
-.pin-btn {
+.pin-btn, .close-btn {
     background: none;
     border: none;
-    color: #aaa;
-    font-size: 14px;
+    color: #ecf0f1;
+    font-size: 16px;
     cursor: pointer;
-    padding: 2px 4px;
-    border-radius: 3px;
-    transition: color 0.2s, background 0.2s;
-    filter: grayscale(100%);
+    padding: 4px 8px;
+}
 
+.close-btn {
+    font-size: 16px;
+    padding: 8px 16px;
+}
 
-    position: static;
-  z-index: 99999;      /* サイドバーより確実に前面に出す */
-  pointer-events: auto; /* クリックイベントを確実に受け取る */
+.pin-btn {
+     filter: grayscale(100%);
 }
 
 .pin-btn:hover {
@@ -493,8 +481,7 @@ font-size: 20px;
 
 /* ピン留めアクティブ時のスタイル */
 .pin-btn.pinned {
-    color: #f39c12; /* オレンジ色で固定中を主張 */
-    background: rgba(243, 156, 18, 0.2);
+
     filter: grayscale(0%);
 }
 
@@ -508,7 +495,9 @@ font-size: 20px;
 }
 
 
-
+.close-btn:hover {
+    color: #e74c3c;
+}
 
 
 /* ラベルと数値の横並び配置 */
@@ -937,23 +926,33 @@ body.sidebar-open #toggle-sidebar-btn {
 
 
 
-/* タブバー */
+/* タブバー兼ドラッグヘッダー */
 .dialog-tabs {
-  display: flex;
-  background-color: rgba(34, 34, 34, 0.5);
-  border-bottom: 1px solid #ccc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #2c3e50;
+    padding: 0 0px;
+    cursor: move; /* ドラッグ可能であることを示すカーソル */
+    user-select: none;
+}
+
+/* 左側のタブグループ */
+.tabs-group {
+    display: flex;
+    gap: 2px;
 }
 
 /* 各タブボタン */
 .tab-btn {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 14px;
-  color: #fff;
-  transition: background-color 0.2s, border-bottom 0.2s;
+    padding: 8px 16px;
+    border: none;
+    background-color: #34495e;
+    color: #ecf0f1;
+    cursor: pointer;
+    font-size: 13px;
+    border-radius: 4px 4px 0 0;
+    transition: background-color 0.2s;
 }
 
 .tab-btn:hover {
@@ -966,6 +965,10 @@ body.sidebar-open #toggle-sidebar-btn {
   font-weight: bold;
   border-bottom: 3px solid #3498db;
 }
+
+
+
+
 
 /* コンテンツ切り替え */
 .dialog-body {

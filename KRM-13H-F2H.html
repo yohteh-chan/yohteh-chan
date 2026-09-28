@@ -155,32 +155,36 @@
 
             <button id="clear-cache-btn">スプレッドシートを更新した</button>
 
+            
+
+
+
+
+
+
+
+
+
+
+
 
 <dialog id="boom-angle-dialog" class="popup-window">
-    <div id="boom-angle-dialog-header" class="popup-header">
-        <span>ブーム設定</span>
+    <!-- 最上部のドラッグヘッダーを兼ねたタブバー -->
+    <div id="boom-angle-dialog-header" class="dialog-tabs popup-header">
+        <div class="tabs-group">
+            <button type="button" class="tab-btn active" data-tab="tab-boom">ブーム設定</button>
+            <button type="button" class="tab-btn" data-tab="tab-jib">ジブ設定</button>
+        </div>
         <div class="header-controls">
-        <button type="button" id="pin-boom-angle-dialog" class="pin-btn">📌</button>
-        <button type="button" id="close-boom-angle-dialog" class="close-btn">&times;</button>
-    </div>
-    </div>
-
-
-
-<!-- タブ切り替えボタン -->
-    <div class="dialog-tabs">
-        <button type="button" class="tab-btn active" data-tab="tab-boom">ブーム設定</button>
-        <button type="button" class="tab-btn" data-tab="tab-jib">ジブ設定</button>
+            <button type="button" id="pin-boom-angle-dialog" class="pin-btn">📌</button>
+            <button type="button" id="close-boom-angle-dialog" class="close-btn">&times;</button>
+        </div>
     </div>
 
-    <!-- タブコンテンツエリア -->
+    <!-- ダイアログコンテンツ本体 -->
     <div class="dialog-body">
-        <!-- ブーム設定タブ -->
         <div id="tab-boom" class="tab-content active">
-           
-
-
-<input type="button" id="specail-boom-button" value="特殊伸縮" class="toggle-btn">
+            <input type="button" id="specail-boom-button" value="特殊伸縮" class="toggle-btn">
 
 <input type="button" id="jib-Btn" value="ジブ" class="jib-Btn">
 
@@ -243,6 +247,33 @@
 
 
         </div>
+
+
+
+        </div>
+        <div id="tab-jib" class="tab-content">
+            <!-- ジブ関連の新規UI -->
+        </div>
+    </div>
+</dialog>
+
+
+
+
+
+
+
+
+    <!-- タブコンテンツエリア -->
+    <div class="dialog-body">
+        <!-- ブーム設定タブ -->
+        <div id="tab-boom" class="tab-content active">
+           
+
+
+
+
+
 
 
 

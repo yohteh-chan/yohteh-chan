@@ -1411,6 +1411,9 @@ let isUpdatingUI = false;
 function makeElementDraggable(dialogEl, headerEl) {
         if (!dialogEl || !headerEl) return;
 
+
+     
+
         let isDragging = false;
         let startX = 0;
         let startY = 0;
@@ -1442,7 +1445,8 @@ function makeElementDraggable(dialogEl, headerEl) {
         // ドラッグ開始
         headerEl.addEventListener('pointerdown', (e) => {
             // 閉じるボタンやピンボタンをクリックした時はドラッグを開始しない
-            if (e.target.closest('.close-btn') || e.target.closest('.pin-btn')) return;
+            if (e.target.closest('.close-btn') || e.target.closest('.pin-btn') || e.target.closest('.tab-btn')) return;
+
 
             isDragging = true;
             headerEl.setPointerCapture(e.pointerId);
@@ -1468,6 +1472,18 @@ function makeElementDraggable(dialogEl, headerEl) {
         headerEl.addEventListener('pointermove', (e) => {
             if (!isDragging) return;
 
+
+        const newX = e.clientX - startX;
+        const newY = e.clientY - startY;
+
+        // ★前回の位置からの移動距離を加算
+        dragDistance += Math.hypot(newX - currentX, newY - currentY);
+
+        // ★少しでも動いたらダイアログ側に「ドラッグ中」フラグを立てる
+        if (dragDistance > 5) {
+            dialogEl.dataset.hasDragged = 'true';
+        }
+
             currentX = e.clientX - startX;
             currentY = e.clientY - startY;
 
@@ -1483,6 +1499,11 @@ function makeElementDraggable(dialogEl, headerEl) {
                 headerEl.releasePointerCapture(e.pointerId);
             } catch (err) {}
             headerEl.style.cursor = 'move';
+
+            // ★クリック処理（イベントバブリング）が終わった直後にフラグを解除
+        setTimeout(() => {
+            delete dialogEl.dataset.hasDragged;
+        }, 50);
         };
 
         headerEl.addEventListener('pointerup', stopDrag);
@@ -1503,7 +1524,13 @@ function makeElementDraggable(dialogEl, headerEl) {
                 dialogEl.removeAttribute('open');
             }
         });
+
+
+
+        
     }
+
+   
 
     // ----------------------------------------------------
     // アウトリガーダイアログの初期化とイベント設定
@@ -2065,5 +2092,13 @@ function handleContinuousInput(e) {
         e.preventDefault();
         changeLengthSliderValue(-step);
         changeBoomSliderValue(-step);
+    }
+
+   if (pressedKeys.has('x')) {
+    e.preventDefault();
+        // キーの長押し連打（e.repeat）でなければ実行
+        if (!e.repeat && SBB) {
+            SBB.click();
+        }
     }
 }
