@@ -182,6 +182,9 @@ let MaxWeight;//定格荷重
 let DengerAngle;//危険角度
 let cachedLimitIndex = -1;// 危険角度のインデックス保持用キャッシュ変数
 
+
+let isInitializing = false;// 初期化中かどうかを判定するフラグ
+
 //定格荷重
 let minFrontNumber=1;
 let minRearNumber=1;
@@ -222,6 +225,10 @@ jibBtn?.addEventListener('click', () => {
 
 
 async function loadCraneBaseData(model) {
+
+isInitializing = true;// 1. 初期化開始を記録（呼び出しをブロック）
+
+try {
     const data = await getCraneData(model);
     if (!data) return;
 
@@ -486,8 +493,8 @@ async function loadCraneBaseData(model) {
     });
 
     let isSliderTicking = false;
-
-    slider?.addEventListener('input', (e) => {
+if (slider) {
+    slider.oninput = (e) => {
 
         if (!isSliderTicking) {
         isSliderTicking = true;
@@ -581,9 +588,12 @@ async function loadCraneBaseData(model) {
 
             });
         }
-    });
+    };
 
-    lengthSlider?.addEventListener('input', (e) => {
+}
+
+if(lengthSlider){
+    lengthSlider.oninput = (e) => {
         
         
         const length = parseFloat(e.target.value);
@@ -762,8 +772,8 @@ async function loadCraneBaseData(model) {
 
 
         initArcSlider();
-    });
-
+    };
+}
 
 //アウトリガー
     try {
@@ -978,6 +988,17 @@ function logCurrentSelection(actionType) {
 
     // データ読み込みがすべて完了してから円弧スライダーを初期化
     initArcSlider();
+
+    
+
+    } finally {
+        // 2. すべての初期化が完了したらブロックを解除
+        isInitializing = false;
+        
+    }
+
+    // 3. 初期化が完了したこのタイミングで、1度だけ画面・計算を更新する
+    dengerAngle();
     
 }
 
@@ -1014,15 +1035,21 @@ function MaxWeit(judgeVal){
        weight="未設定";//ここ
     }
 
-
     //定格荷重　表示
     MaxWeight.textContent=weight;
 }
 
 
+
+
 let DA;
+
 //危険角度
 function dengerAngle(){
+
+    if (isInitializing) {
+        return;
+    }
     
     
     if(jibB==0){
@@ -1032,7 +1059,8 @@ function dengerAngle(){
 
     }
 
-   // console.log("DA",DA);
+ 
+    console.log("DA",DA);
     
     
 }
@@ -1089,6 +1117,43 @@ function resetAllBoomLength() {
     });
 }
 
+
+
+// スクロールを発生させるキーコードのリスト
+const keys = [
+  'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', // 矢印キー
+  'Space', 'PageUp', 'PageDown', 'Home', 'End'       // スペース、ページ移動など
+];
+
+// デフォルト動作（スクロール）を防止する関数
+function preventDefault(e) {
+  e.preventDefault();
+}
+
+// キーボードによるスクロールを防止する関数
+function preventDefaultForScrollKeys(e) {
+  if (keys.includes(e.code)) {
+    e.preventDefault();
+  }
+}
+
+// スクロール禁止を有効にする関数
+function disableScroll() {
+  // マウスホイール
+  window.addEventListener('wheel', preventDefault, { passive: false });
+  // タッチ操作（スマホ・タブレット用）
+  window.addEventListener('touchmove', preventDefault, { passive: false });
+  // キーボード操作
+  window.addEventListener('keydown', preventDefaultForScrollKeys, { passive: false });
+}
+
+// スクロール禁止を解除する関数
+function enableScroll() {
+  window.removeEventListener('wheel', preventDefault);
+  window.removeEventListener('touchmove', preventDefault);
+  window.removeEventListener('keydown', preventDefaultForScrollKeys);
+}
+
 // モーダルのピン留め状態を管理するフラグ（全体で参照できるように外に配置）
 let isBoomDialogPinned = false;
 
@@ -1136,6 +1201,7 @@ function bringToFront(dialogEl) {
             dialog.style.transform = `translate(${posX}px, ${posY}px)`;
             dialog.show();
         }
+        disableScroll();
     }
 
     if (boomGroup) boomGroup.addEventListener('click', openBoomDialog);
@@ -1159,8 +1225,11 @@ function bringToFront(dialogEl) {
 
             if (!isClickInsideDialog && !isClickOnTrigger) {
                 dialog.close();
+                enableScroll();
             }
+            
         }
+        
     });
 
     // ドラッグ処理
@@ -1531,6 +1600,10 @@ function describeArc(x, y, radius, startAngle, endAngle) {
 
 // 円弧スライダーの初期化関数
 function initArcSlider() {
+
+    if (isInitializing) {
+        return;
+    }
   
 
     const svg = document.getElementById('arc-slider-svg');
@@ -1747,7 +1820,6 @@ if (outriggerSelect) {
 
 const boomSlider = document.getElementById('boom-slider');
 const lengthSlider = document.getElementById('boom-length-slider');
-let CCC=0;
 
 
 // スライダー値を安全に更新して input イベントを発火する共通関数
@@ -1800,8 +1872,13 @@ function changeLengthSliderValue(delta) {
 
 }
 
+
+
+
+if(window){
+
 // 1. マウスホイールでの操作
-window.addEventListener('wheel', (e) => {
+window.onwheel=(e) => {
     const step = 1;
     // ホイール上スクロール（deltaY < 0）で増加、下スクロールで減少
     if (e.deltaY < 0) {
@@ -1810,10 +1887,12 @@ window.addEventListener('wheel', (e) => {
         changeBoomSliderValue(-step);
     }
 
-}, { passive: true });
 
-// 2. キーボード操作（↑ / ↓ / W / S）
-window.addEventListener('keydown', (e) => {
+}, { passive: true };
+
+
+    // 2. キーボード操作（↑ / ↓ / W / S）
+window.onkeydown= (e) => {
     // 入力フォーム（input, textarea）にフォーカスがある時はスキップ
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
         // 操作対象のスライダー自体にフォーカスがある場合を除く
@@ -1841,7 +1920,42 @@ window.addEventListener('keydown', (e) => {
         changeLengthSliderValue(step);  // 増加
     }
 
-});
+    if (key === 'q' || key === 'e') {
+        e.preventDefault(); // 横スクロールなどの既定動作を防止
+        changeLengthSliderValue(step);
+        changeBoomSliderValue(step);
+    } else if (key === 'z' || key === 'c') {
+        e.preventDefault(); // 横スクロールなどの既定動作を防止
+        changeLengthSliderValue(-step);
+        changeBoomSliderValue(-step);
+    }
+
+};
+
+
+window.onclick = (e) => {
+  const sidebar = document.getElementById('sidebar');
+  const btn = document.getElementById('toggle-sidebar-btn');
+  const body = document.body;
+
+  if (!sidebar || !btn) return;
+
+  // サイドバーが開いているか判定（collapsedクラスが付いていない状態）
+  const isOpen = !sidebar.classList.contains('collapsed');
+
+  if (isOpen) {
+    // クリックされた要素が「サイドバー内部」でも「開閉ボタン内部」でもない場合
+    if (!sidebar.contains(e.target) && !btn.contains(e.target)) {
+      sidebar.classList.add('collapsed');
+      body.classList.remove('sidebar-open');
+      btn.textContent = '▶クレーン';
+    }
+  }
+};
+
+
+
+}
 
 
 
