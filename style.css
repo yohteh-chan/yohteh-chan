@@ -99,12 +99,13 @@ body {
 /* SVGを囲う枠 */
 .canvas-wrapper {
     height: 100%;       /* 基本は高さいっぱいを目指す */
-    width: 80vh;         /* 幅は比率に応じて自動決定 */
+    width: 80%;         /* 幅は比率に応じて自動決定 */
     aspect-ratio: 1 / 1;
     background-color: #15191c; /* グラフ内の背景はさらに暗く */
     border-radius: 6px;
     border: 1px solid #1c2126;
     overflow: hidden;
+    
     margin: 0 auto;
 }
 
@@ -213,6 +214,7 @@ font-size: 20px;
     background-color: #22272d; /* 左右のパネルと同じ背景色 */
     border-radius: 8px; /* 角丸 */
     padding: 1vw; /* 内側の余白 */
+    width: 100vw;
       
     align-items: flex-start; /* stickyを機能させるために必須 */
 }
@@ -892,11 +894,6 @@ font-size: 20px;
     
 }
 
-.crane-chart{
-    width: 100% ;
-    height: 100% ;
-    
-}
 
 /* 開閉ボタンの基本設定（最初の位置） */
 #toggle-sidebar-btn {

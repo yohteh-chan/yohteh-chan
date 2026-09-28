@@ -374,7 +374,8 @@ try {
         circle.setAttribute('cy', -tireY);
     });
 
-    $('crane-chart')?.setAttribute('viewBox', '0 0 ' + (MaxHolizon) + ' ' + (MaxHight));$('boom-slider')?.setAttribute('max', BoomMaxAngle);
+    $('crane-chart')?.setAttribute('viewBox', '0 0 ' + (MaxHolizon) + ' ' + (MaxHight));
+    $('boom-slider')?.setAttribute('max', BoomMaxAngle);
 
     const el = $('boom-length-slider');
     if (el) {
@@ -1223,6 +1224,7 @@ function bringToFront(dialogEl) {
             isBoomDialogPinned = !isBoomDialogPinned;
             pinBtn.classList.toggle('pinned', isBoomDialogPinned);
         });
+        
     }
 
     // ダイアログを開く共通関数
@@ -1263,7 +1265,6 @@ function bringToFront(dialogEl) {
             }
           
         }
-        
     });
 
     // ドラッグ処理
