@@ -1060,7 +1060,7 @@ function dengerAngle(){
     }
 
  
-    console.log("DA",DA);
+    //console.log("DA",DA);
     
     
 }
@@ -1179,9 +1179,18 @@ document.addEventListener('DOMContentLoaded', () => {
     let isBoomDialogPinned = false; // 未定義エラー防止のための変数定義
     let highestZIndex = 1000;
 
+    let tabDrag = false;
+
 
     tabs.forEach(tab => {
     tab.addEventListener('click', () => {
+
+      if(tabDrag==true){
+        tabDrag=false;
+        return;
+      }
+  
+
       const targetId = tab.getAttribute('data-tab');
 
       // 全てのタブから active クラスを削除して、クリックされたタブだけに付与
@@ -1227,6 +1236,7 @@ function bringToFront(dialogEl) {
         disableScroll();
     }
 
+    
     if (boomGroup) boomGroup.addEventListener('click', openBoomDialog);
     if (BoomTrigger) BoomTrigger.addEventListener('click', openBoomDialog);
 
@@ -1234,6 +1244,7 @@ function bringToFront(dialogEl) {
         closeBtn.addEventListener('click', () => {
             isBoomDialogPinned = false;
             if (pinBtn) pinBtn.classList.remove('pinned');
+            
             dialog.close();
         });
     }
@@ -1250,7 +1261,7 @@ function bringToFront(dialogEl) {
                 dialog.close();
                 enableScroll();
             }
-            
+          
         }
         
     });
@@ -1270,6 +1281,11 @@ function bringToFront(dialogEl) {
             if (!isDragging) return;
             posX = e.clientX - startX;
             posY = e.clientY - startY;
+
+            if(startX>20||startY>20){
+                tabDrag=true;
+            }
+
             dialog.style.transform = `translate(${posX}px, ${posY}px)`;
         });
 
@@ -1376,7 +1392,7 @@ let isUpdatingUI = false;
             const dotRadius = 8;
 
             const percent = ((val - min) / (max - min)) * 100;
-            //span.style.left = `${percent}%`;
+    
 
             span.style.left = `calc(${percent}% + (${dotRadius}px - ${percent * (dotRadius * 2 / 100)}px))`;
 
@@ -1411,8 +1427,7 @@ let isUpdatingUI = false;
 function makeElementDraggable(dialogEl, headerEl) {
         if (!dialogEl || !headerEl) return;
 
-
-     
+       
 
         let isDragging = false;
         let startX = 0;
@@ -1447,7 +1462,6 @@ function makeElementDraggable(dialogEl, headerEl) {
             // 閉じるボタンやピンボタンをクリックした時はドラッグを開始しない
             if (e.target.closest('.close-btn') || e.target.closest('.pin-btn') || e.target.closest('.tab-btn')) return;
 
-
             isDragging = true;
             headerEl.setPointerCapture(e.pointerId);
 
@@ -1472,18 +1486,6 @@ function makeElementDraggable(dialogEl, headerEl) {
         headerEl.addEventListener('pointermove', (e) => {
             if (!isDragging) return;
 
-
-        const newX = e.clientX - startX;
-        const newY = e.clientY - startY;
-
-        // ★前回の位置からの移動距離を加算
-        dragDistance += Math.hypot(newX - currentX, newY - currentY);
-
-        // ★少しでも動いたらダイアログ側に「ドラッグ中」フラグを立てる
-        if (dragDistance > 5) {
-            dialogEl.dataset.hasDragged = 'true';
-        }
-
             currentX = e.clientX - startX;
             currentY = e.clientY - startY;
 
@@ -1499,11 +1501,6 @@ function makeElementDraggable(dialogEl, headerEl) {
                 headerEl.releasePointerCapture(e.pointerId);
             } catch (err) {}
             headerEl.style.cursor = 'move';
-
-            // ★クリック処理（イベントバブリング）が終わった直後にフラグを解除
-        setTimeout(() => {
-            delete dialogEl.dataset.hasDragged;
-        }, 50);
         };
 
         headerEl.addEventListener('pointerup', stopDrag);
@@ -1524,13 +1521,7 @@ function makeElementDraggable(dialogEl, headerEl) {
                 dialogEl.removeAttribute('open');
             }
         });
-
-
-
-        
     }
-
-   
 
     // ----------------------------------------------------
     // アウトリガーダイアログの初期化とイベント設定
@@ -1796,6 +1787,7 @@ function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   const btn = document.getElementById('toggle-sidebar-btn');
   const body = document.body;
+  const BoomTrigger = document.getElementById('boom-trigger');
   
   if (!sidebar || !btn) return;
 
@@ -1806,8 +1798,10 @@ function toggleSidebar() {
     // 閉じた状態
     body.classList.remove('sidebar-open');
     btn.textContent = '▶クレーン';
+    BoomTrigger.classList.remove('selected');
   } else {
     // 開いた状態
+    BoomTrigger.classList.add('selected');
     body.classList.add('sidebar-open');
     btn.textContent = '◀クレーン';
   }
@@ -2000,6 +1994,7 @@ window.onclick = (e) => {
   const sidebar = document.getElementById('sidebar');
   const btn = document.getElementById('toggle-sidebar-btn');
   const body = document.body;
+  const BoomTrigger = document.getElementById('boom-trigger');
 
   if (!sidebar || !btn) return;
 
@@ -2011,6 +2006,7 @@ window.onclick = (e) => {
     if (!sidebar.contains(e.target) && !btn.contains(e.target)) {
       sidebar.classList.add('collapsed');
       body.classList.remove('sidebar-open');
+      BoomTrigger.classList.remove('selected');
       btn.textContent = '▶クレーン';
     }
   }
@@ -2021,6 +2017,41 @@ window.onclick = (e) => {
 }
 
 
+
+// Ctrlキーが押されているかを管理するフラグ
+let isCtrlPressed = false;
+
+// キーが押されたとき（keydown）
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Control' || e.ctrlKey) {
+        isCtrlPressed = true;
+    }
+});
+
+// キーが離されたとき（keyup）★重要
+window.addEventListener('keyup', (e) => {
+    if (e.key === 'Control' || !e.ctrlKey) {
+        isCtrlPressed = false;
+    }
+});
+
+// フォーカスが外れた場合も念のためフラグをリセット
+window.addEventListener('blur', () => {
+    isCtrlPressed = false;
+});
+
+// ページ離脱時の判定
+window.addEventListener('beforeunload', (e) => {
+    // ★ Ctrlキーが押されている時だけ警告ダイアログを発火させる
+
+    if (isCtrlPressed) {
+        e.preventDefault();
+        isCtrlPressed = false;
+        return '';
+    }
+
+
+});
 
 
 
@@ -2039,15 +2070,22 @@ window.addEventListener('keydown', (e) => {
     const key = e.key.toLowerCase();
     pressedKeys.add(key);
 
-    // 操作キーまたはShiftキーが押された場合に処理を実行
+
+
+   // 操作キーまたはShiftキーが押された場合に処理を実行
     handleContinuousInput(e);
 });
 
+
+   
+   
 // キーが離されたとき
 window.addEventListener('keyup', (e) => {
     const key = e.key.toLowerCase();
     pressedKeys.delete(key);
 });
+
+
 
 // スライダー移動処理
 function handleContinuousInput(e) {
@@ -2101,4 +2139,7 @@ function handleContinuousInput(e) {
             SBB.click();
         }
     }
+
+
+ 
 }

@@ -825,8 +825,13 @@ font-size: 20px;
 }
 
 
-/* #boom-trigger にマウスを乗せたときにカーソルを🪝に変更 */
 #boom-trigger {
+    cursor: pointer;
+}
+
+
+/* #boom-trigger にマウスを乗せたときにカーソルを🪝に変更 */
+#boom-trigger.selected {
     cursor: 
         /* 第1候補: オレンジブーム ＋ ワイヤー ＋ 反転フック */
         url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><path d='M3 29 L22 10' stroke='%23e67e22' stroke-width='3.5' stroke-linecap='round'/><path d='M22 10 L22 18' stroke='%23666' stroke-width='1.5' stroke-dasharray='2 2'/><text x='14' y='30' font-size='15'>🪝</text></svg>") 22 24,
@@ -837,7 +842,6 @@ font-size: 20px;
         /* 最終フォールバック: ブラウザ標準のポインター */
         pointer;
 }
-
 
 
 
