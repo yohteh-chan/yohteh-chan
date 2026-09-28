@@ -475,8 +475,7 @@ font-size: 20px;
 }
 
 .pin-btn:hover {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.1);
+    filter: grayscale(0%);
 }
 
 /* ピン留めアクティブ時のスタイル */
