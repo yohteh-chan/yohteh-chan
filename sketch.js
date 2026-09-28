@@ -1169,12 +1169,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const BoomTrigger = document.getElementById('boom-trigger');
     const outriggerBtns = document.querySelectorAll('.outrigger-btn');
     const stateSelect = document.getElementById('outrigger-state-select');
+    
+    const tabs = document.querySelectorAll('.dialog-tabs .tab-btn');
+    const contents = document.querySelectorAll('.dialog-body .tab-content');
 
     let activeBtn = null;
 
     let posX = 0, posY = 0;
     let isBoomDialogPinned = false; // 未定義エラー防止のための変数定義
     let highestZIndex = 1000;
+
+
+    tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const targetId = tab.getAttribute('data-tab');
+
+      // 全てのタブから active クラスを削除して、クリックされたタブだけに付与
+      tabs.forEach(btn => btn.classList.remove('active'));
+      tab.classList.add('active');
+
+      // 全てのコンテンツを非表示にし、対象のコンテンツのみ表示
+      contents.forEach(content => content.classList.remove('active'));
+      const targetContent = document.getElementById(targetId);
+      if (targetContent) {
+        targetContent.classList.add('active');
+      }
+    });
+  });
+
+
 
 function bringToFront(dialogEl) {
         if (!dialogEl) return;
@@ -1847,6 +1870,7 @@ function changeBoomSliderValue(delta) {
 // スライダー値を安全に更新する共通関数
 function changeLengthSliderValue(delta) {
     if (!lengthSlider) return;
+    
 
     const min = parseFloat(lengthSlider.min) || 53;//仮
     const max = parseFloat(lengthSlider.max) || 240;//仮
@@ -1879,7 +1903,15 @@ if(window){
 
 // 1. マウスホイールでの操作
 window.onwheel=(e) => {
-    const step = 1;
+
+   
+    let step = 1;
+
+
+     if (e.shiftKey) {
+        step *= 5;
+    }
+
     // ホイール上スクロール（deltaY < 0）で増加、下スクロールで減少
     if (e.deltaY < 0) {
         changeBoomSliderValue(step);
@@ -1901,8 +1933,12 @@ window.onkeydown= (e) => {
         }
     }
 
-    const step = 0.5;
+    let step = 0.5;
     const key = e.key.toLowerCase();
+
+     if (e.shiftKey) {
+        step *= 5;
+    }
 
     if (key === 'arrowup' || key === 'w') {
         e.preventDefault(); // 画面スクロールを防ぐ
@@ -1961,3 +1997,73 @@ window.onclick = (e) => {
 
 
 
+// 現在押されているキーを保持するセット
+const pressedKeys = new Set();
+
+// キーが押されたとき
+window.addEventListener('keydown', (e) => {
+    // 入力フォームにフォーカスがある時はスキップ
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
+        if (document.activeElement !== lengthSlider && document.activeElement !== boomSlider) {
+            return;
+        }
+    }
+
+    const key = e.key.toLowerCase();
+    pressedKeys.add(key);
+
+    // 操作キーまたはShiftキーが押された場合に処理を実行
+    handleContinuousInput(e);
+});
+
+// キーが離されたとき
+window.addEventListener('keyup', (e) => {
+    const key = e.key.toLowerCase();
+    pressedKeys.delete(key);
+});
+
+// スライダー移動処理
+function handleContinuousInput(e) {
+    // Shiftキーが現在押されているか確認
+    let step = 0.5;
+    if (e.shiftKey || pressedKeys.has('shift')) {
+        step *= 5;
+    }
+
+    // --- 上下操作（ブーム角度） ---
+    if (pressedKeys.has('arrowup') || pressedKeys.has('w')) {
+        e.preventDefault();
+        changeBoomSliderValue(step);
+    } else if (pressedKeys.has('arrowdown') || pressedKeys.has('s')) {
+        e.preventDefault();
+        changeBoomSliderValue(-step);
+    }
+
+    // --- 左右操作（ブーム長さ） ---
+    if (pressedKeys.has('arrowleft') || pressedKeys.has('a')) {
+        e.preventDefault();
+        changeLengthSliderValue(-step);
+    } else if (pressedKeys.has('arrowright') || pressedKeys.has('d')) {
+        e.preventDefault();
+        changeLengthSliderValue(step);
+    }
+
+    // --- 斜め操作 ---
+    if (pressedKeys.has('e')) {
+        e.preventDefault();
+        changeLengthSliderValue(step);
+        changeBoomSliderValue(step);
+    } else if (pressedKeys.has('q')) {
+        e.preventDefault();
+        changeLengthSliderValue(-step);
+        changeBoomSliderValue(step);
+    } else if (pressedKeys.has('c')) {
+        e.preventDefault();
+        changeLengthSliderValue(step);
+        changeBoomSliderValue(-step);
+    } else if (pressedKeys.has('z')) {
+        e.preventDefault();
+        changeLengthSliderValue(-step);
+        changeBoomSliderValue(-step);
+    }
+}

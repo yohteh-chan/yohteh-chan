@@ -60,7 +60,10 @@
     align-items: stretch;
 }
 
-
+/* ページ全体をスクロール不可にする */
+html, body {
+    overflow: hidden;
+}
 
 
 /* タイトル（上部リボン）のデザインをダークモードに合わせる */
@@ -83,6 +86,11 @@
 body {
     background-color: #1a1e22;
     color: #e0e0e0;
+
+    -webkit-user-select: none; /* Safari / Chrome */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* IE / Edge */
+  user-select: none;         /* 標準 */
 }
 
 /*background-color: rgba(226, 219, 219);*/
@@ -923,4 +931,52 @@ font-size: 20px;
 
 body.sidebar-open #toggle-sidebar-btn {
     left: 31vw;             /* ★サイドバーの幅(280px) + ボタンの余白(15px) = 295px に移動 */
+}
+
+
+
+
+
+/* タブバー */
+.dialog-tabs {
+  display: flex;
+  background-color: rgba(34, 34, 34, 0.5);
+  border-bottom: 1px solid #ccc;
+}
+
+/* 各タブボタン */
+.tab-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  color: #fff;
+  transition: background-color 0.2s, border-bottom 0.2s;
+}
+
+.tab-btn:hover {
+  background-color: rgba(34, 34, 34, 0.5);
+}
+
+/* アクティブ（選択中）のタブ */
+.tab-btn.active {
+  background-color: rgba(34, 34, 34, 0.5);
+  font-weight: bold;
+  border-bottom: 3px solid #3498db;
+}
+
+/* コンテンツ切り替え */
+.dialog-body {
+  padding: 16px;
+  background-color: rgba(34, 34, 34, 0.5);
+}
+
+.tab-content {
+  display: none; /* 基本は非表示 */
+}
+
+.tab-content.active {
+  display: block; /* アクティブなものだけ表示 */
 }

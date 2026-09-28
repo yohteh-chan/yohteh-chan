@@ -71,7 +71,6 @@
                     <g class="axis-labels-y" id="axis-labels-y" fill="#fff" font-size="12" text-anchor="middle"></g>
 
                     
-
                      <!-- ブームのグループ -->
                     <g id="boom"></g>
                     <g id="edge"></g>
@@ -155,28 +154,6 @@
 
 
             <button id="clear-cache-btn">スプレッドシートを更新した</button>
-    <!-- ▼▽▼▽　消してもいい　▼▽▼▽ -->
-    <div id="All-Distance">全長：読み込み中...</div><!-- 全長 -->
-    <div id="Carrier-Distance">車体長：読み込み中...</div><!-- 車体長 -->
-    <div id="Carrier-width">車体幅：読み込み中...</div><!-- 車体幅 -->
-    <div id="Boom-1st.distance">ブーム一段目：読み込み中...</div><!-- ブーム一段目長 -->
-    <div id="Boom-2nd.distance">ブーム二段目：読み込み中...</div><!-- ブーム二段目長 -->
-    <div id="Boom-3rd.distance">ブーム三段目：読み込み中...</div><!-- ブーム三段目長 -->
-    <div id="Boom-4th.distance">ブーム四段目：読み込み中...</div><!-- ブーム四段目長 -->
-    <div id="Boom-5th.distance">ブーム五段目：読み込み中...</div><!-- ブーム五段目長 -->
-    <div id="Boom-6th.distance">ブーム六段目：読み込み中...</div><!-- ブーム六段目長 -->
-    <!-- ▲△▲△　消してもいい　▲△▲△ -->
-     
-    <br>
-
-    <!--▽▼▽使うかも▽▼▽-->
-    <div id="Outrigger-1st.distance">アウトリガー最小：読み込み中...</div><!-- アウトリガー最小 -->
-    <div id="Outrigger-2nd.distance">アウトリガー二段目：読み込み中...</div><!-- アウトリガー二段目 -->
-    <div id="Outrigger-3rd.distance">アウトリガー三段目：読み込み中...</div><!-- アウトリガー三段目 -->
-    <div id="Outrigger-4th.distance">アウトリガー四段目：読み込み中...</div><!-- アウトリガー四段目 -->
-    <div id="Outrigger-5th.distance">アウトリガー五段目：読み込み中...</div><!-- アウトリガー五段目 -->
-
-    <!--▲△▲使うかも▲△▲-->
 
 
 <dialog id="boom-angle-dialog" class="popup-window">
@@ -188,6 +165,19 @@
     </div>
     </div>
 
+
+
+<!-- タブ切り替えボタン -->
+    <div class="dialog-tabs">
+        <button type="button" class="tab-btn active" data-tab="tab-boom">ブーム設定</button>
+        <button type="button" class="tab-btn" data-tab="tab-jib">ジブ設定</button>
+    </div>
+
+    <!-- タブコンテンツエリア -->
+    <div class="dialog-body">
+        <!-- ブーム設定タブ -->
+        <div id="tab-boom" class="tab-content active">
+           
 
 
 <input type="button" id="specail-boom-button" value="特殊伸縮" class="toggle-btn">
@@ -250,7 +240,33 @@
         <!-- 既存の数値制御用スライダー（非表示にして互換保持、あるいは完全置換） -->
         <input type="range" id="boom-slider" step="0.01" value="0" style="display:none;">
     </div>
+
+
+        </div>
+
+
+
+        <!-- ジブ設定タブ -->
+        <div id="tab-jib" class="tab-content">
+            <p>ジブ設定の内容</p>
+
+
+
+        </div>
+
+
+
+
+
+
+
+
+    </div>
 </dialog>
+    
+
+
+
 
 
 <!-- アウトリガー設定用ダイアログ -->
