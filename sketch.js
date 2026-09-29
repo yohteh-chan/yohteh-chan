@@ -181,7 +181,7 @@ let DAData;
 let MaxWeight;//定格荷重
 let DengerAngle;//危険角度
 let cachedLimitIndex = -1;// 危険角度のインデックス保持用キャッシュ変数
-
+ let FrontMode;//前方吊りの有無
 
 let isInitializing = false;// 初期化中かどうかを判定するフラグ
 
@@ -282,7 +282,7 @@ try {
     FrontAngle=BaseData[31][2];
     RearAngle=BaseData[31][16];
     valForJadge= J0Data.slice(2).map(row => row[0]);//J0 A3~
-    let FrontMode = BaseData[29][1];//前方吊りモードがあるかどうか
+    FrontMode = BaseData[29][1];//前方吊りモードがあるかどうか
     
 
     WeightJadge = 0 ;//前方・後方吊り判定
@@ -453,7 +453,8 @@ try {
         jibAngle = $('jib-slider'),
         jibAngleVal = $('jib-angle-val'),
         jibLength = $('jib-length-slider'),
-        jibLengthVal = $('jib-length-val');
+        jibLengthVal = $('jib-length-val'),
+        cabinangle =$('cabin-slider');
 
         MaxWeight=$('Max-weight');
 
@@ -468,6 +469,12 @@ try {
         lengthSlider?.dispatchEvent(new Event('input'));
         
     });
+
+    if (cabinangle) {
+    cabinangle.oninput = (e) => {
+            CabinAngle();
+        }
+    }
 
     const getNearest = (arr, val) => {
         let nearest = arr[0];
@@ -914,19 +921,7 @@ if (outriggerSelect) {
 
        
 
-        //前方・後方吊り　判定
-
-        if(FrontMode==0){//前方吊りの有無
-            
-            if(cabinAngle<=FrontAngle||(180-RearAngle)<=cabinAngle&&cabinAngle<=(180+RearAngle)||cabinAngle>=(360-FrontAngle)){
-                WeightJadge=1;//最大張り出しでの定格荷重　適用
-            }else{
-                WeightJadge=0;//最大張り出しでの定格荷重　不適用
-            }
-        }else{
-
-            alert("未設定");//消すな
-        }
+     
 
 
           
@@ -1017,7 +1012,7 @@ function MaxWeit(judgeVal){
     }
     
     CabinAngle();
-    
+
 
  //J0
     if(jibB==0){
@@ -1030,7 +1025,6 @@ function MaxWeit(judgeVal){
             }
         }else{//前方吊り
 
-
         }
     }else{//ジブモード
        weight="未設定";//ここ
@@ -1038,6 +1032,11 @@ function MaxWeit(judgeVal){
 
     //定格荷重　表示
     MaxWeight.textContent=weight;
+
+    // console.log("rowVal",rowVal);
+    // console.log("colVal",colVal);
+    // console.log("J0Data",J0Data);
+    // console.log("weight",weight);
 }
 
 
@@ -1068,8 +1067,11 @@ function dengerAngle(){
 
 function CabinAngle(){
 
-    cabinAngle=205; //仮
+   
+ 
 
+
+cabinAngle=document.getElementById('cabin-slider').value
     
     switch (true){
     case cabinAngle <= 45 || 315 < cabinAngle :
@@ -1089,6 +1091,23 @@ function CabinAngle(){
     break;
 }   
 
+   //前方・後方吊り　判定
+
+        if(FrontMode==0){//前方吊りの有無
+            
+            if(cabinAngle<=FrontAngle||(180-RearAngle)<=cabinAngle&&cabinAngle<=(180+RearAngle)||cabinAngle>=(360-FrontAngle)){
+                WeightJadge=1;//最大張り出しでの定格荷重　適用
+       
+            }else{
+                WeightJadge=0;//最大張り出しでの定格荷重　不適用
+               
+            }
+        }else{
+
+            alert("未設定");//消すな
+        }
+
+        
 dengerAngle();
 
 }
