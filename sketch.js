@@ -201,6 +201,8 @@ let colVal1=0;//J0 アウトリガー幅
 let colVal2=0;//J0 ブーム長
 
 
+let BaseData=[];
+
 // ボタンイベント設定
 const SBB = document.getElementById('specail-boom-button');
 if (SBB) {
@@ -240,8 +242,8 @@ try {
 
     const toRad = (deg) => (deg * Math.PI) / 180;
 
-    const BaseData = data["製品情報"],
-        DDData = data["描画情報"];
+   BaseData = data["製品情報"];
+    const DDData = data["描画情報"];
     
     J0Data = data["J0"];
     DAData = data["危険角度"];
@@ -289,6 +291,7 @@ try {
 
 
 
+    
     
    
 
@@ -376,6 +379,7 @@ try {
 
     $('crane-chart')?.setAttribute('viewBox', '0 0 ' + (MaxHolizon) + ' ' + (MaxHight));
     $('boom-slider')?.setAttribute('max', BoomMaxAngle);
+    
 
     const el = $('boom-length-slider');
     if (el) {
@@ -1000,43 +1004,50 @@ function logCurrentSelection(actionType) {
 
 
 
-
+let reRodeMaxWeit =0;
 
 //定格荷重
 function MaxWeit(judgeVal){
     //作業半径　or 作業角度　の縦方向の情報　位置　0スタート
+
+
+
+
+if(judgeVal==undefined){
+    judgeVal=Number(document.getElementById('working-radius').textContent);
+}
+
     const rowVal= valForJadge.findIndex(val => val >= judgeVal)+2;
     let weight;
     if(WeightJadge=="undefined"){
         WeightJadge=0;
     }
-    
+
+if(reRodeMaxWeit===0){
     CabinAngle();
+}
 
 
  //J0
     if(jibB==0){
         if(WeightJadge==0){//前方吊りでない
             colVal=2+(outriggerNumber-colVal1)*BN+colVal2;
-            if(2<=rowVal&&rowVal<=valForJadge.length&&2<=colVal&&colVal<=(BN*outriggerNumber+1)){
+            if(2<=rowVal&&rowVal<=valForJadge.length&&2<=colVal&&colVal<=(BN*outriggerNumber+2)){
                 weight=J0Data[rowVal][colVal];
             }else{
                 weight="";
             }
         }else{//前方吊り
-
+weight="未設定 1";//ここ
         }
     }else{//ジブモード
-       weight="未設定";//ここ
+       weight="未設定 2";//ここ
     }
 
     //定格荷重　表示
     MaxWeight.textContent=weight;
+  reRodeMaxWeit=0;
 
-    // console.log("rowVal",rowVal);
-    // console.log("colVal",colVal);
-    // console.log("J0Data",J0Data);
-    // console.log("weight",weight);
 }
 
 
@@ -1060,18 +1071,19 @@ function dengerAngle(){
     }
 
  
-    //console.log("DA",DA);
+   
     
     
 }
 
+
+//旋回角度
 function CabinAngle(){
 
-   
- 
-
-
 cabinAngle=document.getElementById('cabin-slider').value
+FrontAngle=BaseData[1+minFrontNumber][30+minRearNumber];
+RearAngle=BaseData[15+minFrontNumber][30+minRearNumber];
+
     
     switch (true){
     case cabinAngle <= 45 || 315 < cabinAngle :
@@ -1097,7 +1109,6 @@ cabinAngle=document.getElementById('cabin-slider').value
             
             if(cabinAngle<=FrontAngle||(180-RearAngle)<=cabinAngle&&cabinAngle<=(180+RearAngle)||cabinAngle>=(360-FrontAngle)){
                 WeightJadge=1;//最大張り出しでの定格荷重　適用
-       
             }else{
                 WeightJadge=0;//最大張り出しでの定格荷重　不適用
                
@@ -1110,6 +1121,8 @@ cabinAngle=document.getElementById('cabin-slider').value
         
 dengerAngle();
 
+reRodeMaxWeit=1;
+MaxWeit();
 }
 
 
