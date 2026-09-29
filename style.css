@@ -983,3 +983,24 @@ body.sidebar-open #toggle-sidebar-btn {
 .tab-content.active {
   display: block; /* アクティブなものだけ表示 */
 }
+
+
+/* 昼用スタイル */
+.day-style {
+    position:absolute;
+    left:50vw;
+  background-color: #fff8e1;
+  color: #333333;
+  border: 1px solid #ffa000;
+  z-index: 1000;
+}
+
+/* 夜用スタイル */
+.night-style {
+    position:absolute;
+    left:50vw;
+  background-color: #1a237e;
+  color: #ffffff;
+  border: 1px solid #3949ab;
+   z-index: 1000;
+}

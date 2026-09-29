@@ -223,12 +223,17 @@ jibBtn?.addEventListener('click', () => {
     
 });
 
+let timeBtn = false;
 
 
 
 async function loadCraneBaseData(model) {
 
 isInitializing = true;// 1. 初期化開始を記録（呼び出しをブロック）
+
+if(timeBtn==false){ 
+    DayOrNight();
+}
 
 try {
     const data = await getCraneData(model);
@@ -2176,3 +2181,47 @@ function handleContinuousInput(e) {
 
  
 }
+
+
+//昼夜切り替えボタン
+const now = new Date();
+const month  = now.getMonth() + 1;
+const hours  = now.getHours();
+
+let isDaytime = false;
+
+const DayOrNightBtn = document.getElementById("dayORnight");
+
+function DayOrNight(){
+
+
+    if(timeBtn==false){
+
+    if (month >= 6 && month <= 8) {
+  // 夏場（6〜8月）：5時〜19時未満を昼とする
+  isDaytime = (hours >= 5 && hours < 19);
+} else if (month === 11 || month === 12 || month === 1) {
+  // 冬場（11〜1月）：7時〜17時未満を昼とする
+  isDaytime = (hours >= 7 && hours < 17);
+} else {
+  // 春・秋（2〜5月、9〜10月）：6時〜18時未満を昼とする
+  isDaytime = (hours >= 6 && hours < 18);
+}
+
+timeBtn=true;
+}
+
+if (isDaytime) {
+  DayOrNightBtn.classList.add("day-style");
+  DayOrNightBtn.classList.remove("night-style");
+} else {
+  DayOrNightBtn.classList.add("night-style");
+  DayOrNightBtn.classList.remove("day-style");
+}
+
+}
+
+DayOrNightBtn?.addEventListener('click', () => {
+    isDaytime = !isDaytime;
+    DayOrNight();
+});
