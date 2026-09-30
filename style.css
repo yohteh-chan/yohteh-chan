@@ -592,7 +592,7 @@ font-size: 20px;
     width: calc(100% - 60px); /* ★ スライダーと同じ横幅にする */
     height: 0;
     transform: translateY(-50%);
-    z-index: 3;
+    z-index: 10;
     pointer-events: none;
 }
 
@@ -1038,10 +1038,22 @@ body.sidebar-open #toggle-sidebar-btn {
     -webkit-user-drag: none;
     touch-action: none;
 
-
-    /* ★ スライダー本体と可動域をそのまま右に 60px シフト */
     margin-left: 15%;
     width: 65%;
+}
+
+
+/* つまみ（Thumb）の基本設定 */
+#jib-length-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1px;
+    height: 2px;
+    box-sizing: border-box;
+    background: #e41010;
+    border: 2px solid #e41010;
+    cursor: grab;
+    z-index: 1000;
 }
 
 /* Chrome, Safari, Edge 用 */
@@ -1053,21 +1065,7 @@ body.sidebar-open #toggle-sidebar-btn {
     mask-image: none;
 }
 
-/* つまみ（Thumb）の基本設定 */
-#jib-length-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
 
-    width: 1px;
-    height: 2px;
-    box-sizing: border-box;
-    background: #e41010;
-    border: 2px solid #e41010;
-    margin-top: 0px; /* 16pxトラックに対して18pxつまみを中央配置 */
-    cursor: grab;
-
-    z-index: 1000;
-}
 
 #jib-length-slider::-moz-range-thumb {
     width: 16px;
@@ -1140,7 +1138,7 @@ body.sidebar-open #toggle-sidebar-btn {
     position: absolute;
     left: 30px; 
     top: 80%;
-    width: 30%;
+    width: 33%;
     height: 3px;
     background: #f39c12; 
     transform: translateY(-650%) rotate(0deg) ;

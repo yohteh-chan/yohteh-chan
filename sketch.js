@@ -172,6 +172,7 @@ let BoomAngle = 0;
 let BoomWidth = 0;
 let SB = 0;
 let jibB = 0;
+let JibSteps=[];
 let minAngle;
 let maxAngle;
 let BN;
@@ -181,7 +182,8 @@ let DAData;
 let MaxWeight;//定格荷重
 let DengerAngle;//危険角度
 let cachedLimitIndex = -1;// 危険角度のインデックス保持用キャッシュ変数
- let FrontMode;//前方吊りの有無
+let FrontMode;//前方吊りの有無
+let SL;
 
 let isInitializing = false;// 初期化中かどうかを判定するフラグ
 let jibIsInitializing = false;// 初期化中かどうかを判定するフラグ
@@ -261,7 +263,8 @@ try {
     let CW = BaseData[1][1],
         CD = BaseData[3][1],
         BoomMaxAngle = BaseData[4][1],
-        SpecialBoom = BaseData[7][1],
+        SpecialBoom = BaseData[7][1];
+
         SL = BaseData[22][1];
 
     let BoomShift = DDData[3][2] / 100;
@@ -276,7 +279,7 @@ try {
 
     let jibNumber = BaseData[1][17];
     const jibY = DDData.map(row => row[28]).filter(val => val !== null && val !== undefined && val !== '').map(Number);
-    const JibSteps = [];
+    JibSteps = [];
 
     let jibMin = BaseData[20][1];
     let jibMax = BaseData[5][1];
@@ -347,10 +350,12 @@ try {
     const JLS = $('jib-length-slider');
     const JLV = $('jib-length-val');
     if (JLS && JLV) {
-        JLS.setAttribute('min', window.jib1th);
+        const dummyMin = window.jib1th*2-window[`jib${jibNumber}th`];
+
+        JLS.setAttribute('min', dummyMin);
         JLS.setAttribute('max', window[`jib${jibNumber}th`]);
-        JLV.setAttribute('value', window.jib1th);
-        JLS.setAttribute('value', window.jib1th);
+        JLV.setAttribute('value', 0);
+        JLS.setAttribute('value', dummyMin);
     }
 
     const DHCdata = DDData.map(row => row[32]);
@@ -500,16 +505,38 @@ try {
         return nearest;
     };
 
-    jibLength?.addEventListener('input', (e) => {
-        let val = parseFloat(e.target.value);
-        if (SL === 0) {
-            val = getNearest(JibSteps, val);
-            e.target.value = val;
-        }
+jibLength?.addEventListener('input', (e) => {
+
+    let val = parseFloat(e.target.value);
+    const minStep = JibSteps[0]; // 最短ジブ長
+    const dummyMin = window.jib1th*2-window[`jib${jibNumber}th`];
+
+
+    if(val<0){val=dummyMin};
+
+    // ★ 0 と JibSteps[0] の間に入った瞬間のジャンプ処理
+    if (0<val && val < minStep) {
+            val = dummyMin;
+    }
+    e.target.value = val;
+
+    if (SL === 0 && val > 0&&changeVal!=1) {
+        
+        val = getNearest(JibSteps, val);
+        e.target.value = val;
+    }
+
+    if (e.target.value >= JibSteps[0]) { // ★ ちょうど JibSteps[0] に飛んだ時も表示されるよう >= に調整
         if (jibLengthVal) jibLengthVal.textContent = Number(val / 10).toFixed(2) + "m";
-        lengthSlider?.dispatchEvent(new Event('input'));
-       
-    });
+        jibB=1;
+    } else {
+        if (jibLengthVal) jibLengthVal.textContent = 0 + "m";
+        jibB=0;
+    }
+
+     lengthSlider?.dispatchEvent(new Event('input'));
+
+});
 
     let isSliderTicking = false;
 if (slider) {
@@ -1352,6 +1379,7 @@ function bringToFront(dialogEl) {
     const popupLengthVal = document.getElementById('popup-length-val');
     const mainLengthVal = document.getElementById('length-val');
     const trackBg = document.querySelector('.boom-track-bg');
+    const jibtrackBg = document.querySelector('.jib-track-bg');
 
     const presetValues = [53, 90.4, 127.8, 165.2, 202.6, 240];//仮
 
@@ -1386,6 +1414,8 @@ function updateBoomFill() {
 // スライダー操作イベントに紐付け
 lengthSlider.addEventListener('input', updateBoomFill);
 updateBoomFill();
+
+
 
 
 let isUpdatingUI = false;
@@ -1466,6 +1496,28 @@ let isUpdatingUI = false;
     
     // 初期値の反映
     updateLengthUI(lengthSlider.value);
+
+    function updateJibFill() {//ここ
+
+   
+    if (!jiblengthSlider) return;
+
+    const COLOR_ACTIVE = '#444'; // 伸びた部分
+    const COLOR_INACTIVE = 'rgba(0, 0, 0, 0.5)';   // 未到達部分
+
+    // つまみ位置でピタッと色が変わるグラデーション文字列を生成
+    const jibfillGradient = `linear-gradient(90deg, 
+        ${COLOR_ACTIVE} 0%, 
+
+        ${COLOR_INACTIVE} 100%)`;
+
+    // CSS変数を更新
+    jibtrackBg.style.setProperty('--jib-fill', jibfillGradient);
+     
+}
+
+jiblengthSlider.addEventListener('input', updateJibFill);
+updateJibFill();
 
 }
 
@@ -2091,10 +2143,10 @@ if (e.code === 'Space' || pressedKeys.has(' ') || pressedKeys.has('space')) {
     // --- 左右操作（ジブ長さ） ---
     if (pressedKeys.has('arrowleft') || pressedKeys.has('a')) {
         e.preventDefault();
-        jiblengthSlider(-step);
+        changeJibLengthSliderValue(-step);
     } else if (pressedKeys.has('arrowright') || pressedKeys.has('d')) {
         e.preventDefault();
-        jiblengthSlider(step);
+        changeJibLengthSliderValue(step);
     }
 
     // --- 斜め操作 ---
@@ -2397,14 +2449,18 @@ function changeJibSliderValue(delta) {
     }
 
 
+
+
 }
 
-
+let changeVal=0;
 
 // スライダー値を安全に更新する共通関数
 function changeJibLengthSliderValue(delta) {//ここ
     if (!jiblengthSlider) return;
     
+
+   
 
     const min = parseFloat(jiblengthSlider.min) || 36;//仮
     const max = parseFloat(jiblengthSlider.max) || 56;//仮
@@ -2412,18 +2468,58 @@ function changeJibLengthSliderValue(delta) {//ここ
     
     // 値を最小値〜最大値の範囲内に収める
     let newVal = currentVal + delta;
-
     
-    newVal = Math.min(max, Math.max(min, newVal));
+
+
+
+
+    const nearestIdx = JibSteps.reduce((bestIdx, curr, i) => 
+        Math.abs(curr - jiblengthSlider.value) < Math.abs(JibSteps[bestIdx] - jiblengthSlider.value) ? i : bestIdx, 0
+    );
+
+
+
+
+    if(SL==1){
+          console.log("BBB");
+        if(jiblengthSlider.value>=JibSteps[0]){
+            newVal = Math.min(max, Math.max(min, newVal));
+
+        }else if(delta>0){
+            newVal=JibSteps[0];
+
+        }
+    }else{
+          
+
+        if(jiblengthSlider.value<JibSteps[0]){
+            if(delta>0){
+                newVal=JibSteps[0];
+            }else{
+                return;
+            }
+        }else{
+            if(delta<0){
+                if(jiblengthSlider.value>JibSteps[0]){
+                newVal=JibSteps[nearestIdx-1];
+
+                }else{
+                    changeVal=1;
+                }
+            }else if(nearestIdx+1<JibSteps.length){
+                 newVal=JibSteps[nearestIdx+1];
+
+            }
+        }
+
+    }
+    
 
 
     if (newVal !== currentVal) {
-        jiblengthSlider.value = newVal;
-
-        // updateLength 関数が定義されていれば直接呼び出し、無ければ input イベントを発火
-        
-            jiblengthSlider.dispatchEvent(new Event('input'));
-        
+        jiblengthSlider.value = newVal;      
+        jiblengthSlider.dispatchEvent(new Event('input'));
+        changeVal=0;
     }
 
 
@@ -2432,31 +2528,5 @@ function changeJibLengthSliderValue(delta) {//ここ
 
 
 
-function updateJibFill() {//ここ
 
-   
-    if (!jiblengthSlider) return;
 
-    const min = parseFloat(jiblengthSlider.min) || 36; //仮
-    const max = parseFloat(jiblengthSlider.max) || 56;//仮
-    const currentVal = parseFloat(jiblengthSlider.value);
-
-    // つまみの現在位置をパーセント（0〜100%）で計算
-  //  const percent = ((currentVal - min) / (max - min)) * 100;
-
-    const COLOR_ACTIVE = '#444'; // 伸びた部分
-    const COLOR_INACTIVE = 'rgba(0, 0, 0, 0.5)';   // 未到達部分
-
-    // つまみ位置でピタッと色が変わるグラデーション文字列を生成
-    const fillGradient = `linear-gradient(90deg, 
-        ${COLOR_ACTIVE} 0%, 
-
-        ${COLOR_INACTIVE} 100%)`;
-
-    // CSS変数を更新
-    trackBg.style.setProperty('--jib-fill', fillGradient);
-     
-}
-
-jiblengthSlider.addEventListener('input', updateJibFill);
-updateJibFill();
