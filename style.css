@@ -611,6 +611,7 @@ font-size: 20px;
     transition: transform 0.15s ease, background-color 0.15s ease;
     -webkit-user-select: none;
     user-select: none;
+    z-index: 10;
 }
 
 .tick-mark:hover {
@@ -1030,16 +1031,17 @@ body.sidebar-open #toggle-sidebar-btn {
     background: transparent;
     cursor: pointer;
     position: relative;
-    z-index: 2;
+    z-index: 2000;
     margin: 0;
     display: block;
     outline: none;
     -webkit-user-drag: none;
     touch-action: none;
 
+
     /* ★ スライダー本体と可動域をそのまま右に 60px シフト */
-    margin-left: 60px;
-    width: calc(100% - 60px);
+    margin-left: 15%;
+    width: 65%;
 }
 
 /* Chrome, Safari, Edge 用 */
@@ -1055,14 +1057,16 @@ body.sidebar-open #toggle-sidebar-btn {
 #jib-length-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
+
     width: 1px;
     height: 2px;
     box-sizing: border-box;
     background: #e41010;
     border: 2px solid #e41010;
-    margin-top: 1px; /* 16pxトラックに対して18pxつまみを中央配置 */
+    margin-top: 0px; /* 16pxトラックに対して18pxつまみを中央配置 */
     cursor: grab;
-    flex-shrink: 0;
+
+    z-index: 1000;
 }
 
 #jib-length-slider::-moz-range-thumb {
@@ -1093,53 +1097,67 @@ body.sidebar-open #toggle-sidebar-btn {
 }
 
 
-
 .jib-root-slider {
     position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 60px;                 /* シフト幅と同じ60px */
-    height: 18px;                /* トラックの左端よりほんの少し太くしてカバーする */
+    left: 0px;
+    top: 80%;
+    transform-origin: left center; /* ★回転軸を左端中央に設定 */
+    transform: translateY(-50%) rotate(-40deg);
+    width: 40px;                
+    height: 18px;
     background: #f39c12; 
-
     box-sizing: border-box;
     z-index: 1;
 }
 
-
 .jib-track-bg {
     position: absolute;
-    left: 60px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: calc(100% - 60px);
+    left: 0px; /* ★親要素の幅（40px）と同じ位置から開始して右下に連結 */
+    top: 80%;
+    transform-origin: left center; /* ★同じ回転軸を設定 */
+    transform: translateY(-50%) rotate(-40deg) ;
+    width: 40px;
     height: 18px;
-    z-index: 1; /* スライダー（z-index:2）の下に配置 */
-    pointer-events: none; /* マウス操作を透過してスライダーに届かせる */
+   
+    background: linear-gradient(to right, transparent 75%, #e41010 75%);
+    box-sizing: border-box;
+    z-index: 1;
+}
 
-    /* JSから塗られるグラデーション */
-    background: var(--jib-fill, linear-gradient(90deg, #e41010 0%, #e41010 100%));
+.jib-tention{
+    position: absolute;
+    left: 25px; 
+    top: 80%;
+    width: 32%;
+    height: 1px;
+    background: #f39c12; 
+    transform: translateY(-2550%) rotate(10deg) ;
 
-    /* マスクで段階の段々に切り抜く */
-    -webkit-mask-image: 
-        linear-gradient(black, black),
-        linear-gradient(black, black);
-    
-    -webkit-mask-position: 
-        0% center,100% center;
-        
+    z-index: 5;
+}
 
-    -webkit-mask-repeat: no-repeat;
-    mask-image: 
-        linear-gradient(black, black),
-        linear-gradient(black, black);
+.jib-main{
+    position: absolute;
+    left: 30px; 
+    top: 80%;
+    width: 30%;
+    height: 3px;
+    background: #f39c12; 
+    transform: translateY(-650%) rotate(0deg) ;
 
-    mask-position: 
-        0% center, 100% center;
-    mask-size: 
-        20% 100%,0% 20%;
-    mask-repeat: no-repeat;
+    z-index: 5;
+}
+
+.jib-submain{
+    position: absolute;
+    left: 30px; 
+    top: 80%;
+    width: 65%;
+    height: 2px;
+    background: #494948; 
+    transform: translateY(-950%) rotate(0deg) ;
+
+    z-index: 5;
 }
 
 
