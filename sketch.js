@@ -1983,11 +1983,24 @@ window.onwheel=(e) => {
         step *= 5;
     }
 
+
+     if (e.code != 'Space' && !pressedKeys.has(' ') && !pressedKeys.has('space')) {
     // ホイール上スクロール（deltaY < 0）で増加、下スクロールで減少
     if (e.deltaY < 0) {
         changeBoomSliderValue(step);
     } else if (e.deltaY > 0) {
         changeBoomSliderValue(-step);
+    }
+    }
+
+    if (e.code === 'Space' || pressedKeys.has(' ') || pressedKeys.has('space')) {
+
+        
+         if (e.deltaY < 0) {
+        changeJibSliderValue(-step*5);
+    } else if (e.deltaY > 0) {
+        changeJibSliderValue(step*5);
+    }
     }
 
 
