@@ -529,6 +529,10 @@ font-size: 20px;
     width: 100%;
 }
 
+
+
+
+
 /* スライダー本体（★ここを右にシフトする） */
 #boom-length-slider {
     -webkit-appearance: none;
@@ -689,9 +693,6 @@ font-size: 20px;
 #power-train:hover {
     fill: #777; /* ホバー時に少し明るくして反応を示す */
 }
-
-
-
 
 
 
@@ -1003,4 +1004,236 @@ body.sidebar-open #toggle-sidebar-btn {
   color: #ffffff;
   border: 1px solid #3949ab;
    z-index: 1000;
+}
+
+
+/* コンテンツ切り替え */
+.jib-dialog-body {
+  padding: 16px;
+  background-color: rgba(34, 34, 34, 0.5);
+}
+
+
+
+
+
+
+
+
+
+
+
+/* スライダー本体（★ここを右にシフトする） */
+#jib-length-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+    margin: 0;
+    display: block;
+    outline: none;
+    -webkit-user-drag: none;
+    touch-action: none;
+
+    /* ★ スライダー本体と可動域をそのまま右に 60px シフト */
+    margin-left: 60px;
+    width: calc(100% - 60px);
+}
+
+/* Chrome, Safari, Edge 用 */
+#jib-length-slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 16px; 
+    background: transparent; /* 透明化 */
+    -webkit-mask-image: none; /* マスク解除 */
+    mask-image: none;
+}
+
+/* つまみ（Thumb）の基本設定 */
+#jib-length-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1px;
+    height: 2px;
+    box-sizing: border-box;
+    background: #e41010;
+    border: 2px solid #e41010;
+    margin-top: 1px; /* 16pxトラックに対して18pxつまみを中央配置 */
+    cursor: grab;
+    flex-shrink: 0;
+}
+
+#jib-length-slider::-moz-range-thumb {
+    width: 16px;
+    height: 22px;
+    background: #f39c12;
+    border: 2px solid #2c3e50;
+    clip-path: polygon(0% 0%, 100% 0%, 100% 70%, 50% 100%, 0% 70%);
+    cursor: grab;
+}
+
+
+
+/* スライダーまわりのレイアウト */
+.jib-range-wrapper {
+    position: absolute;
+    bottom: 40px;
+    right: 15px;
+    z-index: 10;
+    align-items: center;
+    padding: 12px 0;
+    width: 80%;
+
+-webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+
+
+.jib-root-slider {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 60px;                 /* シフト幅と同じ60px */
+    height: 18px;                /* トラックの左端よりほんの少し太くしてカバーする */
+    background: #f39c12; 
+
+    box-sizing: border-box;
+    z-index: 1;
+}
+
+
+.jib-track-bg {
+    position: absolute;
+    left: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: calc(100% - 60px);
+    height: 18px;
+    z-index: 1; /* スライダー（z-index:2）の下に配置 */
+    pointer-events: none; /* マウス操作を透過してスライダーに届かせる */
+
+    /* JSから塗られるグラデーション */
+    background: var(--jib-fill, linear-gradient(90deg, #e41010 0%, #e41010 100%));
+
+    /* マスクで段階の段々に切り抜く */
+    -webkit-mask-image: 
+        linear-gradient(black, black),
+        linear-gradient(black, black);
+    
+    -webkit-mask-position: 
+        0% center,100% center;
+        
+
+    -webkit-mask-repeat: no-repeat;
+    mask-image: 
+        linear-gradient(black, black),
+        linear-gradient(black, black);
+
+    mask-position: 
+        0% center, 100% center;
+    mask-size: 
+        20% 100%,0% 20%;
+    mask-repeat: no-repeat;
+}
+
+
+.jib-arc-slider-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  user-select: none;
+}
+
+#jib-arc-slider-svg {
+  touch-action: none; /* ドラッグ時のスクロール防止 */
+  cursor: pointer;
+}
+
+/* 円弧パス共通スタイル */
+.jib-arc-path {
+  fill: none;
+  stroke-width: 16;
+  stroke-linecap: round;
+}
+
+/* 各レイヤーの色定義 */
+.jib-arc-bg {
+  stroke: #3498db; /* 背景の可動域 */
+}
+
+/* ★ arc-bg が注意領域（黄色）に入ったとき */
+.jib-arc-bg.is-attention {
+  stroke: #fff024;
+}
+
+/* ★ arc-bg が危険領域（赤色）に入ったとき */
+.jib-arc-bg.is-danger {
+  stroke: #e74c3c;
+}
+
+.jib-arc-attention {
+  stroke: #fff024; /* 危険領域の色（黄） */
+  opacity: 1;
+  stroke-linecap: butt;
+}
+
+.jib-arc-danger {
+  stroke: #e74c3c; /* 危険領域の色（赤） */
+  opacity: 1;
+  stroke-linecap: butt;
+}
+
+.jib-arc-danger-edge {
+  stroke: #e74c3c; /* 危険領域の色（赤） */
+  opacity: 1;
+}
+
+.jib-arc-active {
+  stroke: #444; /* 現在値の色（青） */
+}
+
+.jib-arc-active-edge {
+  stroke: #444; /* 現在値の色（青） */
+  stroke-linecap: butt;
+}
+
+/* 操作つまみ */
+.jib-arc-handle {
+  fill: #fff;
+  stroke: #3498db;
+  stroke-width: 4;
+  cursor: grab;
+  filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5));
+}
+
+.jib-arc-handle.is-attention {
+  fill: #fff024;
+  stroke: #fff024;
+}
+
+.jib-arc-handle.is-danger {
+  fill: #e74c3c;
+  stroke: #e74c3c;
+}
+
+
+
+.jib-arc-handle:active {
+  cursor: grabbing;
+  fill: #ecf0f1;
+}
+
+/* 文字表示 */
+.jib-arc-text-val {
+  fill: #fff;
+  font-size: 28px;
+  font-weight: bold;
+  font-family: sans-serif;
 }

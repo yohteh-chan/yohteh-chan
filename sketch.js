@@ -184,6 +184,7 @@ let cachedLimitIndex = -1;// 危険角度のインデックス保持用キャッ
  let FrontMode;//前方吊りの有無
 
 let isInitializing = false;// 初期化中かどうかを判定するフラグ
+let jibIsInitializing = false;// 初期化中かどうかを判定するフラグ
 
 //定格荷重
 let minFrontNumber=1;
@@ -230,6 +231,7 @@ let timeBtn = false;
 async function loadCraneBaseData(model) {
 
 isInitializing = true;// 1. 初期化開始を記録（呼び出しをブロック）
+jibIsInitializing = true;// 1. 初期化開始を記録（呼び出しをブロック）
 
 if(timeBtn==false){ 
     DayOrNight();
@@ -789,8 +791,12 @@ if(lengthSlider){
 
 
         initArcSlider();
+        jibInitArcSlider();
+       
     };
 }
+
+
 
 //アウトリガー
     try {
@@ -993,12 +999,14 @@ function logCurrentSelection(actionType) {
 
     // データ読み込みがすべて完了してから円弧スライダーを初期化
     initArcSlider();
+    jibInitArcSlider();
 
     
 
     } finally {
         // 2. すべての初期化が完了したらブロックを解除
         isInitializing = false;
+        jibIsInitializing = false;
         
     }
 
@@ -1227,6 +1235,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tabDrag=false;
         return;
       }
+      
   
 
       const targetId = tab.getAttribute('data-tab');
@@ -1270,9 +1279,12 @@ function bringToFront(dialogEl) {
             posX = window.innerWidth / 2 - 120;
             posY = window.innerHeight / 3;
             dialog.style.transform = `translate(${posX}px, ${posY}px)`;
+            
             dialog.show();
         }
+        
         disableScroll();
+        
     }
 
     
@@ -1992,38 +2004,105 @@ window.onkeydown= (e) => {
         }
     }
 
-    let step = 0.5;
-    const key = e.key.toLowerCase();
-
-     if (e.shiftKey) {
+ let step = 0.5;
+    if (e.shiftKey || pressedKeys.has('shift')) {
         step *= 5;
     }
 
-    if (key === 'arrowup' || key === 'w') {
-        e.preventDefault(); // 画面スクロールを防ぐ
-        changeBoomSliderValue(step);   // 増加
-    } else if (key === 'arrowdown' || key === 's') {
-        e.preventDefault(); // 画面スクロールを防ぐ
-        changeBoomSliderValue(-step);  // 減少
+
+    if (e.code != 'Space' && !pressedKeys.has(' ') && !pressedKeys.has('space')) {
+    // --- 上下操作（ブーム角度） ---
+    if (pressedKeys.has('arrowup') || pressedKeys.has('w')) {
+        e.preventDefault();
+        changeBoomSliderValue(step);
+    } else if (pressedKeys.has('arrowdown') || pressedKeys.has('s')) {
+        e.preventDefault();
+        changeBoomSliderValue(-step);
     }
 
-    if (key === 'arrowleft' || key === 'a') {
-        e.preventDefault(); // 横スクロールなどの既定動作を防止
+    // --- 左右操作（ブーム長さ） ---
+    if (pressedKeys.has('arrowleft') || pressedKeys.has('a')) {
+        e.preventDefault();
         changeLengthSliderValue(-step);
-    } else if (key === 'arrowright' || key === 'd') {
-        e.preventDefault(); // 横スクロールなどの既定動作を防止
-        changeLengthSliderValue(step);  // 増加
+    } else if (pressedKeys.has('arrowright') || pressedKeys.has('d')) {
+        e.preventDefault();
+        changeLengthSliderValue(step);
     }
 
-    if (key === 'q' || key === 'e') {
-        e.preventDefault(); // 横スクロールなどの既定動作を防止
+    // --- 斜め操作 ---
+    if (pressedKeys.has('e')) {
+        e.preventDefault();
         changeLengthSliderValue(step);
         changeBoomSliderValue(step);
-    } else if (key === 'z' || key === 'c') {
-        e.preventDefault(); // 横スクロールなどの既定動作を防止
+    } else if (pressedKeys.has('q')) {
+        e.preventDefault();
+        changeLengthSliderValue(-step);
+        changeBoomSliderValue(step);
+    } else if (pressedKeys.has('c')) {
+        e.preventDefault();
+        changeLengthSliderValue(step);
+        changeBoomSliderValue(-step);
+    } else if (pressedKeys.has('z')) {
+        e.preventDefault();
         changeLengthSliderValue(-step);
         changeBoomSliderValue(-step);
     }
+
+}
+
+   if (pressedKeys.has('x')) {
+    e.preventDefault();
+        // キーの長押し連打（e.repeat）でなければ実行
+        if (!e.repeat && SBB) {
+            SBB.click();
+        }
+    }
+
+
+
+if (e.code === 'Space' || pressedKeys.has(' ') || pressedKeys.has('space')) {
+       
+    
+
+
+
+     // --- 上下操作（ジブ角度） ---
+    if (pressedKeys.has('arrowup') || pressedKeys.has('w')) {
+        e.preventDefault();
+        changeJibSliderValue(-step);
+    } else if (pressedKeys.has('arrowdown') || pressedKeys.has('s')) {
+        e.preventDefault();
+        changeJibSliderValue(step);
+    }
+
+    // --- 左右操作（ジブ長さ） ---
+    if (pressedKeys.has('arrowleft') || pressedKeys.has('a')) {
+        e.preventDefault();
+        jiblengthSlider(-step);
+    } else if (pressedKeys.has('arrowright') || pressedKeys.has('d')) {
+        e.preventDefault();
+        jiblengthSlider(step);
+    }
+
+    // --- 斜め操作 ---
+    if (pressedKeys.has('e')) {
+        e.preventDefault();
+        changeJibSliderValue(step);
+        changeBoomSliderValue(step);
+    } else if (pressedKeys.has('q')) {
+        e.preventDefault();
+        changeJibSliderValue(-step);
+        changeBoomSliderValue(step);
+    } else if (pressedKeys.has('c')) {
+        e.preventDefault();
+        changeJibSliderValue(step);
+        changeBoomSliderValue(-step);
+    } else if (pressedKeys.has('z')) {
+        e.preventDefault();
+        changeJibSliderValue(-step);
+        changeBoomSliderValue(-step);
+    }
+}
 
 };
 
@@ -2110,8 +2189,6 @@ window.addEventListener('keydown', (e) => {
 
 
 
-   // 操作キーまたはShiftキーが押された場合に処理を実行
-    handleContinuousInput(e);
 });
 
 
@@ -2125,62 +2202,6 @@ window.addEventListener('keyup', (e) => {
 
 
 
-// スライダー移動処理
-function handleContinuousInput(e) {
-    // Shiftキーが現在押されているか確認
-    let step = 0.5;
-    if (e.shiftKey || pressedKeys.has('shift')) {
-        step *= 5;
-    }
-
-    // --- 上下操作（ブーム角度） ---
-    if (pressedKeys.has('arrowup') || pressedKeys.has('w')) {
-        e.preventDefault();
-        changeBoomSliderValue(step);
-    } else if (pressedKeys.has('arrowdown') || pressedKeys.has('s')) {
-        e.preventDefault();
-        changeBoomSliderValue(-step);
-    }
-
-    // --- 左右操作（ブーム長さ） ---
-    if (pressedKeys.has('arrowleft') || pressedKeys.has('a')) {
-        e.preventDefault();
-        changeLengthSliderValue(-step);
-    } else if (pressedKeys.has('arrowright') || pressedKeys.has('d')) {
-        e.preventDefault();
-        changeLengthSliderValue(step);
-    }
-
-    // --- 斜め操作 ---
-    if (pressedKeys.has('e')) {
-        e.preventDefault();
-        changeLengthSliderValue(step);
-        changeBoomSliderValue(step);
-    } else if (pressedKeys.has('q')) {
-        e.preventDefault();
-        changeLengthSliderValue(-step);
-        changeBoomSliderValue(step);
-    } else if (pressedKeys.has('c')) {
-        e.preventDefault();
-        changeLengthSliderValue(step);
-        changeBoomSliderValue(-step);
-    } else if (pressedKeys.has('z')) {
-        e.preventDefault();
-        changeLengthSliderValue(-step);
-        changeBoomSliderValue(-step);
-    }
-
-   if (pressedKeys.has('x')) {
-    e.preventDefault();
-        // キーの長押し連打（e.repeat）でなければ実行
-        if (!e.repeat && SBB) {
-            SBB.click();
-        }
-    }
-
-
- 
-}
 
 
 //昼夜切り替えボタン
@@ -2225,3 +2246,204 @@ DayOrNightBtn?.addEventListener('click', () => {
     isDaytime = !isDaytime;
     DayOrNight();
 });
+
+
+
+
+
+
+// 円弧スライダーの初期化関数
+function jibInitArcSlider() {
+
+    if (jibIsInitializing) {
+        return;
+    }
+  
+    const svg = document.getElementById('jib-arc-slider-svg');
+    const pathBg = document.getElementById('jib-arc-bg');
+    const pathActive = document.getElementById('jib-arc-active');
+    const pathActiveEdge = document.getElementById('jib-arc-active-edge');
+    const handle = document.getElementById('jib-arc-handle');
+    const textVal = document.getElementById('jib-arc-angle-text');
+    const mainSlider = document.getElementById('jib-slider');
+
+    if (!svg || !pathBg || !pathActive || !handle) return;
+
+    const cx = 100, cy = 100, r = 70;
+
+    let minJibAngle = 5;
+    let maxJibAngle = 60;
+
+    pathBg.setAttribute('d', describeArc(cx, cy, r, minJibAngle, maxJibAngle));
+
+    function updateSliderUI(angle) {
+        // ★修正1: maxAngle ではなく maxJibAngle を使用し、下限も minJibAngle に統一
+        const clampedAngle = Math.max(minJibAngle, Math.min(maxJibAngle, angle));
+
+        const handlePos = polarToCartesian(cx, cy, r, clampedAngle);
+        handle.setAttribute('cx', handlePos.x);
+        handle.setAttribute('cy', handlePos.y);
+
+        const shadowLine = document.getElementById('jib-arc-shadow-line');
+        if (shadowLine) {
+            shadowLine.setAttribute('d', describeArc(cx, cy, r, minJibAngle, clampedAngle));
+        }
+
+        if (pathActiveEdge) {
+            pathActiveEdge.setAttribute('d', describeArc(cx, cy, r, minJibAngle, clampedAngle));
+        }
+
+        pathActive.setAttribute('d', describeArc(cx, cy, r, minJibAngle, clampedAngle));
+
+        if (textVal) textVal.textContent = clampedAngle.toFixed(0);
+
+        if (mainSlider && Math.abs(parseFloat(mainSlider.value) - clampedAngle) > 0.01) {
+            mainSlider.value = clampedAngle;
+            mainSlider.dispatchEvent(new Event('input'));
+        }
+    }
+
+    let isDragging = false;
+    let rafId = null;
+
+    function handleMove(e) {
+        if (!isDragging) return;
+
+        if (rafId) return;
+
+        rafId = requestAnimationFrame(() => {
+            rafId = null;
+
+            const pt = svg.createSVGPoint();
+            pt.x = e.touches ? e.touches[0].clientX : e.clientX;
+            pt.y = e.touches ? e.touches[0].clientY : e.clientY;
+
+            const ctm = svg.getScreenCTM();
+            if (!ctm) return;
+
+            const svgPt = pt.matrixTransform(ctm.inverse());
+            const dx = svgPt.x - cx;
+            const dy = svgPt.y - cy;
+
+            let rad = Math.atan2(-dy, dx);
+            let deg = rad * (180 / Math.PI);
+            if (deg < 0) deg += 360;
+
+            // ★修正2: 可動域外（60°〜360°）へカーソルが外れた場合の中間点判定
+            // 閾値（180°や可動域の対角線）を境界にして、近い側の限界値（minかmax）に引きつける
+            if (deg > maxJibAngle && deg < 360) {
+                const midPoint = maxJibAngle + (360 - maxJibAngle) / 2;
+                deg = (deg < midPoint) ? maxJibAngle : minJibAngle;
+            }
+
+            // 範囲の最終ガード
+            deg = Math.max(minJibAngle, Math.min(maxJibAngle, deg));
+
+            updateSliderUI(deg);
+        });
+    }
+
+    svg.addEventListener('pointerdown', (e) => {
+        e.stopPropagation();
+        isDragging = true;
+        handleMove(e);
+    });
+
+    window.addEventListener('pointermove', handleMove);
+    window.addEventListener('pointerup', () => { isDragging = false; });
+
+    updateSliderUI(parseFloat(mainSlider ? mainSlider.value : minJibAngle));
+}
+
+
+
+
+
+
+
+const jibSlider = document.getElementById('jib-slider');
+const jiblengthSlider = document.getElementById('jib-length-slider');
+
+
+// スライダー値を安全に更新して input イベントを発火する共通関数
+function changeJibSliderValue(delta) {
+    if (!jibSlider) return;
+
+    const min = parseFloat(jibSlider.min) || 5;//仮
+    const max = parseFloat(jibSlider.max) || 60;//仮
+    let currentVal = parseFloat(jibSlider.value) || 0;
+    
+    // 値を更新（最小値〜最大値の範囲内に収める）
+    let newVal = currentVal + delta;
+    newVal = Math.min(max, Math.max(min, newVal));
+
+    if (newVal !== currentVal) {
+        jibSlider.value = newVal;
+        // 連動する描画処理・計算を動かすために input イベントを発火
+        jibSlider.dispatchEvent(new Event('input'));
+    }
+
+
+}
+
+
+
+// スライダー値を安全に更新する共通関数
+function changeJibLengthSliderValue(delta) {//ここ
+    if (!jiblengthSlider) return;
+    
+
+    const min = parseFloat(jiblengthSlider.min) || 36;//仮
+    const max = parseFloat(jiblengthSlider.max) || 56;//仮
+    let currentVal = parseFloat(jiblengthSlider.value) || 0;
+    
+    // 値を最小値〜最大値の範囲内に収める
+    let newVal = currentVal + delta;
+
+    
+    newVal = Math.min(max, Math.max(min, newVal));
+
+
+    if (newVal !== currentVal) {
+        jiblengthSlider.value = newVal;
+
+        // updateLength 関数が定義されていれば直接呼び出し、無ければ input イベントを発火
+        
+            jiblengthSlider.dispatchEvent(new Event('input'));
+        
+    }
+
+
+
+}
+
+
+
+function updateJibFill() {//ここ
+
+   
+    if (!jiblengthSlider) return;
+
+    const min = parseFloat(jiblengthSlider.min) || 36; //仮
+    const max = parseFloat(jiblengthSlider.max) || 56;//仮
+    const currentVal = parseFloat(jiblengthSlider.value);
+
+    // つまみの現在位置をパーセント（0〜100%）で計算
+  //  const percent = ((currentVal - min) / (max - min)) * 100;
+
+    const COLOR_ACTIVE = '#444'; // 伸びた部分
+    const COLOR_INACTIVE = 'rgba(0, 0, 0, 0.5)';   // 未到達部分
+
+    // つまみ位置でピタッと色が変わるグラデーション文字列を生成
+    const fillGradient = `linear-gradient(90deg, 
+        ${COLOR_ACTIVE} 0%, 
+
+        ${COLOR_INACTIVE} 100%)`;
+
+    // CSS変数を更新
+    trackBg.style.setProperty('--jib-fill', fillGradient);
+     
+}
+
+jiblengthSlider.addEventListener('input', updateJibFill);
+updateJibFill();

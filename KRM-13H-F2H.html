@@ -126,8 +126,7 @@
          </div>
 
      <input type="range" id="cabin-slider" step="0.01" min="0" max="359.99" value="90">
-               <input type="range" id="jib-slider" step="0.1">
-            <input type="range" id="jib-length-slider" step="0.1">
+               
 
         <footer class="info-panel-bottom">
         <div class="info-box">
@@ -185,36 +184,23 @@
         </div>
     </div>
 
-    <!-- ダイアログコンテンツ本体 -->
-    <div class="dialog-body">
-        <div id="tab-boom" class="tab-content active">
-            <input type="button" id="specail-boom-button" value="特殊伸縮" class="toggle-btn">
-
-<input type="button" id="jib-Btn" value="ジブ" class="jib-Btn">
-
-
-    <div class="popup-body">
-        
+<!-- ダイアログコンテンツ本体 -->
+<div class="dialog-body">
+    <div id="tab-boom" class="tab-content active">
+        <input type="button" id="specail-boom-button" value="特殊伸縮" class="toggle-btn">
+    <div class="popup-body">   
         <div class="arc-slider-container">
             <!-- 円弧スライダー描画用SVG -->
             <svg id="arc-slider-svg" viewBox="0 0 200 200" width="200" height="200">
                 <!-- 1. 全体可動域（背景：グレー） -->
                 <path id="arc-bg" class="arc-path arc-bg" />
-
-                
-
-                 
                 <path id="arc-shadow-line" stroke="#000" stroke-width="16" stroke-linecap="round" fill="none" />
-                
-
                 <path id="arc-active" class="arc-path arc-active" />
                 <path id="arc-shadow-box" stroke="#000" stroke-width="16" stroke-linecap="butt" fill="none" />
-          
                 <path id="arc-danger" class="arc-path arc-danger" />
                 <path id="arc-danger-edge" class="arc-path arc-danger-edge" />
-        <path id="arc-attention" class="arc-path arc-attention" />
-
-         <path id="arc-active-edge" class="arc-path arc-active-edge" />
+                <path id="arc-attention" class="arc-path arc-attention" />
+                <path id="arc-active-edge" class="arc-path arc-active-edge" />
                 
                 <!-- 4. ドラッグ用つまみ（ハンドル） -->
                 <circle id="arc-handle" r="10" class="arc-handle" />
@@ -223,43 +209,75 @@
                     <tspan id="arc-angle-text"></tspan>°
                 </text>
             </svg>
-        </div>
-    
+            <input type="range" id="boom-slider" step="0.01" value="0" style="display:none;">
+           
+            <!-- スライダーと点を配置するラッパー -->
+            <div class="range-wrapper">
+                <div class="boom-root-slider"></div>
+                <div class="boom-track-bg"></div>
+                    <input type="range" id="boom-length-slider" step="0.01">
+                <!-- ★規定位置の点（クリッカブルな目盛り） -->
+                <div id="preset-ticks" class="preset-ticks"></div>
+            </div>
             <span class="length-val-display"><span id="popup-length-val"></span> m</span>
-      
+        </div>
+    </div>
+    </div>
 
-<!-- スライダーと点を配置するラッパー -->
-    <div class="range-wrapper">
 
-        <div class="boom-root-slider"></div>
-
-            <div class="boom-track-bg"></div>
 
         
-        <input type="range" id="boom-length-slider" step="0.01">
+
+
+
+
         
-        <!-- ★規定位置の点（クリッカブルな目盛り） -->
-        <div id="preset-ticks" class="preset-ticks"></div>
-    </div>
+<!-- ジブ設定 -->
+    <div id="tab-jib" class="tab-content">
+        <input type="button" id="jib-Btn" value="ジブ" class="jib-Btn">
+    <div class="jib-popup-body">
+         <div class="jib-arc-slider-container">
+            <!-- 円弧スライダー描画用SVG -->
+            <svg id="jib-arc-slider-svg" viewBox="0 0 200 200" width="200" height="200">
+                <!-- 1. 全体可動域（背景：グレー） -->
+                <path id="jib-arc-bg" class="jib-arc-path jib-arc-bg" />
+                <path id="jib-arc-shadow-line" stroke="#000" stroke-width="16" stroke-linecap="round" fill="none" />
+                <path id="jib-arc-active" class="jib-arc-path jib-arc-active" />
+                <path id="jib-arc-shadow-box" stroke="#000" stroke-width="16" stroke-linecap="butt" fill="none" />
 
-
-   
-
-        <!-- 既存の数値制御用スライダー（非表示にして互換保持、あるいは完全置換） -->
-        <input type="range" id="boom-slider" step="0.01" value="0" style="display:none;">
-    </div>
-
-
+                
+                <!-- 4. ドラッグ用つまみ（ハンドル） -->
+                <circle id="jib-arc-handle" r="10" class="jib-arc-handle" />
+                <!-- 5. 中央の角度数値テキスト -->
+                <text x="100" y="110" text-anchor="middle" class="jib-arc-text-val">
+                    <tspan id="jib-arc-angle-text"></tspan>°
+                </text>
+            </svg>
+            <input type="range" id="jib-slider" step="0.01" value="5"  style="display:none;">
         </div>
 
 
 
-        </div>
-        <div id="tab-jib" class="tab-content">
-            <!-- ジブ関連の新規UI -->
+        <div class="jib-range-wrapper">
+                <div class="jib-root-slider"></div>
+                <div class="jib-track-bg"></div>
+                    <input type="range" id="jib-length-slider" step="0.01">
+                <!-- ★規定位置の点（クリッカブルな目盛り） -->
+                <div id="jib-preset-ticks" class="jib-preset-ticks"></div>
+            </div>
+
+
+
+        
+        
         </div>
     </div>
-</dialog>
+</div>
+
+    
+
+
+
 
 
 
@@ -272,22 +290,9 @@
     <div class="dialog-body">
         <!-- ブーム設定タブ -->
         <div id="tab-boom" class="tab-content active">
-           
-
-
-
-
-
-
-
-
         <!-- ジブ設定タブ -->
         <div id="tab-jib" class="tab-content">
-            <p>ジブ設定の内容</p>
-
-
-
-        </div>
+    </div>
 
 
 
