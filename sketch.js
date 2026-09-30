@@ -512,6 +512,11 @@ jibLength?.addEventListener('input', (e) => {
     const dummyMin = window.jib1th*2-window[`jib${jibNumber}th`];
 
 
+if (val <= 0 || (val > 0 && val < minStep)) {
+        val = 0;
+        e.target.value = val;
+    }
+
     if(val<0){val=dummyMin};
 
     // ★ 0 と JibSteps[0] の間に入った瞬間のジャンプ処理
@@ -2481,7 +2486,7 @@ function changeJibLengthSliderValue(delta) {//ここ
 
 
     if(SL==1){
-          console.log("BBB");
+
         if(jiblengthSlider.value>=JibSteps[0]){
             newVal = Math.min(max, Math.max(min, newVal));
 
