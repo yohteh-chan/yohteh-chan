@@ -1506,7 +1506,7 @@ let isUpdatingUI = false;
 
 
 
-    function updateJibFill() {//ここ
+    function updateJibFill() {
 
    
     if (!jiblengthSlider) return;
@@ -1531,25 +1531,21 @@ let isUpdatingUI = false;
     let COLOR_ACTIVE_main;
    
 
-    if(jibLong != 0){
-        COLOR_ACTIVE = '#444'; // 伸びた部分
+
        
-    }
+        
 
+         
 
-        COLOR_INACTIVE = 'rgba(0, 0, 0, 0.5)';   // 未到達部分
+        if(SL==0){
+                if(jibLong != 0){COLOR_ACTIVE = '#444';}
+COLOR_INACTIVE = 'rgba(0, 0, 0, 0.5)';   // 未到達部分
         COLOR_INACTIVE_main = 'rgba(0, 0, 0, 0.5)';
 
         
     if (jibTrackBg) {
         jibTrackBg.style.zIndex = jibLong < 0 ? '6' : '1';
     }
-       
-        
-
- 
-
-        if(SL==0){
             switch (true){
                     case jibLong <0:
                     percent =0;
@@ -1566,7 +1562,22 @@ let isUpdatingUI = false;
                     COLOR_ACTIVE_main = '#f39c12';
                     break;
             }
-            }else{
+            }else{//ここ
+                COLOR_INACTIVE = 'rgba(0, 0, 0, 0.5)';   // 未到達部分
+        COLOR_INACTIVE_main = 'rgba(0, 0, 0, 0.5)';
+                switch (true){
+                    case jibLong <0:
+                    COLOR_ACTIVE_main = 'transparent';
+                    break;
+
+                    case jibLong ==0:
+                    COLOR_ACTIVE_main = '#f39c12';
+                    break;
+
+                    case jibLong >0:
+                    COLOR_ACTIVE_main = '#f39c12';
+                    break;
+            }
                 percent = ((currentVal - min) / (max - min)) * 100;
             }
 
