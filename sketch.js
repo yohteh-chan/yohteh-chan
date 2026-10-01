@@ -1384,7 +1384,7 @@ function bringToFront(dialogEl) {
     const popupLengthVal = document.getElementById('popup-length-val');
     const mainLengthVal = document.getElementById('length-val');
     const trackBg = document.querySelector('.boom-track-bg');
-    const jibtrackBg = document.querySelector('.jib-track-bg');
+    const jibsubmain = document.querySelector('.jib-submain');
 
     const presetValues = [53, 90.4, 127.8, 165.2, 202.6, 240];//仮
 
@@ -1502,22 +1502,52 @@ let isUpdatingUI = false;
     // 初期値の反映
     updateLengthUI(lengthSlider.value);
 
+
+
+
+
     function updateJibFill() {//ここ
 
    
     if (!jiblengthSlider) return;
 
-    const COLOR_ACTIVE = '#444'; // 伸びた部分
+    let percent=0;
+    const min = 0; //仮
+    const max = parseFloat(jiblengthSlider.max) || 56;//仮
+    const currentVal = parseFloat(jiblengthSlider.value);
+
+
+    let jibLong = JibSteps.reduce((bestIdx, curr, i) => 
+        Math.abs(curr - jiblengthSlider.value) < Math.abs(JibSteps[bestIdx] - jiblengthSlider.value) ? i : bestIdx, 0
+    );
+
+   
+
+    const COLOR_ACTIVE = '#fff'; // 伸びた部分
     const COLOR_INACTIVE = 'rgba(0, 0, 0, 0.5)';   // 未到達部分
 
-    // つまみ位置でピタッと色が変わるグラデーション文字列を生成
-    const jibfillGradient = `linear-gradient(90deg, 
+  
+    if(SL==0){
+         if(jiblengthSlider.value<JibSteps[0]){
+        percent=0;
+    }else{
+          percent = JibSteps[jibLong];
+          }
+        }else{
+         percent = ((currentVal - min) / (max - min)) * 100;
+    }
+ 
+  console.log("percent",percent);//0なら50,1なら75or100,2なら100
+      const jibfillGradient = `linear-gradient(90deg, 
         ${COLOR_ACTIVE} 0%, 
-
+        ${COLOR_ACTIVE} ${percent}%, 
+        ${COLOR_INACTIVE} ${percent}%, 
         ${COLOR_INACTIVE} 100%)`;
 
+
+
     // CSS変数を更新
-    jibtrackBg.style.setProperty('--jib-fill', jibfillGradient);
+    jibsubmain.style.setProperty('--jib-fill', jibfillGradient);
      
 }
 
@@ -2459,6 +2489,7 @@ function changeJibSliderValue(delta) {
 }
 
 let changeVal=0;
+let jibnewVal=0;
 
 // スライダー値を安全に更新する共通関数
 function changeJibLengthSliderValue(delta) {//ここ
@@ -2472,7 +2503,7 @@ function changeJibLengthSliderValue(delta) {//ここ
     let currentVal = parseFloat(jiblengthSlider.value) || 0;
     
     // 値を最小値〜最大値の範囲内に収める
-    let newVal = currentVal + delta;
+    jibnewVal = currentVal + delta;
     
 
 
@@ -2488,10 +2519,10 @@ function changeJibLengthSliderValue(delta) {//ここ
     if(SL==1){
 
         if(jiblengthSlider.value>=JibSteps[0]){
-            newVal = Math.min(max, Math.max(min, newVal));
+            jibnewVal = Math.min(max, Math.max(min, jibnewVal));
 
         }else if(delta>0){
-            newVal=JibSteps[0];
+            jibnewVal=JibSteps[0];
 
         }
     }else{
@@ -2499,20 +2530,20 @@ function changeJibLengthSliderValue(delta) {//ここ
 
         if(jiblengthSlider.value<JibSteps[0]){
             if(delta>0){
-                newVal=JibSteps[0];
+                jibnewVal=JibSteps[0];
             }else{
                 return;
             }
         }else{
             if(delta<0){
                 if(jiblengthSlider.value>JibSteps[0]){
-                newVal=JibSteps[nearestIdx-1];
+                jibnewVal=JibSteps[nearestIdx-1];
 
                 }else{
                     changeVal=1;
                 }
             }else if(nearestIdx+1<JibSteps.length){
-                 newVal=JibSteps[nearestIdx+1];
+                 jibnewVal=JibSteps[nearestIdx+1];
 
             }
         }
@@ -2521,8 +2552,8 @@ function changeJibLengthSliderValue(delta) {//ここ
     
 
 
-    if (newVal !== currentVal) {
-        jiblengthSlider.value = newVal;      
+    if (jibnewVal !== currentVal) {
+        jiblengthSlider.value = jibnewVal;      
         jiblengthSlider.dispatchEvent(new Event('input'));
         changeVal=0;
     }

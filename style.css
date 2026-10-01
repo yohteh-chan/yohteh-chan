@@ -1099,7 +1099,7 @@ body.sidebar-open #toggle-sidebar-btn {
     position: absolute;
     left: 0px;
     top: 80%;
-    transform-origin: left center; /* ★回転軸を左端中央に設定 */
+    transform-origin: left center; 
     transform: translateY(-50%) rotate(-40deg);
     width: 40px;                
     height: 18px;
@@ -1110,7 +1110,7 @@ body.sidebar-open #toggle-sidebar-btn {
 
 .jib-track-bg {
     position: absolute;
-    left: 0px; /* ★親要素の幅（40px）と同じ位置から開始して右下に連結 */
+    left: 0px; 
     top: 80%;
     transform-origin: left center; /* ★同じ回転軸を設定 */
     transform: translateY(-50%) rotate(-40deg) ;
@@ -1152,10 +1152,15 @@ body.sidebar-open #toggle-sidebar-btn {
     top: 80%;
     width: 65%;
     height: 2px;
-    background: #494948; 
+        z-index: 5;
     transform: translateY(-950%) rotate(0deg) ;
 
-    z-index: 5;
+
+    background: var(--jib-fill, linear-gradient(90deg, transparent 0%, #e41010 100%));
+
+
+    mask-repeat: no-repeat;
+
 }
 
 
