@@ -1117,9 +1117,9 @@ body.sidebar-open #toggle-sidebar-btn {
     width: 40px;
     height: 18px;
    
-    background: linear-gradient(to right, transparent 75%, #e41010 75%);
+    background: linear-gradient(to right, transparent 80%, #e41010 80%);
     box-sizing: border-box;
-    z-index: 1;
+    z-index: 1000;
 }
 
 .jib-tention{
@@ -1128,7 +1128,7 @@ body.sidebar-open #toggle-sidebar-btn {
     top: 80%;
     width: 32%;
     height: 1px;
-    background: #f39c12; 
+    background: var(--jib-fill, linear-gradient(90deg, transparent 0%,  transparent 50%,transparent 75%, transparent 100%));
     transform: translateY(-2550%) rotate(10deg) ;
 
     z-index: 5;
@@ -1140,7 +1140,7 @@ body.sidebar-open #toggle-sidebar-btn {
     top: 80%;
     width: 33%;
     height: 3px;
-    background: #f39c12; 
+    background: var(--jib-fill, linear-gradient(90deg, transparent 0%,  transparent 50%,transparent 75%, transparent 100%));
     transform: translateY(-650%) rotate(0deg) ;
 
     z-index: 5;
@@ -1154,13 +1154,46 @@ body.sidebar-open #toggle-sidebar-btn {
     height: 2px;
         z-index: 5;
     transform: translateY(-950%) rotate(0deg) ;
-
-
-    background: var(--jib-fill, linear-gradient(90deg, transparent 0%, #e41010 100%));
-
-
+    background: var(--jib-fill, linear-gradient(90deg, transparent 0%, #444 100%));
     mask-repeat: no-repeat;
+}
 
+
+
+.jib-tention-shadow{
+    position: absolute;
+    left: 25px; 
+    top: 80%;
+    width: 32%;
+    height: 1px;
+    background:rgba(0, 0, 0, 0.5);
+    transform: translateY(-2550%) rotate(10deg) ;
+
+    z-index: 4;
+}
+
+.jib-main-shadow{
+    position: absolute;
+    left: 30px; 
+    top: 80%;
+    width: 33%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent 0%, transparent 5%, rgba(0, 0, 0, 0.5) 5%, rgba(0, 0, 0, 0.5) 100%);
+    transform: translateY(-650%) rotate(0deg) ;
+
+    z-index: 4;
+}
+
+.jib-submain-shadow{
+    position: absolute;
+    left: 30px; 
+    top: 80%;
+    width: 65%;
+    height: 2px;
+        z-index: 4;
+    transform: translateY(-950%) rotate(0deg) ;
+    background: linear-gradient(90deg, transparent 0%, transparent 5%, rgba(0, 0, 0, 0.5) 5%, rgba(0, 0, 0, 0.5) 100%);
+    mask-repeat: no-repeat;
 }
 
 

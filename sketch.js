@@ -1515,40 +1515,82 @@ let isUpdatingUI = false;
     const min = 0; //仮
     const max = parseFloat(jiblengthSlider.max) || 56;//仮
     const currentVal = parseFloat(jiblengthSlider.value);
+    const jibMain = document.querySelector('.jib-main');
+    
+    const jibTention = document.querySelector('.jib-tention');
+    const jibTrackBg = document.querySelector('.jib-track-bg');
 
 
-    let jibLong = JibSteps.reduce((bestIdx, curr, i) => 
-        Math.abs(curr - jiblengthSlider.value) < Math.abs(JibSteps[bestIdx] - jiblengthSlider.value) ? i : bestIdx, 0
-    );
+    let jibLong = currentVal < JibSteps[0] ? -1 : JibSteps.reduce((bestIdx, curr, i) => 
+    Math.abs(curr - currentVal) < Math.abs(JibSteps[bestIdx] - currentVal) ? i : bestIdx, 0
+);
 
+    let COLOR_ACTIVE;
+    let COLOR_INACTIVE;
+    let COLOR_INACTIVE_main;
+    let COLOR_ACTIVE_main;
    
 
-    const COLOR_ACTIVE = '#fff'; // 伸びた部分
-    const COLOR_INACTIVE = 'rgba(0, 0, 0, 0.5)';   // 未到達部分
-
-  
-    if(SL==0){
-         if(jiblengthSlider.value<JibSteps[0]){
-        percent=0;
-    }else{
-          percent = JibSteps[jibLong];
-          }
-        }else{
-         percent = ((currentVal - min) / (max - min)) * 100;
+    if(jibLong != 0){
+        COLOR_ACTIVE = '#444'; // 伸びた部分
+       
     }
+
+
+        COLOR_INACTIVE = 'rgba(0, 0, 0, 0.5)';   // 未到達部分
+        COLOR_INACTIVE_main = 'rgba(0, 0, 0, 0.5)';
+
+        
+    if (jibTrackBg) {
+        jibTrackBg.style.zIndex = jibLong < 0 ? '6' : '1';
+    }
+       
+        
+
  
-  console.log("percent",percent);//0なら50,1なら75or100,2なら100
+
+        if(SL==0){
+            switch (true){
+                    case jibLong <0:
+                    percent =0;
+                    COLOR_ACTIVE_main = 'transparent';
+                    break;
+
+                    case jibLong ==0:
+                    percent =50;
+                    COLOR_ACTIVE_main = '#f39c12';
+                    break;
+
+                    case jibLong >0:
+                    percent =(50/JibSteps.length)*(jibLong+1)+50;
+                    COLOR_ACTIVE_main = '#f39c12';
+                    break;
+            }
+            }else{
+                percent = ((currentVal - min) / (max - min)) * 100;
+            }
+
+
+
+
       const jibfillGradient = `linear-gradient(90deg, 
         ${COLOR_ACTIVE} 0%, 
         ${COLOR_ACTIVE} ${percent}%, 
         ${COLOR_INACTIVE} ${percent}%, 
         ${COLOR_INACTIVE} 100%)`;
 
+        const jibfillMain = `linear-gradient(90deg, 
+        ${COLOR_ACTIVE_main} 0%, 
+        ${COLOR_ACTIVE_main} 100%, 
+        ${COLOR_INACTIVE_main} 0%, 
+        ${COLOR_INACTIVE_main} 100%)`;
+
 
 
     // CSS変数を更新
     jibsubmain.style.setProperty('--jib-fill', jibfillGradient);
-     
+     jibMain.style.setProperty('--jib-fill', jibfillMain);
+     jibTention.style.setProperty('--jib-fill', jibfillMain);
 }
 
 jiblengthSlider.addEventListener('input', updateJibFill);
